@@ -36,8 +36,7 @@ class TestTelemetry(unittest.TestCase):
         strategy = GraphQLRetrievalStrategy(endpoint="http://telemetry.b4mad.racing:30050/graphql")
         telemetry = Telemetry(strategy)
         telemetry.set_filter("game", "example_game")
-        adapter = MockDataAdapter()
-        data = telemetry.get_data(adapter)
+        data = telemetry.get_data(MockDataAdapter())
         self.assertIsInstance(data, list)
 
 if __name__ == '__main__':
