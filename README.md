@@ -11,7 +11,21 @@ This repository contains Jupyter notebooks for analyzing racing data and a Pytho
 - `README.md`: Project overview.
 - `.gitignore`: Git ignore file.
 
-## Installation
+## Installation with Pipenv
+
+To install the library using Pipenv, run:
+
+```bash
+pipenv install
+```
+
+To activate the virtual environment, use:
+
+```bash
+pipenv shell
+```
+
+## Installation with pip
 
 To install the library, run:
 
