@@ -33,6 +33,14 @@ To install the library, run:
 pip install .
 ```
 
+## Running Tests
+
+To run the tests, use:
+
+```bash
+pipenv run pytest
+```
+
 ## Usage
 
 You can use the library in your notebooks as follows:
