@@ -8,13 +8,14 @@ class GraphQLRetrievalStrategy(RetrievalStrategy):
     def retrieve_data(self, filters):
         # Implement GraphQL data retrieval logic here
         query = """
-        query($filters: [String!]) {
-            data(filters: $filters) {
-                id
-                name
-                value
+            query AllTelemetryGames {
+                allTelemetryGames {
+                    totalCount
+                    nodes {
+                        name
+                    }
+                }
             }
-        }
         """
         variables = {"filters": filters}
         response = requests.post(
