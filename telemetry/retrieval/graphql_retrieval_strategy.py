@@ -7,7 +7,8 @@ class GraphQLRetrievalStrategy(RetrievalStrategy):
         self.endpoint = endpoint
 
     def retrieve_data(self, filters):
-        # Implement GraphQL data retrieval logic here
+        if not filters:
+            raise Exception("Filters cannot be empty")
         transport = RequestsHTTPTransport(url=self.endpoint, verify=True, retries=3)
         client = Client(transport=transport, fetch_schema_from_transport=True)
         query = gql("""
