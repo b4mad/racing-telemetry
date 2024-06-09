@@ -14,6 +14,8 @@ class TestGraphQLRetrievalStrategy(unittest.TestCase):
         result = strategy.retrieve_data(filters=filters)
         self.assertIsInstance(result, list)
         self.assertIsInstance(result[0], dict)
+        game_names = [game['name'] for game in result]
+        self.assertIn('iRacing', game_names)
 
 if __name__ == '__main__':
     unittest.main()
