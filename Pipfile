@@ -12,3 +12,5 @@ influxdb-client = "*"
 
 [requires]
 python_version = "3"
+[scripts]
+test = "pytest"
