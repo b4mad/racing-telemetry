@@ -17,4 +17,6 @@ class TestGraphQLRetrievalStrategy(unittest.TestCase):
         self.assertIsInstance(result, list)
         if result:
             self.assertIsInstance(result[0], dict)
+
+if __name__ == '__main__':
     unittest.main()

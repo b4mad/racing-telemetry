@@ -11,8 +11,10 @@ gql = "*"
 requests = "*"
 influxdb-client = "*"
 pandas = "*"
+requests-toolbelt = "*"
 
 [requires]
 python_version = "3"
+
 [scripts]
 test = "pytest"
