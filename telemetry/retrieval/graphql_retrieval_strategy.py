@@ -1,4 +1,5 @@
-import requests
+import graphene
+from graphqlclient import GraphQLClient
 from telemetry.retrieval.retrieval_strategy import RetrievalStrategy
 
 class GraphQLRetrievalStrategy(RetrievalStrategy):
@@ -7,22 +8,17 @@ class GraphQLRetrievalStrategy(RetrievalStrategy):
 
     def retrieve_data(self, filters):
         # Implement GraphQL data retrieval logic here
+        client = GraphQLClient(self.endpoint)
         query = """
-            query AllTelemetryGames {
-                allTelemetryGames {
-                    totalCount
-                    nodes {
-                        name
-                    }
-                }
+        query($filters: [String!]) {
+            data(filters: $filters) {
+                id
+                name
+                value
             }
+        }
         """
         variables = {"filters": filters}
-        response = requests.post(
-            self.endpoint,
-            json={'query': query, 'variables': variables}
-        )
-        if response.status_code == 200:
-            return response.json().get('data', {}).get('data', [])
-        else:
-            response.raise_for_status()
+        response = client.execute(query, variables)
+        result = json.loads(response)
+        return result.get('data', {}).get('data', [])
