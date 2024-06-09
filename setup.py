@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name='telemetry',
     version='0.1.0',
-    packages=find_packages(),
+    packages=find_packages(include=['telemetry', 'telemetry.*']),
     install_requires=[
         # Add any dependencies here
     ],
