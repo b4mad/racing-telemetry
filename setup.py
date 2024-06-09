@@ -5,6 +5,7 @@ setup(
     version='0.1.0',
     packages=find_packages(include=['telemetry', 'telemetry.retrieval', 'telemetry.adapter']),
     install_requires=[
+        'graphene',
         # Add any dependencies here
     ],
     author='Your Name',
