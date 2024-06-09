@@ -13,4 +13,4 @@ influxdb-client = "*"
 [requires]
 python_version = "3"
 [scripts]
-test = "PYTHONPATH=./telemetry pytest"
+test = "PYTHONPATH=./ pytest"
