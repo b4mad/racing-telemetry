@@ -1,0 +1,31 @@
+# Telemetry
+
+This repository contains Jupyter notebooks for analyzing racing data and a Python library for telemetry data analysis.
+
+## Directory Structure
+
+- `notebooks/`: Jupyter notebooks for data analysis.
+- `telemetry/`: Python library for telemetry data analysis.
+- `tests/`: Unit tests for the library.
+- `setup.py`: Packaging and distribution configuration.
+- `README.md`: Project overview.
+- `.gitignore`: Git ignore file.
+
+## Installation
+
+To install the library, run:
+
+```bash
+pip install .
+```
+
+## Usage
+
+You can use the library in your notebooks as follows:
+
+```python
+from telemetry import Telemetry
+
+# Example usage
+telemetry = Telemetry()
+```
