@@ -13,8 +13,8 @@ class TestGraphQLRetrievalStrategy(unittest.TestCase):
         filters = ['game']
         result = strategy.retrieve_data(filters=filters)
         self.assertIsInstance(result, list)
-        if result:
-            self.assertIsInstance(result[0], dict)
+        self.assertIsInstance(result[0], dict)
+        print(result)
 
 if __name__ == '__main__':
     unittest.main()

@@ -8,15 +8,25 @@
             "name": "test",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/tests",
+            "stopOnEntry": false,
+            "module": "pytest",
             "args": [
-                "-m",
-                "pytest",
-                "--maxfail=3",
-                "--disable-warnings"
+                "-vrP",
+                // "-m not crypto and not s3_slow and not s3",
+                // "-m pyfish_web_gui",
+                // "-k flaskr/test_blog",
+                // "-m pfileset",
+                // "-m cryto_gpg",
             ],
-        "env": {
-            "PYTHONPATH": "${workspaceFolder}"
-        }
+            "cwd": "${workspaceRoot}",
+            "env": {
+            },
+            // "envFile": "tests/.env_test",
+            // "debugOptions": [
+            //     "WaitOnAbnormalExit",
+            //     // "WaitOnNormalExit",
+            //     "RedirectOutput"
+            // ]
+        },
     ]
 }

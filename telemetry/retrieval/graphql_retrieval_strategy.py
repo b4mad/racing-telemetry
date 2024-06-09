@@ -24,4 +24,4 @@ query AllTelemetryGames {
         # variables = {"filters": filters}
         response = client.execute(query)
         result = response
-        return result.get('data', {}).get('data', [])
+        return result.get('allTelemetryGames', {}).get('nodes', [])
