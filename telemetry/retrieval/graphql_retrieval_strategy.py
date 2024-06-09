@@ -1,5 +1,5 @@
-import graphene
-from graphqlclient import GraphQLClient
+from gql import Client, gql
+from gql.transport.requests import RequestsHTTPTransport
 from telemetry.retrieval.retrieval_strategy import RetrievalStrategy
 
 class GraphQLRetrievalStrategy(RetrievalStrategy):
@@ -8,8 +8,9 @@ class GraphQLRetrievalStrategy(RetrievalStrategy):
 
     def retrieve_data(self, filters):
         # Implement GraphQL data retrieval logic here
-        client = GraphQLClient(self.endpoint)
-        query = """
+        transport = RequestsHTTPTransport(url=self.endpoint, verify=True, retries=3)
+        client = Client(transport=transport, fetch_schema_from_transport=True)
+        query = gql("""
         query($filters: [String!]) {
             data(filters: $filters) {
                 id
@@ -17,8 +18,8 @@ class GraphQLRetrievalStrategy(RetrievalStrategy):
                 value
             }
         }
-        """
+        """)
         variables = {"filters": filters}
-        response = client.execute(query, variables)
-        result = json.loads(response)
+        response = client.execute(query, variable_values=variables)
+        result = response
         return result.get('data', {}).get('data', [])
