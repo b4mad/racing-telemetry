@@ -4,11 +4,9 @@ from telemetry.retrieval.graphql_retrieval_strategy import GraphQLRetrievalStrat
 class TestGraphQLRetrievalStrategy(unittest.TestCase):
     def test_retrieve_data_with_empty_filter(self):
         strategy = GraphQLRetrievalStrategy(endpoint="http://example.com/graphql")
-        try:
+        with self.assertRaises(Exception) as context:
             strategy.retrieve_data(filters={})
-            self.assertTrue(True)
-        except Exception as e:
-            self.fail(f"retrieve_data raised an exception with empty filters: {e}")
+        self.assertEqual(str(context.exception), "Filters cannot be empty")
 
     def test_retrieve_data_with_game_filter(self):
         strategy = GraphQLRetrievalStrategy(endpoint="http://telemetry.b4mad.racing:30050/graphql")
