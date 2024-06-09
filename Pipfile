@@ -11,6 +11,7 @@ graphene = "*"
 requests = "*"
 influxdb-client = "*"
 pandas = "*"
+graphqlclient = "*"
 
 [requires]
 python_version = "3"
