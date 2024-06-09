@@ -1,8 +1,8 @@
 class Telemetry:
     def __init__(self):
         pass
-from telemetry.data_retrieval.data_retrieval_strategy import DataRetrievalStrategy
-from telemetry.data_adapter.data_adapter import DataAdapter
+from telemetry.retrieval.data_retrieval_strategy import DataRetrievalStrategy
+from telemetry.adapter.data_adapter import DataAdapter
 
 class Telemetry:
     def __init__(self, strategy: DataRetrievalStrategy):

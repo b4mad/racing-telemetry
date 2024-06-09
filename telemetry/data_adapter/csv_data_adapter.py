@@ -1,5 +1,5 @@
 import csv
-from telemetry.data_adapter.data_adapter import DataAdapter
+from telemetry.adapter.data_adapter import DataAdapter
 
 class CSVDataAdapter(DataAdapter):
     def convert(self, data):

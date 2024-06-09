@@ -1,4 +1,4 @@
-from telemetry.data_retrieval.data_retrieval_strategy import DataRetrievalStrategy
+from telemetry.retrieval.data_retrieval_strategy import DataRetrievalStrategy
 
 class GraphQLDataRetrievalStrategy(DataRetrievalStrategy):
     def retrieve_data(self, filters):
