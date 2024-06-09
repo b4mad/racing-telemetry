@@ -1,1 +1,3 @@
 from .telemetry import Telemetry
+from telemetry.data_retrieval.data_retrieval_strategy import DataRetrievalStrategy
+from telemetry.data_adapter.data_adapter import DataAdapter
