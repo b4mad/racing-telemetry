@@ -1,13 +1,13 @@
 import unittest
 from telemetry import Telemetry
-from telemetry.data_retrieval.data_retrieval_strategy import DataRetrievalStrategy
-from telemetry.data_adapter.data_adapter import DataAdapter
+from telemetry.retrieval.retrieval_strategy import RetrievalStrategy
+from telemetry.adapter.adapter import Adapter
 
-class MockDataRetrievalStrategy(DataRetrievalStrategy):
+class MockDataRetrievalStrategy(RetrievalStrategy):
     def retrieve_data(self, filters):
         return [{"key": "value"}]
 
-class MockDataAdapter(DataAdapter):
+class MockDataAdapter(Adapter):
     def convert(self, data):
         return data
 
