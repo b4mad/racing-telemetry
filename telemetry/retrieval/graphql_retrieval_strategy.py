@@ -31,23 +31,13 @@ class GraphQLRetrievalStrategy(RetrievalStrategy):
 #     }
 # }
 #         """)
-        # query = self.ds.query.allTelemetryGames(
-        #     self.ds.allTelemetryGames.totalCount(),
-        #     self.ds.allTelemetryGames.nodes(
-        #         self.ds.allTelemetryGames.nodes.name()
-        #     )
-        # )
         ds = self.ds
-        # query = DSLQuery(
-        #     ds.Query.characters.select(
-        #         ds.Character.id
-        #     )
-        # )
-        query = ds.Query.characters
-        # query.select(ds.Character.id)
-        # query.select(ds.Character.name)
+        query = ds.Query.characters.select(
+            ds.Character.name
+        )
         query = dsl_gql(DSLQuery(query))
 
         response = self.client.execute(query)
-        result = response
-        return result.get('allTelemetryGames', {}).get('nodes', [])
+        result = response.get('characters', [])
+        character_names = [character['name'] for character in result]
+        return character_names
