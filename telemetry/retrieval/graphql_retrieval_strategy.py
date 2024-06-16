@@ -32,12 +32,10 @@ class GraphQLRetrievalStrategy(RetrievalStrategy):
 # }
 #         """)
         ds = self.ds
-        query = ds.Query.characters.select(
-            ds.Character.name
-        )
+        query = ds.Query.characters
+        query.select(ds.Characters.results.select(ds.Character.name))
         query = dsl_gql(DSLQuery(query))
 
         response = self.client.execute(query)
-        result = response.get('characters', [])
-        character_names = [character['name'] for character in result]
-        return character_names
+        result = response
+        return result
