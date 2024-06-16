@@ -1,6 +1,131 @@
+from datetime import datetime
+import logging
+import os
+import sys
+
+import influxdb_client
 from telemetry.retrieval.retrieval_strategy import RetrievalStrategy
 
 class InfluxDBDataRetrievalStrategy(RetrievalStrategy):
+
+    def __init__(self) -> None:
+        (self.org, self.token, self.url) = self._get_influxdb2_config()
+
+        self.influx = influxdb_client.InfluxDBClient(
+            url=self.url, token=self.token, org=self.org, timeout=(10_000, 600_000)
+        )
+        # if self.influx.ping():
+        #     logging.debug(f"Influx: Connected to {self.url}")
+        # else:
+        #     logging.error(f"Influx: Connection to {self.url} failed")
+        #     sys.exit(1)
+
+        self.query_api = self.influx.query_api()
+
+
+    def _get_influxdb2_config(self) -> tuple[str, str, str] | Exception:
+        """Get InfluxDB2 configuration from environment variables."""
+        org = os.environ.get("B4MAD_RACING_INFLUX_ORG", "b4mad")
+
+        _INFLUXDB2_TOKEN = os.environ.get("B4MAD_RACING_INFLUX_TOKEN")  # noqa: N806
+
+        if _INFLUXDB2_TOKEN is None or _INFLUXDB2_TOKEN == "":
+            raise Exception(
+                "B4MAD_RACING_INFLUX_TOKEN",
+            )
+
+        token = _INFLUXDB2_TOKEN
+
+        _INFLUXDB2_SERVICE_HOST = os.environ.get("INFLUXDB2_SERVICE_HOST")  # noqa: N806
+        _INFLUXDB2_SERVICE_PORT = os.environ.get("INFLUXDB2_SERVICE_PORT", 8086)  # noqa: N806
+        _INFLUXDB2_SERVICE_PROTOCOL = os.environ.get("INFLUXDB2_SERVICE_PROTOCOL", "http")  # noqa: N806
+
+        if _INFLUXDB2_SERVICE_HOST is None:
+            raise Exception(
+                "INFLUXDB2_SERVICE_HOST",
+            )
+
+        url = f"{_INFLUXDB2_SERVICE_PROTOCOL}://{_INFLUXDB2_SERVICE_HOST}:{_INFLUXDB2_SERVICE_PORT}/"
+
+        return (org, token, url)
+
     def retrieve_data(self, filters):
-        # Implement InfluxDB data retrieval logic here
-        pass
+        return self.session_df(filters)
+
+    def session_df(
+        self,
+        session_id,
+        lap_number=None,
+        start="-60d",
+        end="now()",
+        measurement="fast_laps",
+        bucket="fast_laps",
+        aggregate="",
+        fields=[],
+        drop_tags=False,
+    ):
+        if isinstance(start, datetime):
+            start = start.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        if isinstance(end, datetime):
+            end = end.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+        query = f"""
+        from(bucket: "{bucket}")
+        |> range(start: {start}, stop: {end})
+        |> filter(fn: (r) => r["_measurement"] == "{measurement}")
+        |> filter(fn: (r) => r["SessionId"] == "{session_id}")
+        """
+
+        if fields:
+            query += f"""
+            |> filter(fn: (r) => r["_field"] == "{fields[0]}")
+            """
+            for field in fields[1:]:
+                query += f"""
+                or r["_field"] == "{field}"
+                """
+            query += ")\n"
+
+        if aggregate:
+            # downsample to 1Hz
+            query += f"""
+            |> aggregateWindow(every: {aggregate}, fn: last, createEmpty: false)
+            """
+
+        query += """
+        |> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
+        """
+
+        if lap_number:
+            query += f"""
+        |> filter(fn: (r) => r["CurrentLap"] == "{lap_number}")
+        """
+
+        query += """
+        |> sort(columns: ["_time"], desc: false)
+        """
+
+        # drop columns that are not needed
+        if drop_tags:
+            query += """
+            |> drop(columns: ["_start", "_stop", "_measurement", "host", "topic", "user"])
+            """
+
+        df = self.query_api.query_data_frame(query=query)
+        if df.empty:
+            raise Exception(f"No data found for {session_id} lap {lap_number}")
+
+        game = df["GameName"].iloc[0]
+        if game == "Assetto Corsa Competizione":
+            # flip y axis
+            df["x"] = df["WorldPosition_x"]
+            df["y"] = df["WorldPosition_z"] * -1
+        if game == "Automobilista 2":
+            df["x"] = df["WorldPosition_x"]
+            df["y"] = df["WorldPosition_z"]
+
+        df["id"] = df["SessionId"].astype(str) + "-" + df["CurrentLap"].astype(str)
+
+        df = df[df["Gear"] != 0]
+
+        return df
