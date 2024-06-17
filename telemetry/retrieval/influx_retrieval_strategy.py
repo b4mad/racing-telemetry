@@ -6,7 +6,7 @@ import sys
 import influxdb_client
 from telemetry.retrieval.retrieval_strategy import RetrievalStrategy
 
-class InfluxDBDataRetrievalStrategy(RetrievalStrategy):
+class InfluxRetrievalStrategy(RetrievalStrategy):
 
     def __init__(self) -> None:
         (self.org, self.token, self.url) = self._get_influxdb2_config()
@@ -50,7 +50,17 @@ class InfluxDBDataRetrievalStrategy(RetrievalStrategy):
         return (org, token, url)
 
     def retrieve_data(self, filters):
-        return self.session_df(filters)
+        # if filters is an integer
+        if isinstance(filters, int):
+            return self.session_df(session_id=filters)
+        if isinstance(filters, dict):
+            if "session_id" in filters:
+                return self.session_df(session_id=filters["session_id"])
+            # if "session_id" in filters and "lap_number" in filters:
+            #     return self.session_df(
+            #         session_id=filters["session_id"], lap_number=filters["lap_number"]
+            #     )
+        return None
 
     def session_df(
         self,

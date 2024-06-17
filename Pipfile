@@ -8,6 +8,7 @@ pytest = "*"
 pytest-recording = "*"
 vcrpy = "*"
 aiohttp = "*"
+jupyter = "*"
 
 [packages]
 gql = "*"
@@ -15,6 +16,7 @@ requests = "*"
 influxdb-client = "*"
 pandas = "*"
 requests-toolbelt = "*"
+plotly = "*"
 
 [requires]
 python_version = "3"

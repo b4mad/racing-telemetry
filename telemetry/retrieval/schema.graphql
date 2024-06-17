@@ -1,208 +1,2545 @@
-""""""
-directive @cacheControl(maxAge: Int, scope: CacheControlScope) on FIELD_DEFINITION | OBJECT | INTERFACE
-
-""""""
-type Query {
-  """Get a specific character by ID"""
-  character(id: ID!): Character
-
-  """Get the list of all characters"""
-  characters(page: Int, filter: FilterCharacter): Characters
-
-  """Get a list of characters selected by ids"""
-  charactersByIds(ids: [ID!]!): [Character]
-
-  """Get a specific locations by ID"""
-  location(id: ID!): Location
-
-  """Get the list of all locations"""
-  locations(page: Int, filter: FilterLocation): Locations
-
-  """Get a list of locations selected by ids"""
-  locationsByIds(ids: [ID!]!): [Location]
-
-  """Get a specific episode by ID"""
-  episode(id: ID!): Episode
-
-  """Get the list of all episodes"""
-  episodes(page: Int, filter: FilterEpisode): Episodes
-
-  """Get a list of episodes selected by ids"""
-  episodesByIds(ids: [ID!]!): [Episode]
-}
-
-""""""
-type Character {
-  """The id of the character."""
-  id: ID
-
-  """The name of the character."""
-  name: String
-
-  """The status of the character ('Alive', 'Dead' or 'unknown')."""
-  status: String
-
-  """The species of the character."""
-  species: String
-
-  """The type or subspecies of the character."""
-  type: String
+"""The root query type which gives access points into the data universe."""
+type Query implements Node {
+  """
+  Exposes the root query type nested one level down. This is helpful for Relay 1
+  which can only query top level fields if they are in a particular form.
+  """
+  query: Query!
 
   """
-  The gender of the character ('Female', 'Male', 'Genderless' or 'unknown').
+  The root query type must be a `Node` to work well with Relay 1 mutations. This just resolves to `query`.
   """
-  gender: String
+  nodeId: ID!
 
-  """The character's origin location"""
-  origin: Location
+  """Fetches an object given its globally unique `ID`."""
+  node(
+    """The globally unique `ID`."""
+    nodeId: ID!
+  ): Node
 
-  """The character's last known location"""
-  location: Location
+  """Reads and enables pagination through a set of `TelemetryCar`."""
+  allTelemetryCars(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetryCar`."""
+    orderBy: [TelemetryCarsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetryCarCondition
+  ): TelemetryCarsConnection
+
+  """Reads and enables pagination through a set of `TelemetryCarclass`."""
+  allTelemetryCarclasses(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetryCarclass`."""
+    orderBy: [TelemetryCarclassesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetryCarclassCondition
+  ): TelemetryCarclassesConnection
+
+  """Reads and enables pagination through a set of `TelemetryDriver`."""
+  allTelemetryDrivers(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetryDriver`."""
+    orderBy: [TelemetryDriversOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetryDriverCondition
+  ): TelemetryDriversConnection
+
+  """Reads and enables pagination through a set of `TelemetryFastlap`."""
+  allTelemetryFastlaps(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetryFastlap`."""
+    orderBy: [TelemetryFastlapsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetryFastlapCondition
+  ): TelemetryFastlapsConnection
 
   """
-  Link to the character's image.
-  All images are 300x300px and most are medium shots or portraits since they are intended to be used as avatars.
+  Reads and enables pagination through a set of `TelemetryFastlapsegment`.
   """
-  image: String
+  allTelemetryFastlapsegments(
+    """Only read the first `n` values of the set."""
+    first: Int
 
-  """Episodes in which this character appeared."""
-  episode: [Episode]!
+    """Only read the last `n` values of the set."""
+    last: Int
 
-  """Time at which the character was created in the database."""
-  created: String
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetryFastlapsegment`."""
+    orderBy: [TelemetryFastlapsegmentsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetryFastlapsegmentCondition
+  ): TelemetryFastlapsegmentsConnection
+
+  """Reads and enables pagination through a set of `TelemetryGame`."""
+  allTelemetryGames(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetryGame`."""
+    orderBy: [TelemetryGamesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetryGameCondition
+  ): TelemetryGamesConnection
+
+  """Reads and enables pagination through a set of `TelemetryLandmark`."""
+  allTelemetryLandmarks(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetryLandmark`."""
+    orderBy: [TelemetryLandmarksOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetryLandmarkCondition
+  ): TelemetryLandmarksConnection
+
+  """Reads and enables pagination through a set of `TelemetryLap`."""
+  allTelemetryLaps(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetryLap`."""
+    orderBy: [TelemetryLapsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetryLapCondition
+  ): TelemetryLapsConnection
+
+  """Reads and enables pagination through a set of `TelemetrySession`."""
+  allTelemetrySessions(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetrySession`."""
+    orderBy: [TelemetrySessionsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetrySessionCondition
+  ): TelemetrySessionsConnection
+
+  """Reads and enables pagination through a set of `TelemetrySessiontype`."""
+  allTelemetrySessiontypes(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetrySessiontype`."""
+    orderBy: [TelemetrySessiontypesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetrySessiontypeCondition
+  ): TelemetrySessiontypesConnection
+
+  """Reads and enables pagination through a set of `TelemetryTrack`."""
+  allTelemetryTracks(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetryTrack`."""
+    orderBy: [TelemetryTracksOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetryTrackCondition
+  ): TelemetryTracksConnection
+
+  """Reads and enables pagination through a set of `TelemetryTrackguide`."""
+  allTelemetryTrackguides(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetryTrackguide`."""
+    orderBy: [TelemetryTrackguidesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetryTrackguideCondition
+  ): TelemetryTrackguidesConnection
+
+  """
+  Reads and enables pagination through a set of `TelemetryTrackguidenote`.
+  """
+  allTelemetryTrackguidenotes(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetryTrackguidenote`."""
+    orderBy: [TelemetryTrackguidenotesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetryTrackguidenoteCondition
+  ): TelemetryTrackguidenotesConnection
+  telemetryCarById(id: BigInt!): TelemetryCar
+  telemetryCarclassById(id: BigInt!): TelemetryCarclass
+  telemetryDriverById(id: BigInt!): TelemetryDriver
+  telemetryDriverByName(name: String!): TelemetryDriver
+  telemetryFastlapById(id: BigInt!): TelemetryFastlap
+  telemetryFastlapsegmentById(id: BigInt!): TelemetryFastlapsegment
+  telemetryGameById(id: BigInt!): TelemetryGame
+  telemetryGameByName(name: String!): TelemetryGame
+  telemetryLandmarkById(id: BigInt!): TelemetryLandmark
+  telemetryLapById(id: BigInt!): TelemetryLap
+  telemetryLapBySessionIdAndStart(sessionId: BigInt!, start: Datetime!): TelemetryLap
+  telemetrySessionById(id: BigInt!): TelemetrySession
+  telemetrySessionByDriverIdAndSessionIdAndSessionTypeIdAndGameId(driverId: BigInt!, sessionId: String!, sessionTypeId: BigInt!, gameId: BigInt!): TelemetrySession
+  telemetrySessiontypeById(id: BigInt!): TelemetrySessiontype
+  telemetrySessiontypeByType(type: String!): TelemetrySessiontype
+  telemetryTrackById(id: BigInt!): TelemetryTrack
+  telemetryTrackguideById(id: BigInt!): TelemetryTrackguide
+  telemetryTrackguidenoteById(id: BigInt!): TelemetryTrackguidenote
+
+  """Reads a single `TelemetryCar` using its globally unique `ID`."""
+  telemetryCar(
+    """
+    The globally unique `ID` to be used in selecting a single `TelemetryCar`.
+    """
+    nodeId: ID!
+  ): TelemetryCar
+
+  """Reads a single `TelemetryCarclass` using its globally unique `ID`."""
+  telemetryCarclass(
+    """
+    The globally unique `ID` to be used in selecting a single `TelemetryCarclass`.
+    """
+    nodeId: ID!
+  ): TelemetryCarclass
+
+  """Reads a single `TelemetryDriver` using its globally unique `ID`."""
+  telemetryDriver(
+    """
+    The globally unique `ID` to be used in selecting a single `TelemetryDriver`.
+    """
+    nodeId: ID!
+  ): TelemetryDriver
+
+  """Reads a single `TelemetryFastlap` using its globally unique `ID`."""
+  telemetryFastlap(
+    """
+    The globally unique `ID` to be used in selecting a single `TelemetryFastlap`.
+    """
+    nodeId: ID!
+  ): TelemetryFastlap
+
+  """
+  Reads a single `TelemetryFastlapsegment` using its globally unique `ID`.
+  """
+  telemetryFastlapsegment(
+    """
+    The globally unique `ID` to be used in selecting a single `TelemetryFastlapsegment`.
+    """
+    nodeId: ID!
+  ): TelemetryFastlapsegment
+
+  """Reads a single `TelemetryGame` using its globally unique `ID`."""
+  telemetryGame(
+    """
+    The globally unique `ID` to be used in selecting a single `TelemetryGame`.
+    """
+    nodeId: ID!
+  ): TelemetryGame
+
+  """Reads a single `TelemetryLandmark` using its globally unique `ID`."""
+  telemetryLandmark(
+    """
+    The globally unique `ID` to be used in selecting a single `TelemetryLandmark`.
+    """
+    nodeId: ID!
+  ): TelemetryLandmark
+
+  """Reads a single `TelemetryLap` using its globally unique `ID`."""
+  telemetryLap(
+    """
+    The globally unique `ID` to be used in selecting a single `TelemetryLap`.
+    """
+    nodeId: ID!
+  ): TelemetryLap
+
+  """Reads a single `TelemetrySession` using its globally unique `ID`."""
+  telemetrySession(
+    """
+    The globally unique `ID` to be used in selecting a single `TelemetrySession`.
+    """
+    nodeId: ID!
+  ): TelemetrySession
+
+  """Reads a single `TelemetrySessiontype` using its globally unique `ID`."""
+  telemetrySessiontype(
+    """
+    The globally unique `ID` to be used in selecting a single `TelemetrySessiontype`.
+    """
+    nodeId: ID!
+  ): TelemetrySessiontype
+
+  """Reads a single `TelemetryTrack` using its globally unique `ID`."""
+  telemetryTrack(
+    """
+    The globally unique `ID` to be used in selecting a single `TelemetryTrack`.
+    """
+    nodeId: ID!
+  ): TelemetryTrack
+
+  """Reads a single `TelemetryTrackguide` using its globally unique `ID`."""
+  telemetryTrackguide(
+    """
+    The globally unique `ID` to be used in selecting a single `TelemetryTrackguide`.
+    """
+    nodeId: ID!
+  ): TelemetryTrackguide
+
+  """
+  Reads a single `TelemetryTrackguidenote` using its globally unique `ID`.
+  """
+  telemetryTrackguidenote(
+    """
+    The globally unique `ID` to be used in selecting a single `TelemetryTrackguidenote`.
+    """
+    nodeId: ID!
+  ): TelemetryTrackguidenote
 }
 
-""""""
-type Location {
-  """The id of the location."""
-  id: ID
+"""An object with a globally unique `ID`."""
+interface Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+}
 
-  """The name of the location."""
+"""A connection to a list of `TelemetryCar` values."""
+type TelemetryCarsConnection {
+  """A list of `TelemetryCar` objects."""
+  nodes: [TelemetryCar]!
+
+  """
+  A list of edges which contains the `TelemetryCar` and cursor to aid in pagination.
+  """
+  edges: [TelemetryCarsEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `TelemetryCar` you could get from the connection."""
+  totalCount: Int!
+}
+
+type TelemetryCar implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: BigInt!
+  name: String!
+  gameId: BigInt!
+  created: Datetime!
+  modified: Datetime!
+  carClassId: BigInt
+
+  """Reads a single `TelemetryGame` that is related to this `TelemetryCar`."""
+  telemetryGameByGameId: TelemetryGame
+
+  """
+  Reads a single `TelemetryCarclass` that is related to this `TelemetryCar`.
+  """
+  telemetryCarclassByCarClassId: TelemetryCarclass
+
+  """Reads and enables pagination through a set of `TelemetryFastlap`."""
+  telemetryFastlapsByCarId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetryFastlap`."""
+    orderBy: [TelemetryFastlapsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetryFastlapCondition
+  ): TelemetryFastlapsConnection!
+
+  """Reads and enables pagination through a set of `TelemetryLap`."""
+  telemetryLapsByCarId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetryLap`."""
+    orderBy: [TelemetryLapsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetryLapCondition
+  ): TelemetryLapsConnection!
+
+  """Reads and enables pagination through a set of `TelemetryTrackguide`."""
+  telemetryTrackguidesByCarId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetryTrackguide`."""
+    orderBy: [TelemetryTrackguidesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetryTrackguideCondition
+  ): TelemetryTrackguidesConnection!
+}
+
+"""
+A signed eight-byte integer. The upper big integer values are greater than the
+max value for a JavaScript number. Therefore all big integers will be output as
+strings and not numbers.
+"""
+scalar BigInt
+
+"""
+A point in time as described by the [ISO
+8601](https://en.wikipedia.org/wiki/ISO_8601) standard. May or may not include a timezone.
+"""
+scalar Datetime
+
+type TelemetryGame implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: BigInt!
+  name: String!
+  created: Datetime!
+  modified: Datetime!
+
+  """Reads and enables pagination through a set of `TelemetryCar`."""
+  telemetryCarsByGameId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetryCar`."""
+    orderBy: [TelemetryCarsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetryCarCondition
+  ): TelemetryCarsConnection!
+
+  """Reads and enables pagination through a set of `TelemetryCarclass`."""
+  telemetryCarclassesByGameId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetryCarclass`."""
+    orderBy: [TelemetryCarclassesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetryCarclassCondition
+  ): TelemetryCarclassesConnection!
+
+  """Reads and enables pagination through a set of `TelemetryFastlap`."""
+  telemetryFastlapsByGameId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetryFastlap`."""
+    orderBy: [TelemetryFastlapsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetryFastlapCondition
+  ): TelemetryFastlapsConnection!
+
+  """Reads and enables pagination through a set of `TelemetrySession`."""
+  telemetrySessionsByGameId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetrySession`."""
+    orderBy: [TelemetrySessionsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetrySessionCondition
+  ): TelemetrySessionsConnection!
+
+  """Reads and enables pagination through a set of `TelemetryTrack`."""
+  telemetryTracksByGameId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetryTrack`."""
+    orderBy: [TelemetryTracksOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetryTrackCondition
+  ): TelemetryTracksConnection!
+}
+
+"""A location in a connection that can be used for resuming pagination."""
+scalar Cursor
+
+"""Methods to use when ordering `TelemetryCar`."""
+enum TelemetryCarsOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  NAME_ASC
+  NAME_DESC
+  GAME_ID_ASC
+  GAME_ID_DESC
+  CREATED_ASC
+  CREATED_DESC
+  MODIFIED_ASC
+  MODIFIED_DESC
+  CAR_CLASS_ID_ASC
+  CAR_CLASS_ID_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `TelemetryCar` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+"""
+input TelemetryCarCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: BigInt
+
+  """Checks for equality with the object’s `name` field."""
   name: String
 
-  """The type of the location."""
+  """Checks for equality with the object’s `gameId` field."""
+  gameId: BigInt
+
+  """Checks for equality with the object’s `created` field."""
+  created: Datetime
+
+  """Checks for equality with the object’s `modified` field."""
+  modified: Datetime
+
+  """Checks for equality with the object’s `carClassId` field."""
+  carClassId: BigInt
+}
+
+"""A connection to a list of `TelemetryCarclass` values."""
+type TelemetryCarclassesConnection {
+  """A list of `TelemetryCarclass` objects."""
+  nodes: [TelemetryCarclass]!
+
+  """
+  A list of edges which contains the `TelemetryCarclass` and cursor to aid in pagination.
+  """
+  edges: [TelemetryCarclassesEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  The count of *all* `TelemetryCarclass` you could get from the connection.
+  """
+  totalCount: Int!
+}
+
+type TelemetryCarclass implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: BigInt!
+  created: Datetime!
+  modified: Datetime!
+  name: String!
+  gameId: BigInt!
+
+  """
+  Reads a single `TelemetryGame` that is related to this `TelemetryCarclass`.
+  """
+  telemetryGameByGameId: TelemetryGame
+
+  """Reads and enables pagination through a set of `TelemetryCar`."""
+  telemetryCarsByCarClassId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetryCar`."""
+    orderBy: [TelemetryCarsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetryCarCondition
+  ): TelemetryCarsConnection!
+}
+
+"""A `TelemetryCarclass` edge in the connection."""
+type TelemetryCarclassesEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `TelemetryCarclass` at the end of the edge."""
+  node: TelemetryCarclass
+}
+
+"""Information about pagination in a connection."""
+type PageInfo {
+  """When paginating forwards, are there more items?"""
+  hasNextPage: Boolean!
+
+  """When paginating backwards, are there more items?"""
+  hasPreviousPage: Boolean!
+
+  """When paginating backwards, the cursor to continue."""
+  startCursor: Cursor
+
+  """When paginating forwards, the cursor to continue."""
+  endCursor: Cursor
+}
+
+"""Methods to use when ordering `TelemetryCarclass`."""
+enum TelemetryCarclassesOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  CREATED_ASC
+  CREATED_DESC
+  MODIFIED_ASC
+  MODIFIED_DESC
+  NAME_ASC
+  NAME_DESC
+  GAME_ID_ASC
+  GAME_ID_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `TelemetryCarclass` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+"""
+input TelemetryCarclassCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: BigInt
+
+  """Checks for equality with the object’s `created` field."""
+  created: Datetime
+
+  """Checks for equality with the object’s `modified` field."""
+  modified: Datetime
+
+  """Checks for equality with the object’s `name` field."""
+  name: String
+
+  """Checks for equality with the object’s `gameId` field."""
+  gameId: BigInt
+}
+
+"""A connection to a list of `TelemetryFastlap` values."""
+type TelemetryFastlapsConnection {
+  """A list of `TelemetryFastlap` objects."""
+  nodes: [TelemetryFastlap]!
+
+  """
+  A list of edges which contains the `TelemetryFastlap` and cursor to aid in pagination.
+  """
+  edges: [TelemetryFastlapsEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  The count of *all* `TelemetryFastlap` you could get from the connection.
+  """
+  totalCount: Int!
+}
+
+type TelemetryFastlap implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: BigInt!
+  carId: BigInt!
+  gameId: BigInt!
+  trackId: BigInt!
+  driverId: BigInt
+  data: String
+  created: Datetime!
+  modified: Datetime!
+
+  """
+  Reads a single `TelemetryCar` that is related to this `TelemetryFastlap`.
+  """
+  telemetryCarByCarId: TelemetryCar
+
+  """
+  Reads a single `TelemetryGame` that is related to this `TelemetryFastlap`.
+  """
+  telemetryGameByGameId: TelemetryGame
+
+  """
+  Reads a single `TelemetryTrack` that is related to this `TelemetryFastlap`.
+  """
+  telemetryTrackByTrackId: TelemetryTrack
+
+  """
+  Reads a single `TelemetryDriver` that is related to this `TelemetryFastlap`.
+  """
+  telemetryDriverByDriverId: TelemetryDriver
+
+  """
+  Reads and enables pagination through a set of `TelemetryFastlapsegment`.
+  """
+  telemetryFastlapsegmentsByFastLapId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetryFastlapsegment`."""
+    orderBy: [TelemetryFastlapsegmentsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetryFastlapsegmentCondition
+  ): TelemetryFastlapsegmentsConnection!
+
+  """Reads and enables pagination through a set of `TelemetryLap`."""
+  telemetryLapsByFastLapId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetryLap`."""
+    orderBy: [TelemetryLapsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetryLapCondition
+  ): TelemetryLapsConnection!
+}
+
+type TelemetryTrack implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: BigInt!
+  name: String!
+  length: Int!
+  gameId: BigInt!
+  created: Datetime!
+  modified: Datetime!
+
+  """
+  Reads a single `TelemetryGame` that is related to this `TelemetryTrack`.
+  """
+  telemetryGameByGameId: TelemetryGame
+
+  """Reads and enables pagination through a set of `TelemetryFastlap`."""
+  telemetryFastlapsByTrackId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetryFastlap`."""
+    orderBy: [TelemetryFastlapsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetryFastlapCondition
+  ): TelemetryFastlapsConnection!
+
+  """Reads and enables pagination through a set of `TelemetryLandmark`."""
+  telemetryLandmarksByTrackId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetryLandmark`."""
+    orderBy: [TelemetryLandmarksOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetryLandmarkCondition
+  ): TelemetryLandmarksConnection!
+
+  """Reads and enables pagination through a set of `TelemetryLap`."""
+  telemetryLapsByTrackId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetryLap`."""
+    orderBy: [TelemetryLapsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetryLapCondition
+  ): TelemetryLapsConnection!
+
+  """Reads and enables pagination through a set of `TelemetryTrackguide`."""
+  telemetryTrackguidesByTrackId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetryTrackguide`."""
+    orderBy: [TelemetryTrackguidesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetryTrackguideCondition
+  ): TelemetryTrackguidesConnection!
+}
+
+"""Methods to use when ordering `TelemetryFastlap`."""
+enum TelemetryFastlapsOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  CAR_ID_ASC
+  CAR_ID_DESC
+  GAME_ID_ASC
+  GAME_ID_DESC
+  TRACK_ID_ASC
+  TRACK_ID_DESC
+  DRIVER_ID_ASC
+  DRIVER_ID_DESC
+  DATA_ASC
+  DATA_DESC
+  CREATED_ASC
+  CREATED_DESC
+  MODIFIED_ASC
+  MODIFIED_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `TelemetryFastlap` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+"""
+input TelemetryFastlapCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: BigInt
+
+  """Checks for equality with the object’s `carId` field."""
+  carId: BigInt
+
+  """Checks for equality with the object’s `gameId` field."""
+  gameId: BigInt
+
+  """Checks for equality with the object’s `trackId` field."""
+  trackId: BigInt
+
+  """Checks for equality with the object’s `driverId` field."""
+  driverId: BigInt
+
+  """Checks for equality with the object’s `data` field."""
+  data: String
+
+  """Checks for equality with the object’s `created` field."""
+  created: Datetime
+
+  """Checks for equality with the object’s `modified` field."""
+  modified: Datetime
+}
+
+"""A connection to a list of `TelemetryLandmark` values."""
+type TelemetryLandmarksConnection {
+  """A list of `TelemetryLandmark` objects."""
+  nodes: [TelemetryLandmark]!
+
+  """
+  A list of edges which contains the `TelemetryLandmark` and cursor to aid in pagination.
+  """
+  edges: [TelemetryLandmarksEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  The count of *all* `TelemetryLandmark` you could get from the connection.
+  """
+  totalCount: Int!
+}
+
+type TelemetryLandmark implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: BigInt!
+  created: Datetime!
+  modified: Datetime!
+  name: String!
+  start: Int
+  end: Int
+  isOvertakingSpot: Boolean
+  kind: String!
+  trackId: BigInt!
+  fromCc: Boolean!
+
+  """
+  Reads a single `TelemetryTrack` that is related to this `TelemetryLandmark`.
+  """
+  telemetryTrackByTrackId: TelemetryTrack
+
+  """
+  Reads and enables pagination through a set of `TelemetryTrackguidenote`.
+  """
+  telemetryTrackguidenotesByLandmarkId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetryTrackguidenote`."""
+    orderBy: [TelemetryTrackguidenotesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetryTrackguidenoteCondition
+  ): TelemetryTrackguidenotesConnection!
+}
+
+"""A connection to a list of `TelemetryTrackguidenote` values."""
+type TelemetryTrackguidenotesConnection {
+  """A list of `TelemetryTrackguidenote` objects."""
+  nodes: [TelemetryTrackguidenote]!
+
+  """
+  A list of edges which contains the `TelemetryTrackguidenote` and cursor to aid in pagination.
+  """
+  edges: [TelemetryTrackguidenotesEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  The count of *all* `TelemetryTrackguidenote` you could get from the connection.
+  """
+  totalCount: Int!
+}
+
+type TelemetryTrackguidenote implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: BigInt!
+  created: Datetime!
+  modified: Datetime!
+  segment: Int!
+  priority: Int!
+  refId: String!
+  refEval: String!
+  message: String!
+  eval: String!
+  notes: String!
+  landmarkId: BigInt
+  trackGuideId: BigInt!
+  at: String!
+  score: String!
+  finishAt: String
+  mode: String!
+  sortKey: String!
+
+  """
+  Reads a single `TelemetryLandmark` that is related to this `TelemetryTrackguidenote`.
+  """
+  telemetryLandmarkByLandmarkId: TelemetryLandmark
+
+  """
+  Reads a single `TelemetryTrackguide` that is related to this `TelemetryTrackguidenote`.
+  """
+  telemetryTrackguideByTrackGuideId: TelemetryTrackguide
+}
+
+type TelemetryTrackguide implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: BigInt!
+  created: Datetime!
+  modified: Datetime!
+  name: String!
+  description: String!
+  carId: BigInt!
+  trackId: BigInt!
+
+  """
+  Reads a single `TelemetryCar` that is related to this `TelemetryTrackguide`.
+  """
+  telemetryCarByCarId: TelemetryCar
+
+  """
+  Reads a single `TelemetryTrack` that is related to this `TelemetryTrackguide`.
+  """
+  telemetryTrackByTrackId: TelemetryTrack
+
+  """
+  Reads and enables pagination through a set of `TelemetryTrackguidenote`.
+  """
+  telemetryTrackguidenotesByTrackGuideId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetryTrackguidenote`."""
+    orderBy: [TelemetryTrackguidenotesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetryTrackguidenoteCondition
+  ): TelemetryTrackguidenotesConnection!
+}
+
+"""Methods to use when ordering `TelemetryTrackguidenote`."""
+enum TelemetryTrackguidenotesOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  CREATED_ASC
+  CREATED_DESC
+  MODIFIED_ASC
+  MODIFIED_DESC
+  SEGMENT_ASC
+  SEGMENT_DESC
+  PRIORITY_ASC
+  PRIORITY_DESC
+  REF_ID_ASC
+  REF_ID_DESC
+  REF_EVAL_ASC
+  REF_EVAL_DESC
+  MESSAGE_ASC
+  MESSAGE_DESC
+  EVAL_ASC
+  EVAL_DESC
+  NOTES_ASC
+  NOTES_DESC
+  LANDMARK_ID_ASC
+  LANDMARK_ID_DESC
+  TRACK_GUIDE_ID_ASC
+  TRACK_GUIDE_ID_DESC
+  AT_ASC
+  AT_DESC
+  SCORE_ASC
+  SCORE_DESC
+  FINISH_AT_ASC
+  FINISH_AT_DESC
+  MODE_ASC
+  MODE_DESC
+  SORT_KEY_ASC
+  SORT_KEY_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `TelemetryTrackguidenote` object types. All
+fields are tested for equality and combined with a logical ‘and.’
+"""
+input TelemetryTrackguidenoteCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: BigInt
+
+  """Checks for equality with the object’s `created` field."""
+  created: Datetime
+
+  """Checks for equality with the object’s `modified` field."""
+  modified: Datetime
+
+  """Checks for equality with the object’s `segment` field."""
+  segment: Int
+
+  """Checks for equality with the object’s `priority` field."""
+  priority: Int
+
+  """Checks for equality with the object’s `refId` field."""
+  refId: String
+
+  """Checks for equality with the object’s `refEval` field."""
+  refEval: String
+
+  """Checks for equality with the object’s `message` field."""
+  message: String
+
+  """Checks for equality with the object’s `eval` field."""
+  eval: String
+
+  """Checks for equality with the object’s `notes` field."""
+  notes: String
+
+  """Checks for equality with the object’s `landmarkId` field."""
+  landmarkId: BigInt
+
+  """Checks for equality with the object’s `trackGuideId` field."""
+  trackGuideId: BigInt
+
+  """Checks for equality with the object’s `at` field."""
+  at: String
+
+  """Checks for equality with the object’s `score` field."""
+  score: String
+
+  """Checks for equality with the object’s `finishAt` field."""
+  finishAt: String
+
+  """Checks for equality with the object’s `mode` field."""
+  mode: String
+
+  """Checks for equality with the object’s `sortKey` field."""
+  sortKey: String
+}
+
+"""A `TelemetryTrackguidenote` edge in the connection."""
+type TelemetryTrackguidenotesEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `TelemetryTrackguidenote` at the end of the edge."""
+  node: TelemetryTrackguidenote
+}
+
+"""A `TelemetryLandmark` edge in the connection."""
+type TelemetryLandmarksEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `TelemetryLandmark` at the end of the edge."""
+  node: TelemetryLandmark
+}
+
+"""Methods to use when ordering `TelemetryLandmark`."""
+enum TelemetryLandmarksOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  CREATED_ASC
+  CREATED_DESC
+  MODIFIED_ASC
+  MODIFIED_DESC
+  NAME_ASC
+  NAME_DESC
+  START_ASC
+  START_DESC
+  END_ASC
+  END_DESC
+  IS_OVERTAKING_SPOT_ASC
+  IS_OVERTAKING_SPOT_DESC
+  KIND_ASC
+  KIND_DESC
+  TRACK_ID_ASC
+  TRACK_ID_DESC
+  FROM_CC_ASC
+  FROM_CC_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `TelemetryLandmark` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+"""
+input TelemetryLandmarkCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: BigInt
+
+  """Checks for equality with the object’s `created` field."""
+  created: Datetime
+
+  """Checks for equality with the object’s `modified` field."""
+  modified: Datetime
+
+  """Checks for equality with the object’s `name` field."""
+  name: String
+
+  """Checks for equality with the object’s `start` field."""
+  start: Int
+
+  """Checks for equality with the object’s `end` field."""
+  end: Int
+
+  """Checks for equality with the object’s `isOvertakingSpot` field."""
+  isOvertakingSpot: Boolean
+
+  """Checks for equality with the object’s `kind` field."""
+  kind: String
+
+  """Checks for equality with the object’s `trackId` field."""
+  trackId: BigInt
+
+  """Checks for equality with the object’s `fromCc` field."""
+  fromCc: Boolean
+}
+
+"""A connection to a list of `TelemetryLap` values."""
+type TelemetryLapsConnection {
+  """A list of `TelemetryLap` objects."""
+  nodes: [TelemetryLap]!
+
+  """
+  A list of edges which contains the `TelemetryLap` and cursor to aid in pagination.
+  """
+  edges: [TelemetryLapsEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `TelemetryLap` you could get from the connection."""
+  totalCount: Int!
+}
+
+type TelemetryLap implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: BigInt!
+  number: Int!
+  start: Datetime!
+  time: Float!
+  length: Int!
+  carId: BigInt!
+  sessionId: BigInt!
+  trackId: BigInt!
+  valid: Boolean!
+  end: Datetime!
+  fastLapId: BigInt
+  created: Datetime!
+  modified: Datetime!
+
+  """Reads a single `TelemetryCar` that is related to this `TelemetryLap`."""
+  telemetryCarByCarId: TelemetryCar
+
+  """
+  Reads a single `TelemetrySession` that is related to this `TelemetryLap`.
+  """
+  telemetrySessionBySessionId: TelemetrySession
+
+  """
+  Reads a single `TelemetryTrack` that is related to this `TelemetryLap`.
+  """
+  telemetryTrackByTrackId: TelemetryTrack
+
+  """
+  Reads a single `TelemetryFastlap` that is related to this `TelemetryLap`.
+  """
+  telemetryFastlapByFastLapId: TelemetryFastlap
+}
+
+type TelemetrySession implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: BigInt!
+  sessionId: String!
+  start: Datetime!
+  end: Datetime!
+  driverId: BigInt!
+  gameId: BigInt!
+  sessionTypeId: BigInt!
+  created: Datetime!
+  modified: Datetime!
+
+  """
+  Reads a single `TelemetryDriver` that is related to this `TelemetrySession`.
+  """
+  telemetryDriverByDriverId: TelemetryDriver
+
+  """
+  Reads a single `TelemetryGame` that is related to this `TelemetrySession`.
+  """
+  telemetryGameByGameId: TelemetryGame
+
+  """
+  Reads a single `TelemetrySessiontype` that is related to this `TelemetrySession`.
+  """
+  telemetrySessiontypeBySessionTypeId: TelemetrySessiontype
+
+  """Reads and enables pagination through a set of `TelemetryLap`."""
+  telemetryLapsBySessionId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetryLap`."""
+    orderBy: [TelemetryLapsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetryLapCondition
+  ): TelemetryLapsConnection!
+}
+
+type TelemetryDriver implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: BigInt!
+  name: String!
+  created: Datetime!
+  modified: Datetime!
+
+  """Reads and enables pagination through a set of `TelemetryFastlap`."""
+  telemetryFastlapsByDriverId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetryFastlap`."""
+    orderBy: [TelemetryFastlapsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetryFastlapCondition
+  ): TelemetryFastlapsConnection!
+
+  """Reads and enables pagination through a set of `TelemetrySession`."""
+  telemetrySessionsByDriverId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetrySession`."""
+    orderBy: [TelemetrySessionsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetrySessionCondition
+  ): TelemetrySessionsConnection!
+}
+
+"""A connection to a list of `TelemetrySession` values."""
+type TelemetrySessionsConnection {
+  """A list of `TelemetrySession` objects."""
+  nodes: [TelemetrySession]!
+
+  """
+  A list of edges which contains the `TelemetrySession` and cursor to aid in pagination.
+  """
+  edges: [TelemetrySessionsEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  The count of *all* `TelemetrySession` you could get from the connection.
+  """
+  totalCount: Int!
+}
+
+"""A `TelemetrySession` edge in the connection."""
+type TelemetrySessionsEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `TelemetrySession` at the end of the edge."""
+  node: TelemetrySession
+}
+
+"""Methods to use when ordering `TelemetrySession`."""
+enum TelemetrySessionsOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  SESSION_ID_ASC
+  SESSION_ID_DESC
+  START_ASC
+  START_DESC
+  END_ASC
+  END_DESC
+  DRIVER_ID_ASC
+  DRIVER_ID_DESC
+  GAME_ID_ASC
+  GAME_ID_DESC
+  SESSION_TYPE_ID_ASC
+  SESSION_TYPE_ID_DESC
+  CREATED_ASC
+  CREATED_DESC
+  MODIFIED_ASC
+  MODIFIED_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `TelemetrySession` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+"""
+input TelemetrySessionCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: BigInt
+
+  """Checks for equality with the object’s `sessionId` field."""
+  sessionId: String
+
+  """Checks for equality with the object’s `start` field."""
+  start: Datetime
+
+  """Checks for equality with the object’s `end` field."""
+  end: Datetime
+
+  """Checks for equality with the object’s `driverId` field."""
+  driverId: BigInt
+
+  """Checks for equality with the object’s `gameId` field."""
+  gameId: BigInt
+
+  """Checks for equality with the object’s `sessionTypeId` field."""
+  sessionTypeId: BigInt
+
+  """Checks for equality with the object’s `created` field."""
+  created: Datetime
+
+  """Checks for equality with the object’s `modified` field."""
+  modified: Datetime
+}
+
+type TelemetrySessiontype implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: BigInt!
+  type: String!
+  created: Datetime!
+  modified: Datetime!
+
+  """Reads and enables pagination through a set of `TelemetrySession`."""
+  telemetrySessionsBySessionTypeId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TelemetrySession`."""
+    orderBy: [TelemetrySessionsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TelemetrySessionCondition
+  ): TelemetrySessionsConnection!
+}
+
+"""Methods to use when ordering `TelemetryLap`."""
+enum TelemetryLapsOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  NUMBER_ASC
+  NUMBER_DESC
+  START_ASC
+  START_DESC
+  TIME_ASC
+  TIME_DESC
+  LENGTH_ASC
+  LENGTH_DESC
+  CAR_ID_ASC
+  CAR_ID_DESC
+  SESSION_ID_ASC
+  SESSION_ID_DESC
+  TRACK_ID_ASC
+  TRACK_ID_DESC
+  VALID_ASC
+  VALID_DESC
+  END_ASC
+  END_DESC
+  FAST_LAP_ID_ASC
+  FAST_LAP_ID_DESC
+  CREATED_ASC
+  CREATED_DESC
+  MODIFIED_ASC
+  MODIFIED_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `TelemetryLap` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+"""
+input TelemetryLapCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: BigInt
+
+  """Checks for equality with the object’s `number` field."""
+  number: Int
+
+  """Checks for equality with the object’s `start` field."""
+  start: Datetime
+
+  """Checks for equality with the object’s `time` field."""
+  time: Float
+
+  """Checks for equality with the object’s `length` field."""
+  length: Int
+
+  """Checks for equality with the object’s `carId` field."""
+  carId: BigInt
+
+  """Checks for equality with the object’s `sessionId` field."""
+  sessionId: BigInt
+
+  """Checks for equality with the object’s `trackId` field."""
+  trackId: BigInt
+
+  """Checks for equality with the object’s `valid` field."""
+  valid: Boolean
+
+  """Checks for equality with the object’s `end` field."""
+  end: Datetime
+
+  """Checks for equality with the object’s `fastLapId` field."""
+  fastLapId: BigInt
+
+  """Checks for equality with the object’s `created` field."""
+  created: Datetime
+
+  """Checks for equality with the object’s `modified` field."""
+  modified: Datetime
+}
+
+"""A `TelemetryLap` edge in the connection."""
+type TelemetryLapsEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `TelemetryLap` at the end of the edge."""
+  node: TelemetryLap
+}
+
+"""A connection to a list of `TelemetryTrackguide` values."""
+type TelemetryTrackguidesConnection {
+  """A list of `TelemetryTrackguide` objects."""
+  nodes: [TelemetryTrackguide]!
+
+  """
+  A list of edges which contains the `TelemetryTrackguide` and cursor to aid in pagination.
+  """
+  edges: [TelemetryTrackguidesEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  The count of *all* `TelemetryTrackguide` you could get from the connection.
+  """
+  totalCount: Int!
+}
+
+"""A `TelemetryTrackguide` edge in the connection."""
+type TelemetryTrackguidesEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `TelemetryTrackguide` at the end of the edge."""
+  node: TelemetryTrackguide
+}
+
+"""Methods to use when ordering `TelemetryTrackguide`."""
+enum TelemetryTrackguidesOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  CREATED_ASC
+  CREATED_DESC
+  MODIFIED_ASC
+  MODIFIED_DESC
+  NAME_ASC
+  NAME_DESC
+  DESCRIPTION_ASC
+  DESCRIPTION_DESC
+  CAR_ID_ASC
+  CAR_ID_DESC
+  TRACK_ID_ASC
+  TRACK_ID_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `TelemetryTrackguide` object types. All fields
+are tested for equality and combined with a logical ‘and.’
+"""
+input TelemetryTrackguideCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: BigInt
+
+  """Checks for equality with the object’s `created` field."""
+  created: Datetime
+
+  """Checks for equality with the object’s `modified` field."""
+  modified: Datetime
+
+  """Checks for equality with the object’s `name` field."""
+  name: String
+
+  """Checks for equality with the object’s `description` field."""
+  description: String
+
+  """Checks for equality with the object’s `carId` field."""
+  carId: BigInt
+
+  """Checks for equality with the object’s `trackId` field."""
+  trackId: BigInt
+}
+
+"""A connection to a list of `TelemetryFastlapsegment` values."""
+type TelemetryFastlapsegmentsConnection {
+  """A list of `TelemetryFastlapsegment` objects."""
+  nodes: [TelemetryFastlapsegment]!
+
+  """
+  A list of edges which contains the `TelemetryFastlapsegment` and cursor to aid in pagination.
+  """
+  edges: [TelemetryFastlapsegmentsEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  The count of *all* `TelemetryFastlapsegment` you could get from the connection.
+  """
+  totalCount: Int!
+}
+
+type TelemetryFastlapsegment implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: BigInt!
+  turn: String!
+  start: Int!
+  end: Int!
+  brake: Int!
+  turnIn: Int!
+  force: Int!
+  gear: Int!
+  stop: Int!
+  accelerate: Int!
+  speed: Int!
+  mark: String!
+  fastLapId: BigInt!
+  created: Datetime!
+  modified: Datetime!
+
+  """
+  Reads a single `TelemetryFastlap` that is related to this `TelemetryFastlapsegment`.
+  """
+  telemetryFastlapByFastLapId: TelemetryFastlap
+}
+
+"""A `TelemetryFastlapsegment` edge in the connection."""
+type TelemetryFastlapsegmentsEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `TelemetryFastlapsegment` at the end of the edge."""
+  node: TelemetryFastlapsegment
+}
+
+"""Methods to use when ordering `TelemetryFastlapsegment`."""
+enum TelemetryFastlapsegmentsOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  TURN_ASC
+  TURN_DESC
+  START_ASC
+  START_DESC
+  END_ASC
+  END_DESC
+  BRAKE_ASC
+  BRAKE_DESC
+  TURN_IN_ASC
+  TURN_IN_DESC
+  FORCE_ASC
+  FORCE_DESC
+  GEAR_ASC
+  GEAR_DESC
+  STOP_ASC
+  STOP_DESC
+  ACCELERATE_ASC
+  ACCELERATE_DESC
+  SPEED_ASC
+  SPEED_DESC
+  MARK_ASC
+  MARK_DESC
+  FAST_LAP_ID_ASC
+  FAST_LAP_ID_DESC
+  CREATED_ASC
+  CREATED_DESC
+  MODIFIED_ASC
+  MODIFIED_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `TelemetryFastlapsegment` object types. All
+fields are tested for equality and combined with a logical ‘and.’
+"""
+input TelemetryFastlapsegmentCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: BigInt
+
+  """Checks for equality with the object’s `turn` field."""
+  turn: String
+
+  """Checks for equality with the object’s `start` field."""
+  start: Int
+
+  """Checks for equality with the object’s `end` field."""
+  end: Int
+
+  """Checks for equality with the object’s `brake` field."""
+  brake: Int
+
+  """Checks for equality with the object’s `turnIn` field."""
+  turnIn: Int
+
+  """Checks for equality with the object’s `force` field."""
+  force: Int
+
+  """Checks for equality with the object’s `gear` field."""
+  gear: Int
+
+  """Checks for equality with the object’s `stop` field."""
+  stop: Int
+
+  """Checks for equality with the object’s `accelerate` field."""
+  accelerate: Int
+
+  """Checks for equality with the object’s `speed` field."""
+  speed: Int
+
+  """Checks for equality with the object’s `mark` field."""
+  mark: String
+
+  """Checks for equality with the object’s `fastLapId` field."""
+  fastLapId: BigInt
+
+  """Checks for equality with the object’s `created` field."""
+  created: Datetime
+
+  """Checks for equality with the object’s `modified` field."""
+  modified: Datetime
+}
+
+"""A `TelemetryFastlap` edge in the connection."""
+type TelemetryFastlapsEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `TelemetryFastlap` at the end of the edge."""
+  node: TelemetryFastlap
+}
+
+"""A connection to a list of `TelemetryTrack` values."""
+type TelemetryTracksConnection {
+  """A list of `TelemetryTrack` objects."""
+  nodes: [TelemetryTrack]!
+
+  """
+  A list of edges which contains the `TelemetryTrack` and cursor to aid in pagination.
+  """
+  edges: [TelemetryTracksEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `TelemetryTrack` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `TelemetryTrack` edge in the connection."""
+type TelemetryTracksEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `TelemetryTrack` at the end of the edge."""
+  node: TelemetryTrack
+}
+
+"""Methods to use when ordering `TelemetryTrack`."""
+enum TelemetryTracksOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  NAME_ASC
+  NAME_DESC
+  LENGTH_ASC
+  LENGTH_DESC
+  GAME_ID_ASC
+  GAME_ID_DESC
+  CREATED_ASC
+  CREATED_DESC
+  MODIFIED_ASC
+  MODIFIED_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `TelemetryTrack` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+"""
+input TelemetryTrackCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: BigInt
+
+  """Checks for equality with the object’s `name` field."""
+  name: String
+
+  """Checks for equality with the object’s `length` field."""
+  length: Int
+
+  """Checks for equality with the object’s `gameId` field."""
+  gameId: BigInt
+
+  """Checks for equality with the object’s `created` field."""
+  created: Datetime
+
+  """Checks for equality with the object’s `modified` field."""
+  modified: Datetime
+}
+
+"""A `TelemetryCar` edge in the connection."""
+type TelemetryCarsEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `TelemetryCar` at the end of the edge."""
+  node: TelemetryCar
+}
+
+"""A connection to a list of `TelemetryDriver` values."""
+type TelemetryDriversConnection {
+  """A list of `TelemetryDriver` objects."""
+  nodes: [TelemetryDriver]!
+
+  """
+  A list of edges which contains the `TelemetryDriver` and cursor to aid in pagination.
+  """
+  edges: [TelemetryDriversEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  The count of *all* `TelemetryDriver` you could get from the connection.
+  """
+  totalCount: Int!
+}
+
+"""A `TelemetryDriver` edge in the connection."""
+type TelemetryDriversEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `TelemetryDriver` at the end of the edge."""
+  node: TelemetryDriver
+}
+
+"""Methods to use when ordering `TelemetryDriver`."""
+enum TelemetryDriversOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  NAME_ASC
+  NAME_DESC
+  CREATED_ASC
+  CREATED_DESC
+  MODIFIED_ASC
+  MODIFIED_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `TelemetryDriver` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+"""
+input TelemetryDriverCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: BigInt
+
+  """Checks for equality with the object’s `name` field."""
+  name: String
+
+  """Checks for equality with the object’s `created` field."""
+  created: Datetime
+
+  """Checks for equality with the object’s `modified` field."""
+  modified: Datetime
+}
+
+"""A connection to a list of `TelemetryGame` values."""
+type TelemetryGamesConnection {
+  """A list of `TelemetryGame` objects."""
+  nodes: [TelemetryGame]!
+
+  """
+  A list of edges which contains the `TelemetryGame` and cursor to aid in pagination.
+  """
+  edges: [TelemetryGamesEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `TelemetryGame` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `TelemetryGame` edge in the connection."""
+type TelemetryGamesEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `TelemetryGame` at the end of the edge."""
+  node: TelemetryGame
+}
+
+"""Methods to use when ordering `TelemetryGame`."""
+enum TelemetryGamesOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  NAME_ASC
+  NAME_DESC
+  CREATED_ASC
+  CREATED_DESC
+  MODIFIED_ASC
+  MODIFIED_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `TelemetryGame` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+"""
+input TelemetryGameCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: BigInt
+
+  """Checks for equality with the object’s `name` field."""
+  name: String
+
+  """Checks for equality with the object’s `created` field."""
+  created: Datetime
+
+  """Checks for equality with the object’s `modified` field."""
+  modified: Datetime
+}
+
+"""A connection to a list of `TelemetrySessiontype` values."""
+type TelemetrySessiontypesConnection {
+  """A list of `TelemetrySessiontype` objects."""
+  nodes: [TelemetrySessiontype]!
+
+  """
+  A list of edges which contains the `TelemetrySessiontype` and cursor to aid in pagination.
+  """
+  edges: [TelemetrySessiontypesEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  The count of *all* `TelemetrySessiontype` you could get from the connection.
+  """
+  totalCount: Int!
+}
+
+"""A `TelemetrySessiontype` edge in the connection."""
+type TelemetrySessiontypesEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `TelemetrySessiontype` at the end of the edge."""
+  node: TelemetrySessiontype
+}
+
+"""Methods to use when ordering `TelemetrySessiontype`."""
+enum TelemetrySessiontypesOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  TYPE_ASC
+  TYPE_DESC
+  CREATED_ASC
+  CREATED_DESC
+  MODIFIED_ASC
+  MODIFIED_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `TelemetrySessiontype` object types. All fields
+are tested for equality and combined with a logical ‘and.’
+"""
+input TelemetrySessiontypeCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: BigInt
+
+  """Checks for equality with the object’s `type` field."""
   type: String
 
-  """The dimension in which the location is located."""
-  dimension: String
+  """Checks for equality with the object’s `created` field."""
+  created: Datetime
 
-  """List of characters who have been last seen in the location."""
-  residents: [Character]!
-
-  """Time at which the location was created in the database."""
-  created: String
+  """Checks for equality with the object’s `modified` field."""
+  modified: Datetime
 }
-
-""""""
-type Episode {
-  """The id of the episode."""
-  id: ID
-
-  """The name of the episode."""
-  name: String
-
-  """The air date of the episode."""
-  air_date: String
-
-  """The code of the episode."""
-  episode: String
-
-  """List of characters who have been seen in the episode."""
-  characters: [Character]!
-
-  """Time at which the episode was created in the database."""
-  created: String
-}
-
-""""""
-input FilterCharacter {
-  """"""
-  name: String
-
-  """"""
-  status: String
-
-  """"""
-  species: String
-
-  """"""
-  type: String
-
-  """"""
-  gender: String
-}
-
-""""""
-type Characters {
-  """"""
-  info: Info
-
-  """"""
-  results: [Character]
-}
-
-""""""
-type Info {
-  """The length of the response."""
-  count: Int
-
-  """The amount of pages."""
-  pages: Int
-
-  """Number of the next page (if it exists)"""
-  next: Int
-
-  """Number of the previous page (if it exists)"""
-  prev: Int
-}
-
-""""""
-input FilterLocation {
-  """"""
-  name: String
-
-  """"""
-  type: String
-
-  """"""
-  dimension: String
-}
-
-""""""
-type Locations {
-  """"""
-  info: Info
-
-  """"""
-  results: [Location]
-}
-
-""""""
-input FilterEpisode {
-  """"""
-  name: String
-
-  """"""
-  episode: String
-}
-
-""""""
-type Episodes {
-  """"""
-  info: Info
-
-  """"""
-  results: [Episode]
-}
-
-""""""
-enum CacheControlScope {
-  """"""
-  PUBLIC
-
-  """"""
-  PRIVATE
-}
-
-"""The `Upload` scalar type represents a file upload."""
-scalar Upload

@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"query": "{\n  characters {\n    results {\n      name\n    }\n  }\n}"}'
+    body: '{"query": "{\n  allTelemetryGames {\n    nodes {\n      name\n    }\n  }\n}"}'
     headers:
       Accept:
       - '*/*'
@@ -9,76 +9,33 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '72'
+      - '77'
       Content-Type:
       - application/json
       User-Agent:
       - python-requests/2.32.3
     method: POST
-    uri: https://rickandmortyapi.com/graphql
+    uri: http://telemetry.b4mad.racing:30050/graphql
   response:
     body:
-      string: '{"data":{"characters":{"results":[{"name":"Rick Sanchez"},{"name":"Morty
-        Smith"},{"name":"Summer Smith"},{"name":"Beth Smith"},{"name":"Jerry Smith"},{"name":"Abadango
-        Cluster Princess"},{"name":"Abradolf Lincler"},{"name":"Adjudicator Rick"},{"name":"Agency
-        Director"},{"name":"Alan Rails"},{"name":"Albert Einstein"},{"name":"Alexander"},{"name":"Alien
-        Googah"},{"name":"Alien Morty"},{"name":"Alien Rick"},{"name":"Amish Cyborg"},{"name":"Annie"},{"name":"Antenna
-        Morty"},{"name":"Antenna Rick"},{"name":"Ants in my Eyes Johnson"}]}}}'
+      string: '{"data":{"allTelemetryGames":{"nodes":[{"name":"iRacing"},{"name":"RaceRoom"},{"name":"Assetto
+        Corsa Competizione"},{"name":"Assetto Corsa (64 bit)"},{"name":"Automobilista
+        2"},{"name":"rFactor 2 (64 bit)"},{"name":"Automobilista"},{"name":"pCARS
+        (network data)"},{"name":"Race Room"},{"name":"pCARS 2"},{"name":"rFactor"},{"name":"GTR
+        2"},{"name":"pCARS (64 bit)"},{"name":"Assetto Corsa (32 bit)"},{"name":"Richard
+        Burns Rally"},{"name":"pCARS 3"},{"name":"iracing"},{"name":"ams2"},{"name":"Le
+        Mans Ultimate"},{"name":"Project Cars (64 bit)"}]}}}'
     headers:
-      Accept-Ranges:
-      - none
-      Access-Control-Allow-Credentials:
-      - 'true'
-      Access-Control-Allow-Headers:
-      - '*'
-      Access-Control-Allow-Methods:
-      - POST, GET, HEAD, OPTIONS
-      Access-Control-Allow-Origin:
-      - '*'
-      Access-Control-Expose-Headers:
-      - '*'
-      Access-Control-Max-Age:
-      - '600'
-      Age:
-      - '541'
-      Cache-Control:
-      - public,s-maxage=900,stale-while-revalidate=900
-      Cache-Status:
-      - '"Netlify Edge"; fwd=method'
-      Content-Encoding:
-      - gzip
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '549'
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Sun, 16 Jun 2024 12:05:34 GMT
-      Etag:
-      - W/"5cc-gKjEE6zyOra3PVSH3Ih9WU/pna4"
-      Expires:
-      - Wed, 19 Jun 2024 11:56:35 GMT
-      Gcdn-Cache:
-      - HIT
-      Netlify-Vary:
-      - query
-      Server:
-      - Netlify
-      Stellate-Query-Hash:
-      - '4339292150631261'
-      Strict-Transport-Security:
-      - max-age=31536000
-      Transfer-Encoding:
-      - chunked
-      Vary:
-      - accept-encoding
-      X-Cache:
-      - HIT
-      X-Cache-Hits:
-      - '2'
-      X-Nf-Request-Id:
-      - 01J0GF0FFBY5HP28YA2G1VKXDG
-      X-Powered-By:
-      - Stellate
-      X-Served-By:
-      - cache-fra-etou8220077-FRA
+      - Mon, 17 Jun 2024 19:00:38 GMT
+      Keep-Alive:
+      - timeout=5
     status:
       code: 200
       message: OK
