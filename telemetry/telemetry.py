@@ -6,6 +6,22 @@ from typing import Optional
 class Telemetry:
     def __init__(self):
         self.filter = {}
+        self.graphql_strategy = GraphQLRetrievalStrategy()
+        self.influx_strategy = InfluxRetrievalStrategy()
+        self.adapter = TransparentAdapter()
+
+    def set_pandas_adapter(self):
+        self.adapter = PandasAdapter()
+
+    def games(self):
+        return self.adapter.convert(
+            self.graphql_strategy.games()
+        )
+
+    def sessions(self):
+        return self.adapter.convert(
+            self.graphql_strategy.sessions()
+        )
 
     def set_filter(self, filter):
         self.filter = filter
