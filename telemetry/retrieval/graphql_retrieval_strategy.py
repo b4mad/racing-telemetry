@@ -39,6 +39,5 @@ class GraphQLRetrievalStrategy(RetrievalStrategy):
         query = dsl_gql(DSLQuery(query))
 
         response = self.client.execute(query)
-        result = response
-        print(result)
+        result = response.get("allTelemetryGames", {}).get("nodes", [])
         return result

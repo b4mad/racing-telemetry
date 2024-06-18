@@ -1,6 +1,5 @@
 from telemetry.retrieval import *
-from telemetry.adapter.adapter import Adapter
-from telemetry.adapter.transparent_adapter import TransparentAdapter
+from telemetry.adapter import *
 
 from typing import Optional
 
@@ -12,9 +11,17 @@ class Telemetry:
         self.filter = filter
 
     def get_data(self, adapter: Adapter = TransparentAdapter()):
+        self.strategy = GraphQLRetrievalStrategy()
         raw_data = self.strategy.retrieve_data(self.filter)
         return adapter.convert(raw_data)
 
-    def get_telemetry(self):
+    def get_data_df(self):
+        return self.get_data(adapter=PandasAdapter())
+
+    def get_telemetry(self, adapter: Adapter = TransparentAdapter()):
         self.strategy = InfluxRetrievalStrategy()
-        return self.get_data()
+        raw_data = self.strategy.retrieve_data(self.filter)
+        return adapter.convert(raw_data)
+
+    def get_telemetry_df(self):
+        return self.get_telemetry(adapter=PandasAdapter())
