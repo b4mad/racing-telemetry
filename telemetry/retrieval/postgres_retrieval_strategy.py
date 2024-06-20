@@ -25,3 +25,11 @@ class PostgresRetrievalStrategy(RetrievalStrategy):
         result = cursor.fetchall()
         cursor.close()
         return result
+
+    def games(self):
+        cursor = self.connection.cursor()
+        query = "SELECT * FROM telemetry_game"
+        cursor.execute(query)
+        result = cursor.fetchall()
+        cursor.close()
+        return result
