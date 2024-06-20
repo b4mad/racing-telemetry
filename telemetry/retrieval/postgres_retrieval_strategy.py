@@ -20,7 +20,7 @@ class PostgresRetrievalStrategy(RetrievalStrategy):
 
     def retrieve_data(self, filters):
         cursor = self.connection.cursor()
-        query = "SELECT * FROM telemetry_game"  # Example query
+        query = "SELECT * FROM telemetry_game"
         cursor.execute(query)
         result = cursor.fetchall()
         cursor.close()
