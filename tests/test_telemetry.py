@@ -9,7 +9,6 @@ class MockDataRetrievalStrategy(RetrievalStrategy):
 
 class TestTelemetry(unittest.TestCase):
 
-    pass
     # def test_get_data(self):
     #     strategy = MockDataRetrievalStrategy()
     #     telemetry = Telemetry(strategy)
@@ -23,5 +22,8 @@ class TestTelemetry(unittest.TestCase):
     #     data = telemetry.get_data()
     #     self.assertIsInstance(data, list)
 
-if __name__ == '__main__':
-    unittest.main()
+    def test_games(self):
+        telemetry = Telemetry()
+        games = telemetry.games()
+        game_names = [game[1] for game in games]  # Assuming the second column is the game name
+        self.assertIn("iRacing", game_names)
