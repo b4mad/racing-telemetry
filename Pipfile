@@ -17,6 +17,7 @@ influxdb-client = "*"
 pandas = "*"
 requests-toolbelt = "*"
 plotly = "*"
+psycopg2-binary = "*"
 
 [requires]
 python_version = "3"

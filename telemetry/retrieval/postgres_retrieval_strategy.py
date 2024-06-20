@@ -9,7 +9,7 @@ class PostgresRetrievalStrategy(RetrievalStrategy):
         password = os.getenv('DB_PASSWORD', 'postgres')
         host = os.getenv('DB_HOST', 'localhost')
         port = os.getenv('DB_PORT', '5432')
-        
+
         self.connection = psycopg2.connect(
             dbname=dbname,
             user=user,
@@ -20,7 +20,7 @@ class PostgresRetrievalStrategy(RetrievalStrategy):
 
     def retrieve_data(self, filters):
         cursor = self.connection.cursor()
-        query = "SELECT * FROM telemetry_data"  # Example query
+        query = "SELECT * FROM telemetry_game"  # Example query
         cursor.execute(query)
         result = cursor.fetchall()
         cursor.close()

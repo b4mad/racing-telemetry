@@ -46,19 +46,24 @@ class GraphQLRetrievalStrategy(RetrievalStrategy):
     def sessions(self, group_by: Optional[str] = None):
         ds = self.ds
         query = ds.Query.allTelemetrySessions
-        query.select(ds.TelemetrySessionsConnection.nodes.select(
-            ds.TelemetrySession.sessionId,
-            ds.TelemetrySession.start,
-            ds.TelemetrySession.end,
-            # ds.TelemetrySession.telemetryDriverByDriverId.select(
-            #     ds.TelemetryDriver.name
-            # ),
-        ))
         if group_by:
+            # query.select(ds.TelemetrySessionsConnection.nodes.select(
+            #     ds.TelemetrySession.telemetryDriverByDriverId.select(
+            #         ds.TelemetryDriver.name
+            #     )
+            # ))
+            # also count the sessions
             query.select(ds.TelemetrySessionsConnection.nodes.select(
-                ds.TelemetrySession.telemetryDriverByDriverId.select(
-                    ds.TelemetryDriver.name
-                )
+                ds.TelemetrySession.count
+            ))
+        else:
+            query.select(ds.TelemetrySessionsConnection.nodes.select(
+                ds.TelemetrySession.sessionId,
+                ds.TelemetrySession.start,
+                ds.TelemetrySession.end,
+                # ds.TelemetrySession.telemetryDriverByDriverId.select(
+                #     ds.TelemetryDriver.name
+                # ),
             ))
         result = self._query(query)
         result = result.get("allTelemetrySessions", {}).get("nodes", [])

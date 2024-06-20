@@ -3,13 +3,7 @@ from telemetry.retrieval.postgres_retrieval_strategy import PostgresRetrievalStr
 
 class TestPostgresRetrievalStrategy(unittest.TestCase):
     def setUp(self):
-        self.strategy = PostgresRetrievalStrategy(
-            dbname="test_db",
-            user="test_user",
-            password="test_password",
-            host="localhost",
-            port="5432"
-        )
+        self.strategy = PostgresRetrievalStrategy()
 
     def test_retrieve_data(self):
         filters = {}  # Example filters
