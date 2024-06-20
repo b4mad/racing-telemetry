@@ -35,4 +35,3 @@ class TestGraphQLRetrievalStrategy(unittest.TestCase):
         self.assertIn('iRacing', game_sessions)
         # assert that we have sessions grouped by game
         self.assertGreaterEqual(len(game_sessions), 1)
-    unittest.main()
