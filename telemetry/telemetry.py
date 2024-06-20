@@ -8,6 +8,13 @@ class Telemetry:
         self.filter = {}
         self.graphql_strategy = GraphQLRetrievalStrategy()
         self.influx_strategy = InfluxRetrievalStrategy()
+        self.postgres_strategy = PostgresRetrievalStrategy(
+            dbname="your_dbname",
+            user="your_user",
+            password="your_password",
+            host="your_host",
+            port="your_port"
+        )
         self.adapter = TransparentAdapter()
 
     def set_pandas_adapter(self):
