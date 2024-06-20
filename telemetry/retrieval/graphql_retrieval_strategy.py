@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 from gql import Client, gql
 from gql.dsl import DSLSchema, DSLQuery, dsl_gql
 from gql.transport.requests import RequestsHTTPTransport
@@ -25,9 +26,8 @@ class GraphQLRetrievalStrategy(RetrievalStrategy):
         return result
 
     def _query(self, query):
-        query.args(first=10)
+        # query.args(first=10)
         query = dsl_gql(DSLQuery(query))
-
         return self.client.execute(query)
 
     def games(self):
@@ -43,15 +43,23 @@ class GraphQLRetrievalStrategy(RetrievalStrategy):
         query.select(ds.TelemetryGamesConnection.nodes.select(ds.TelemetryGame.name))
         return query
 
-    def sessions(self):
+    def sessions(self, group_by: Optional[str] = None):
         ds = self.ds
         query = ds.Query.allTelemetrySessions
         query.select(ds.TelemetrySessionsConnection.nodes.select(
             ds.TelemetrySession.sessionId,
             ds.TelemetrySession.start,
             ds.TelemetrySession.end,
-            ds.TelemetrySession.driverId,
+            # ds.TelemetrySession.telemetryDriverByDriverId.select(
+            #     ds.TelemetryDriver.name
+            # ),
         ))
+        if group_by:
+            query.select(ds.TelemetrySessionsConnection.nodes.select(
+                ds.TelemetrySession.telemetryDriverByDriverId.select(
+                    ds.TelemetryDriver.name
+                )
+            ))
         result = self._query(query)
         result = result.get("allTelemetrySessions", {}).get("nodes", [])
         return result
