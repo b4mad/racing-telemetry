@@ -25,5 +25,5 @@ class TestTelemetry(unittest.TestCase):
     def test_games(self):
         telemetry = Telemetry()
         games = telemetry.games()
-        game_names = [game[1] for game in games]  # Assuming the second column is the game name
+        game_names = [game.name for game in games]  # Accessing the game name attribute directly
         self.assertIn("iRacing", game_names)

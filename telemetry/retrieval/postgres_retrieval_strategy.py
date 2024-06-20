@@ -1,6 +1,7 @@
 import os
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.automap import automap_base
 from .retrieval_strategy import RetrievalStrategy
 
 class PostgresRetrievalStrategy(RetrievalStrategy):
@@ -12,17 +13,23 @@ class PostgresRetrievalStrategy(RetrievalStrategy):
         port = os.getenv('DB_PORT', '5432')
 
         self.engine = create_engine(f'postgresql://{user}:{password}@{host}:{port}/{dbname}')
-        self.Session = sessionmaker(bind=self.engine)
+        self.db_session = sessionmaker(bind=self.engine)
+
+        Base = automap_base()
+        Base.prepare(self.engine, reflect=True)
+
+        self.Game = Base.classes.telemetry_game
+        self.Session = Base.classes.telemetry_session
 
     def retrieve_data(self, query):
-        with self.Session() as session:
+        with self.db_session() as session:
             result = session.execute(text(query)).fetchall()
         return result
 
     def games(self):
-        query = "SELECT * FROM telemetry_game"
-        return self.retrieve_data(query)
+        with self.db_session() as session:
+            return session.query(self.Game).all()
 
     def sessions(self, limit=10):
-        query = f"SELECT * FROM telemetry_session LIMIT {limit}"
-        return self.retrieve_data(query)
+        with self.db_session() as session:
+            return session.query(self.Session).limit(limit).all()
