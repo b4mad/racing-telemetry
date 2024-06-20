@@ -16,5 +16,9 @@ class TestPostgresRetrievalStrategy(unittest.TestCase):
         game_names = [game[1] for game in result]  # Assuming the second column is the game name
         self.assertIn("iRacing", game_names)
 
+    def test_sessions(self):
+        result = self.strategy.sessions(limit=10)
+        self.assertEqual(len(result), 10)
+
 if __name__ == "__main__":
     unittest.main()

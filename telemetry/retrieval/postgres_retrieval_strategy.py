@@ -22,3 +22,7 @@ class PostgresRetrievalStrategy(RetrievalStrategy):
     def games(self):
         query = "SELECT * FROM telemetry_game"
         return self.retrieve_data(query)
+
+    def sessions(self, limit=10):
+        query = f"SELECT * FROM telemetry_session LIMIT {limit}"
+        return self.retrieve_data(query)
