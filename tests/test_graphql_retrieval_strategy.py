@@ -25,5 +25,14 @@ class TestGraphQLRetrievalStrategy(unittest.TestCase):
         game_names = [game['name'] for game in result]
         self.assertIn('iRacing', game_names)
 
-if __name__ == '__main__':
+    @vcr.use_cassette('tests/cassettes/test_sessions_group_by_game.yaml')
+    def test_sessions_group_by_game(self):
+        strategy = GraphQLRetrievalStrategy()
+        result = strategy.sessions(group_by='game')
+        self.assertIsInstance(result, list)
+        self.assertIsInstance(result[0], dict)
+        game_sessions = {session['telemetryDriverByDriverId']['name']: session for session in result}
+        self.assertIn('iRacing', game_sessions)
+        # assert that we have sessions grouped by game
+        self.assertGreaterEqual(len(game_sessions), 1)
     unittest.main()
