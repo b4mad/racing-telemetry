@@ -1,5 +1,6 @@
 import os
-import psycopg2
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import sessionmaker
 from .retrieval_strategy import RetrievalStrategy
 
 class PostgresRetrievalStrategy(RetrievalStrategy):
@@ -10,19 +11,12 @@ class PostgresRetrievalStrategy(RetrievalStrategy):
         host = os.getenv('DB_HOST', 'localhost')
         port = os.getenv('DB_PORT', '5432')
 
-        self.connection = psycopg2.connect(
-            dbname=dbname,
-            user=user,
-            password=password,
-            host=host,
-            port=port
-        )
+        self.engine = create_engine(f'postgresql://{user}:{password}@{host}:{port}/{dbname}')
+        self.Session = sessionmaker(bind=self.engine)
 
     def retrieve_data(self, query):
-        cursor = self.connection.cursor()
-        cursor.execute(query)
-        result = cursor.fetchall()
-        cursor.close()
+        with self.Session() as session:
+            result = session.execute(text(query)).fetchall()
         return result
 
     def games(self):

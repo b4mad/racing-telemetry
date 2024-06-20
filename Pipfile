@@ -18,6 +18,7 @@ pandas = "*"
 requests-toolbelt = "*"
 plotly = "*"
 psycopg2-binary = "*"
+sqlalchemy = "*"
 
 [requires]
 python_version = "3"
