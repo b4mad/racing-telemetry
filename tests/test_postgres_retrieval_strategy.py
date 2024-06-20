@@ -6,8 +6,8 @@ class TestPostgresRetrievalStrategy(unittest.TestCase):
         self.strategy = PostgresRetrievalStrategy()
 
     def test_retrieve_data(self):
-        filters = {}  # Example filters
-        data = self.strategy.retrieve_data(filters)
+        query = "SELECT * FROM telemetry_game"  # Example query
+        data = self.strategy.retrieve_data(query)
         self.assertIsNotNone(data)
 
     def test_games(self):

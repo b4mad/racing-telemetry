@@ -18,18 +18,13 @@ class PostgresRetrievalStrategy(RetrievalStrategy):
             port=port
         )
 
-    def retrieve_data(self, filters):
+    def retrieve_data(self, query):
         cursor = self.connection.cursor()
-        query = "SELECT * FROM telemetry_game"
         cursor.execute(query)
         result = cursor.fetchall()
         cursor.close()
         return result
 
     def games(self):
-        cursor = self.connection.cursor()
         query = "SELECT * FROM telemetry_game"
-        cursor.execute(query)
-        result = cursor.fetchall()
-        cursor.close()
-        return result
+        return self.retrieve_data(query)
