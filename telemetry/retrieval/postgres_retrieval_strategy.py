@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 from sqlalchemy import create_engine, func, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.automap import automap_base
@@ -20,6 +21,7 @@ class PostgresRetrievalStrategy(RetrievalStrategy):
 
         self.Game = Base.classes.telemetry_game
         self.Session = Base.classes.telemetry_session
+        self.Driver = Base.classes.telemetry_driver
 
     def retrieve_data(self, query):
         with self.db_session() as session:
@@ -30,7 +32,7 @@ class PostgresRetrievalStrategy(RetrievalStrategy):
         with self.db_session() as session:
             return session.query(self.Game).all()
 
-    def sessions(self, limit=10, group_by=None):
+    def sessions(self, limit: Optional[int] =10, group_by=None):
         with self.db_session() as session:
             if group_by:
                 if group_by == 'game':
@@ -38,6 +40,11 @@ class PostgresRetrievalStrategy(RetrievalStrategy):
                         self.Game.name,
                         func.count(self.Session.id).label('count')
                     ).join(self.Game, self.Session.game_id == self.Game.id).group_by(self.Game.name).limit(limit).all()
+                elif group_by == 'driver':
+                    return session.query(
+                        self.Driver.name,
+                        func.count(self.Session.id).label('count')
+                    ).join(self.Session, self.Driver.id == self.Session.driver_id).group_by(self.Driver.name).limit(limit).all()
                 else:
                     return session.query(
                         getattr(self.Session, group_by),

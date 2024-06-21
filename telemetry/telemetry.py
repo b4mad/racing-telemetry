@@ -19,9 +19,9 @@ class Telemetry:
             self.postgres_strategy.games()
         )
 
-    def sessions(self, group_by: Optional[str] = None):
+    def sessions(self, group_by: Optional[str] = None, limit: Optional[int] = 10):
         return self.adapter.convert(
-            self.postgres_strategy.sessions(group_by=group_by)
+            self.postgres_strategy.sessions(group_by=group_by, limit=limit)
         )
 
     def set_filter(self, filter):
