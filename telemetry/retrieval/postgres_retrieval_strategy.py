@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, func, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.automap import automap_base
 from .retrieval_strategy import RetrievalStrategy
@@ -30,6 +30,18 @@ class PostgresRetrievalStrategy(RetrievalStrategy):
         with self.db_session() as session:
             return session.query(self.Game).all()
 
-    def sessions(self, limit=10):
+    def sessions(self, limit=10, group_by=None):
         with self.db_session() as session:
-            return session.query(self.Session).limit(limit).all()
+            if group_by:
+                if group_by == 'game':
+                    return session.query(
+                        self.Game.name,
+                        func.count(self.Session.id).label('count')
+                    ).join(self.Game, self.Session.game_id == self.Game.id).group_by(self.Game.name).limit(limit).all()
+                else:
+                    return session.query(
+                        getattr(self.Session, group_by),
+                        func.count(self.Session.id).label('count')
+                    ).group_by(getattr(self.Session, group_by)).limit(limit).all()
+            else:
+                return session.query(self.Session).limit(limit).all()

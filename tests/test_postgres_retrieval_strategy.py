@@ -20,5 +20,13 @@ class TestPostgresRetrievalStrategy(unittest.TestCase):
         result = self.strategy.sessions(limit=10)
         self.assertEqual(len(result), 10)
 
+    def test_sessions_group_by(self):
+        result = self.strategy.sessions(limit=10, group_by="game_id")
+        self.assertEqual(len(result), 10)
+
+    def test_sessions_group_by_game(self):
+        result = self.strategy.sessions(limit=10, group_by="game")
+        self.assertEqual(len(result), 10)
+
 if __name__ == "__main__":
     unittest.main()

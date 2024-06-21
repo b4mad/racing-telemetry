@@ -21,7 +21,7 @@ class Telemetry:
 
     def sessions(self, group_by: Optional[str] = None):
         return self.adapter.convert(
-            self.graphql_strategy.sessions(group_by=group_by)
+            self.postgres_strategy.sessions(group_by=group_by)
         )
 
     def set_filter(self, filter):

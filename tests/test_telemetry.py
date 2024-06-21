@@ -1,4 +1,6 @@
 import unittest
+
+import pandas as pd
 from telemetry import Telemetry
 from telemetry.retrieval.retrieval_strategy import RetrievalStrategy
 from telemetry.retrieval.graphql_retrieval_strategy import GraphQLRetrievalStrategy
@@ -27,3 +29,9 @@ class TestTelemetry(unittest.TestCase):
         games = telemetry.games()
         game_names = [game.name for game in games]  # Accessing the game name attribute directly
         self.assertIn("iRacing", game_names)
+
+    def test_games_pandas(self):
+        telemetry = Telemetry()
+        telemetry.set_pandas_adapter()
+        games = telemetry.games()
+        self.assertIsInstance(games, pd.DataFrame)
