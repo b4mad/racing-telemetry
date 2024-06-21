@@ -32,23 +32,23 @@ class PostgresRetrievalStrategy(RetrievalStrategy):
         with self.db_session() as session:
             return session.query(self.Game).all()
 
-    def sessions(self, limit: Optional[int] =10, group_by=None):
+    def sessions(self, limit: Optional[int] = 10, group_by=None):
         with self.db_session() as session:
-            if group_by:
-                if group_by == 'game':
-                    return session.query(
-                        self.Game.name,
-                        func.count(self.Session.id).label('count')
-                    ).join(self.Game, self.Session.game_id == self.Game.id).group_by(self.Game.name).limit(limit).all()
-                elif group_by == 'driver':
-                    return session.query(
-                        self.Driver.name,
-                        func.count(self.Session.id).label('count')
-                    ).join(self.Session, self.Driver.id == self.Session.driver_id).group_by(self.Driver.name).limit(limit).all()
-                else:
-                    return session.query(
-                        getattr(self.Session, group_by),
-                        func.count(self.Session.id).label('count')
-                    ).group_by(getattr(self.Session, group_by)).limit(limit).all()
-            else:
+            if not group_by:
                 return session.query(self.Session).limit(limit).all()
+
+            query = session.query(func.count(self.Session.id).label('count'))
+
+            if group_by == 'game':
+                query = query.add_columns(self.Game.name)
+                query = query.join(self.Game, self.Session.game_id == self.Game.id)
+                group_column = self.Game.name
+            elif group_by == 'driver':
+                query = query.add_columns(self.Driver.name)
+                query = query.join(self.Driver, self.Session.driver_id == self.Driver.id)
+                group_column = self.Driver.name
+            else:
+                group_column = getattr(self.Session, group_by)
+                query = query.add_columns(group_column)
+
+            return query.group_by(group_column).limit(limit).all()
