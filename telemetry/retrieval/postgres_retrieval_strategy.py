@@ -32,6 +32,10 @@ class PostgresRetrievalStrategy(RetrievalStrategy):
         with self.db_session() as session:
             return session.query(self.Game).all()
 
+    def drivers(self):
+        with self.db_session() as session:
+            return session.query(self.Driver).all()
+
     def sessions(self, limit: Optional[int] = 10, group_by=None):
         with self.db_session() as session:
             if not group_by:

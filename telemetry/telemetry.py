@@ -24,6 +24,11 @@ class Telemetry:
             self.postgres_strategy.sessions(group_by=group_by, limit=limit)
         )
 
+    def drivers(self):
+        return self.adapter.convert(
+            self.postgres_strategy.drivers()
+        )
+
     def set_filter(self, filter):
         self.filter = filter
 
