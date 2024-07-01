@@ -129,28 +129,45 @@ def plot_3d_map(df):
 
     return fig
 
-def plot_2d_map(df, landmarks=None):
+def plot_2d_map(data, landmarks=None):
     """
     Create a 2D map using Plotly with WorldPosition coordinates and optional landmarks.
 
-    :param df: DataFrame containing WorldPosition_x, WorldPosition_y, and DistanceRoundTrack columns
+    :param data: DataFrame or list of DataFrames containing WorldPosition_x, WorldPosition_y, and DistanceRoundTrack columns
     :param landmarks: DataFrame containing landmark information (optional)
     :return: Plotly Figure object
     """
-    fig = go.Figure(data=[go.Scatter(
-        x=df['WorldPosition_x'],
-        y=df['WorldPosition_y'],
-        mode='lines',
-        line=dict(
-            color='blue',
-            width=2
-        ),
-        name='Track'
-    )])
+    fig = go.Figure()
+
+    if isinstance(data, list):
+        colors = ['blue', 'green', 'red', 'purple', 'orange', 'cyan', 'magenta', 'yellow']
+        for i, df in enumerate(data):
+            fig.add_trace(go.Scatter(
+                x=df['WorldPosition_x'],
+                y=df['WorldPosition_y'],
+                mode='lines',
+                line=dict(
+                    color=colors[i % len(colors)],
+                    width=2
+                ),
+                name=f'Track {i+1}'
+            ))
+    else:
+        fig.add_trace(go.Scatter(
+            x=data['WorldPosition_x'],
+            y=data['WorldPosition_y'],
+            mode='lines',
+            line=dict(
+                color='blue',
+                width=2
+            ),
+            name='Track'
+        ))
 
     if landmarks is not None:
         for _, landmark in landmarks.iterrows():
-            # Find the closest point in df to the landmark's DistanceRoundTrack
+            # Find the closest point in the first DataFrame to the landmark's DistanceRoundTrack
+            df = data[0] if isinstance(data, list) else data
             closest_point = df.iloc[(df['DistanceRoundTrack'] - landmark['start']).abs().argsort()[:1]]
 
             fig.add_trace(go.Scatter(

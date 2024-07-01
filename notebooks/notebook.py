@@ -9,9 +9,10 @@ CACHE_FILE = os.path.join(current_dir, 'cached_df.pkl')
 
 t = Telemetry()
 t.set_pandas_adapter()
-t.set_filter({'session_id': 1719840630})
+session_id = 1718699812
+t.set_filter({'session_id': session_id})
 
-lap = get_or_create_df(lambda: t.get_telemetry_df())
+lap = get_or_create_df(lambda: t.get_telemetry_df(), name=session_id)
 
 # print(lap.columns)
 # Index(['result', 'table', '_start', '_stop', '_time', 'CarModel', 'CurrentLap',
@@ -33,6 +34,7 @@ lap = get_or_create_df(lambda: t.get_telemetry_df())
 track = lap["TrackCode"].iloc[0]
 
 # get all sessions with the same track
+print(f"Fetching sessions for track {track}")
 sessions = t.sessions(track=track)
 # print(sessions)
 #        id  session_id                            start                              end  ...  game_id  session_type_id                          created                         modified
@@ -44,8 +46,16 @@ sessions = t.sessions(track=track)
 laps = [lap]
 for session_id in sessions["session_id"]:
     t.set_filter({'session_id': session_id})
+    print(f"Fetching session {session_id}")
     lap = get_or_create_df(lambda: t.get_telemetry_df(), name=session_id)
-    laps.append(lap)
+    if not lap.empty:
+        session_id = lap["SessionId"].iloc[0]
+        print(f"Session {session_id} has {len(lap)} rows")
+        game = lap["GameName"].iloc[0]
+        track = lap["TrackCode"].iloc[0]
+        car = lap["CarModel"].iloc[0]
+        print(f"Game: {game}, Track: {track}, Car: {car}")
+        laps.append(lap)
 
 # fig = lap_fig(df)
 # fig.show()
@@ -70,5 +80,5 @@ landmarks_df = t.landmarks(game="Richard Burns Rally", track=track, kind="turn")
 # 3   28158 2024-06-07 16:42:04.466408+00:00 2024-06-07 16:42:04.466408+00:00  HAIRPINLEFT    640  None               None  turn      3133     True
 # 4   28159 2024-06-07 16:42:04.475159+00:00 2024-06-07 16:42:04.475159+00:00       KRIGHT    710  None               None  turn      3133     True
 
-# fig = plot_2d_map(lap, landmarks_df)
-# fig.show()
+fig = plot_2d_map(laps, landmarks_df)
+fig.show()

@@ -40,22 +40,19 @@ class PostgresRetrievalStrategy(RetrievalStrategy):
 
     def sessions(self, limit: Optional[int] = 10, group_by=None, game_name=None, track_name=None, driver_name=None):
         with self.db_session() as session:
+            query = session.query(self.Session)
 
             if game_name:
-                query = session.query(self.Session).join(self.Game).filter(self.Game.name == game_name)
-            else:
-                query = session.query(self.Session)
-
+                query = query.join(self.Game).filter(self.Game.name == game_name)
             if track_name:
                 query = query.join(self.Track).filter(self.Track.name == track_name)
-
             if driver_name:
                 query = query.join(self.Driver).filter(self.Driver.name == driver_name)
 
             if not group_by:
-                return session.query(self.Session).limit(limit).all()
+                return query.limit(limit).all()
 
-            query = session.query(func.count(self.Session.id).label('count'))
+            query = query.with_entities(func.count(self.Session.id).label('count'))
 
             if group_by == 'game':
                 query = query.add_columns(self.Game.name)
@@ -65,6 +62,10 @@ class PostgresRetrievalStrategy(RetrievalStrategy):
                 query = query.add_columns(self.Driver.name)
                 query = query.join(self.Driver, self.Session.driver_id == self.Driver.id)
                 group_column = self.Driver.name
+            elif group_by == 'track':
+                query = query.add_columns(self.Track.name)
+                query = query.join(self.Track, self.Session.track_id == self.Track.id)
+                group_column = self.Track.name
             else:
                 group_column = getattr(self.Session, group_by)
                 query = query.add_columns(group_column)
