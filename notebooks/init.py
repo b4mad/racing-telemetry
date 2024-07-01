@@ -16,8 +16,7 @@ sys.path.append(project_root)
 from telemetry import Telemetry
 
 
-
-def get_or_create_df():
+def get_or_create_df(create_df_func):
     # Get the directory of the current file
     current_dir = os.path.dirname(os.path.abspath(__file__))
     CACHE_FILE = os.path.join(current_dir, 'cached_df.pkl')
@@ -26,20 +25,12 @@ def get_or_create_df():
         print("Loading DataFrame from cache...")
         return pd.read_pickle(CACHE_FILE)
 
-    print("DataFrame not found in cache. Use create_df() to generate a new one.")
-    return None
-
-def create_df():
-    print("Creating new DataFrame...")
-    t = Telemetry()
-    t.set_pandas_adapter()
-    t.set_filter({'session_id': 1719840630})
-    df = t.get_telemetry_df()
+    print("DataFrame not found in cache. Creating a new one...")
+    df = create_df_func()
 
     # Cache the DataFrame
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    CACHE_FILE = os.path.join(current_dir, 'cached_df.pkl')
     df.to_pickle(CACHE_FILE)
     print("DataFrame cached to disk.")
 
     return df
+

@@ -6,9 +6,12 @@ import os
 current_dir = os.path.dirname(os.path.abspath(__file__))
 CACHE_FILE = os.path.join(current_dir, 'cached_df.pkl')
 
-df = get_or_create_df()
-if df is None:
-    df = create_df()
+
+t = Telemetry()
+t.set_pandas_adapter()
+t.set_filter({'session_id': 1719840630})
+
+df = get_or_create_df(lambda: t.get_telemetry_df())
 
 # print(df.head())
 
@@ -19,5 +22,8 @@ if df is None:
 # 3  _result      1 2023-07-02 16:19:40.153722+00:00 2024-07-01 16:19:40.153722+00:00 2024-07-01 15:30:35.857103+00:00  Citroen Xsara Kit Car          0  ...  0.007843  Dry Gravel     -231.150589        83.04983      -27.045351 -64.44776  1719840630-0
 # 4  _result      1 2023-07-02 16:19:40.153722+00:00 2024-07-01 16:19:40.153722+00:00 2024-07-01 15:30:35.966476+00:00  Citroen Xsara Kit Car          0  ...  0.168627  Dry Gravel     -231.150589        83.04983      -27.045351 -64.44776  1719840630-0
 
-fig = lap_fig(df)
+# fig = lap_fig(df)
+# fig.show()
+
+fig = plot_3d_map(df)
 fig.show()
