@@ -24,6 +24,7 @@ class PostgresRetrievalStrategy(RetrievalStrategy):
         self.Driver = Base.classes.telemetry_driver
         self.Track = Base.classes.telemetry_track
         self.Landmark = Base.classes.telemetry_landmark
+        self.Lap = Base.classes.telemetry_lap
 
     def retrieve_data(self, query):
         with self.db_session() as session:
@@ -45,7 +46,7 @@ class PostgresRetrievalStrategy(RetrievalStrategy):
             if game_name:
                 query = query.join(self.Game).filter(self.Game.name == game_name)
             if track_name:
-                query = query.join(self.Track).filter(self.Track.name == track_name)
+                query = query.join(self.Lap).join(self.Track).filter(self.Track.name == track_name)
             if driver_name:
                 query = query.join(self.Driver).filter(self.Driver.name == driver_name)
 
@@ -64,7 +65,7 @@ class PostgresRetrievalStrategy(RetrievalStrategy):
                 group_column = self.Driver.name
             elif group_by == 'track':
                 query = query.add_columns(self.Track.name)
-                query = query.join(self.Track, self.Session.track_id == self.Track.id)
+                query = query.join(self.Lap).join(self.Track)
                 group_column = self.Track.name
             else:
                 group_column = getattr(self.Session, group_by)
@@ -83,6 +84,21 @@ class PostgresRetrievalStrategy(RetrievalStrategy):
                 query = query.filter(self.Track.name == track_name)
 
             return query.all()
+
+    def laps(self, limit: Optional[int] = 10, session_id=None, track_name=None, driver_name=None):
+        with self.db_session() as session:
+            query = session.query(self.Lap)
+
+            if session_id:
+                query = query.filter(self.Lap.session_id == session_id)
+            if track_name:
+                query = query.join(self.Track).filter(self.Track.name == track_name)
+            if driver_name:
+                query = query.join(self.Session).join(self.Driver).filter(self.Driver.name == driver_name)
+
+            query = query.order_by(self.Lap.start.desc())
+
+            return query.limit(limit).all()
 
     def landmarks(self, game_name=None, track_name=None, kind=None):
         with self.db_session() as session:
