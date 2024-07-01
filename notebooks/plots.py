@@ -129,11 +129,12 @@ def plot_3d_map(df):
 
     return fig
 
-def plot_2d_map(df):
+def plot_2d_map(df, landmarks=None):
     """
-    Create a 2D map using Plotly with WorldPosition coordinates.
+    Create a 2D map using Plotly with WorldPosition coordinates and optional landmarks.
 
-    :param df: DataFrame containing WorldPosition_x and WorldPosition_y columns
+    :param df: DataFrame containing WorldPosition_x, WorldPosition_y, and DistanceRoundTrack columns
+    :param landmarks: DataFrame containing landmark information (optional)
     :return: Plotly Figure object
     """
     fig = go.Figure(data=[go.Scatter(
@@ -143,13 +144,31 @@ def plot_2d_map(df):
         line=dict(
             color='blue',
             width=2
-        )
+        ),
+        name='Track'
     )])
+
+    if landmarks is not None:
+        for _, landmark in landmarks.iterrows():
+            # Find the closest point in df to the landmark's DistanceRoundTrack
+            closest_point = df.iloc[(df['DistanceRoundTrack'] - landmark['start']).abs().argsort()[:1]]
+
+            fig.add_trace(go.Scatter(
+                x=[closest_point['WorldPosition_x'].values[0]],
+                y=[closest_point['WorldPosition_y'].values[0]],
+                mode='markers',
+                marker=dict(
+                    size=10,
+                    color='red',
+                    symbol='star'
+                ),
+                name=f"{landmark['name']}"
+            ))
 
     fig.update_layout(
         xaxis_title='X Position',
         yaxis_title='Y Position',
-        title='2D Map of World Positions',
+        title='2D Map of World Positions with Landmarks',
         xaxis=dict(
             scaleanchor="y",
             scaleratio=1,

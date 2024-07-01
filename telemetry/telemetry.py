@@ -19,9 +19,10 @@ class Telemetry:
             self.postgres_strategy.games()
         )
 
-    def sessions(self, group_by: Optional[str] = None, limit: Optional[int] = 10):
+    def sessions(self, group_by: Optional[str] = None, limit: Optional[int] = 10,
+                 game: Optional[str] = None, track: Optional[str] = None, driver: Optional[str] = None):
         return self.adapter.convert(
-            self.postgres_strategy.sessions(group_by=group_by, limit=limit)
+            self.postgres_strategy.sessions(group_by=group_by, limit=limit, game_name=game, track_name=track, driver_name=driver)
         )
 
     def drivers(self):
@@ -34,9 +35,9 @@ class Telemetry:
             self.postgres_strategy.tracks(game_name=game, track_name=track)
         )
 
-    def landmarks(self, game: Optional[str] = None, track: Optional[str] = None):
+    def landmarks(self, game: Optional[str] = None, track: Optional[str] = None, kind: Optional[str] = None):
         return self.adapter.convert(
-            self.postgres_strategy.landmarks(game_name=game, track_name=track)
+            self.postgres_strategy.landmarks(game_name=game, track_name=track, kind=kind)
         )
 
     def set_filter(self, filter):

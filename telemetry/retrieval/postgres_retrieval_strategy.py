@@ -38,8 +38,20 @@ class PostgresRetrievalStrategy(RetrievalStrategy):
         with self.db_session() as session:
             return session.query(self.Driver).all()
 
-    def sessions(self, limit: Optional[int] = 10, group_by=None):
+    def sessions(self, limit: Optional[int] = 10, group_by=None, game_name=None, track_name=None, driver_name=None):
         with self.db_session() as session:
+
+            if game_name:
+                query = session.query(self.Session).join(self.Game).filter(self.Game.name == game_name)
+            else:
+                query = session.query(self.Session)
+
+            if track_name:
+                query = query.join(self.Track).filter(self.Track.name == track_name)
+
+            if driver_name:
+                query = query.join(self.Driver).filter(self.Driver.name == driver_name)
+
             if not group_by:
                 return session.query(self.Session).limit(limit).all()
 
@@ -67,11 +79,11 @@ class PostgresRetrievalStrategy(RetrievalStrategy):
                 query = query.join(self.Game).filter(self.Game.name == game_name)
 
             if track_name:
-                query = query.filter(self.Track.name.ilike(f"%{track_name}%"))
+                query = query.filter(self.Track.name == track_name)
 
             return query.all()
 
-    def landmarks(self, game_name=None, track_name=None):
+    def landmarks(self, game_name=None, track_name=None, kind=None):
         with self.db_session() as session:
             query = session.query(self.Landmark)
 
@@ -82,6 +94,9 @@ class PostgresRetrievalStrategy(RetrievalStrategy):
                     query = query.join(self.Game).filter(self.Game.name == game_name)
 
                 if track_name:
-                    query = query.filter(self.Track.name.ilike(f"%{track_name}%"))
+                    query = query.filter(self.Track.name == track_name)
+
+            if kind:
+                query = query.filter(self.Landmark.kind == kind)
 
             return query.all()

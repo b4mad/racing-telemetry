@@ -16,10 +16,13 @@ sys.path.append(project_root)
 from telemetry import Telemetry
 
 
-def get_or_create_df(create_df_func):
+def get_or_create_df(create_df_func, name=None):
     # Get the directory of the current file
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    CACHE_FILE = os.path.join(current_dir, 'cached_df.pkl')
+    if name:
+        CACHE_FILE = os.path.join(current_dir, f'cached_{name}.pkl')
+    else:
+        CACHE_FILE = os.path.join(current_dir, 'cached_df.pkl')
 
     if os.path.exists(CACHE_FILE):
         print("Loading DataFrame from cache...")
