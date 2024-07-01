@@ -98,3 +98,33 @@ def fig_add_features(fig, features, color="red"):
         y1=features["force"],
         line=dict(color="yellow", width=2),
     )
+
+def plot_3d_map(df):
+    """
+    Create a 3D map using Plotly with WorldPosition coordinates.
+    
+    :param df: DataFrame containing WorldPosition_x, WorldPosition_y, and WorldPosition_z columns
+    :return: Plotly Figure object
+    """
+    fig = go.Figure(data=[go.Scatter3d(
+        x=df['WorldPosition_x'],
+        y=df['WorldPosition_y'],
+        z=df['WorldPosition_z'],
+        mode='lines',
+        line=dict(
+            color='blue',
+            width=2
+        )
+    )])
+
+    fig.update_layout(
+        scene=dict(
+            xaxis_title='X Position',
+            yaxis_title='Y Position',
+            zaxis_title='Z Position',
+            aspectmode='data'
+        ),
+        title='3D Map of World Positions'
+    )
+
+    return fig
