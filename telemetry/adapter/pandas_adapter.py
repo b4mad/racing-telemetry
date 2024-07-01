@@ -3,6 +3,9 @@ from telemetry.adapter.adapter import Adapter
 
 class PandasAdapter(Adapter):
     def convert(self, data):
+        # if data is a DataFrame, just return it
+        if isinstance(data, pd.DataFrame):
+            return data
         # Implement conversion to pandas DataFrame here
         converted_data = []
         for entry in data:

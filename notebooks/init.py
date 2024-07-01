@@ -1,6 +1,9 @@
 import sys
 import os
 import plotly.express as px
+import ipywidgets as widgets
+from IPython.display import display
+from plots import *
 
 # Get the absolute path of the directory containing this script
 script_dir = os.path.dirname(os.path.abspath(__file__))

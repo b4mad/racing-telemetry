@@ -62,11 +62,21 @@ class InfluxRetrievalStrategy(RetrievalStrategy):
             #     )
         return None
 
-    def session_df(
+    def session_df(self, **kwargs):
+        kwargs["measurement"] = "fast_laps"
+        kwargs["bucket"] = "fast_laps"
+        df = self._session_df(**kwargs)
+        if df.empty:
+            kwargs["measurement"] = "laps_cc"
+            kwargs["bucket"] = "racing"
+            df = self._session_df(**kwargs)
+        return df
+
+    def _session_df(
         self,
         session_id,
         lap_number=None,
-        start="-60d",
+        start="-365d",
         end="now()",
         measurement="fast_laps",
         bucket="fast_laps",
@@ -121,9 +131,10 @@ class InfluxRetrievalStrategy(RetrievalStrategy):
             |> drop(columns: ["_start", "_stop", "_measurement", "host", "topic", "user"])
             """
 
+        # print(query)
         df = self.query_api.query_data_frame(query=query)
         if df.empty:
-            raise Exception(f"No data found for {session_id} lap {lap_number}")
+            return df
 
         game = df["GameName"].iloc[0]
         if game == "Assetto Corsa Competizione":
