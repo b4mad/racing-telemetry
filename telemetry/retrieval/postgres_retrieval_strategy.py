@@ -22,6 +22,8 @@ class PostgresRetrievalStrategy(RetrievalStrategy):
         self.Game = Base.classes.telemetry_game
         self.Session = Base.classes.telemetry_session
         self.Driver = Base.classes.telemetry_driver
+        self.Track = Base.classes.telemetry_track
+        self.Landmark = Base.classes.telemetry_landmark
 
     def retrieve_data(self, query):
         with self.db_session() as session:
@@ -56,3 +58,30 @@ class PostgresRetrievalStrategy(RetrievalStrategy):
                 query = query.add_columns(group_column)
 
             return query.group_by(group_column).limit(limit).all()
+
+    def tracks(self, game_name=None, track_name=None):
+        with self.db_session() as session:
+            query = session.query(self.Track)
+
+            if game_name:
+                query = query.join(self.Game).filter(self.Game.name == game_name)
+
+            if track_name:
+                query = query.filter(self.Track.name.ilike(f"%{track_name}%"))
+
+            return query.all()
+
+    def landmarks(self, game_name=None, track_name=None):
+        with self.db_session() as session:
+            query = session.query(self.Landmark)
+
+            if game_name or track_name:
+                query = query.join(self.Track)
+
+                if game_name:
+                    query = query.join(self.Game).filter(self.Game.name == game_name)
+
+                if track_name:
+                    query = query.filter(self.Track.name.ilike(f"%{track_name}%"))
+
+            return query.all()

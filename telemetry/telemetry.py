@@ -29,6 +29,16 @@ class Telemetry:
             self.postgres_strategy.drivers()
         )
 
+    def tracks(self, game: Optional[str] = None, track: Optional[str] = None):
+        return self.adapter.convert(
+            self.postgres_strategy.tracks(game_name=game, track_name=track)
+        )
+
+    def landmarks(self, game: Optional[str] = None, track: Optional[str] = None):
+        return self.adapter.convert(
+            self.postgres_strategy.landmarks(game_name=game, track_name=track)
+        )
+
     def set_filter(self, filter):
         self.filter = filter
 

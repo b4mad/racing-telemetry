@@ -27,5 +27,11 @@ df = get_or_create_df(lambda: t.get_telemetry_df())
 
 # fig = plot_3d_map(df)
 
-fig = plot_2d_map(df)
-fig.show()
+# fig = plot_2d_map(df)
+# fig.show()
+
+# Fetch all tracks for Richard Burns Rally
+rbr_tracks_df = t.tracks(game="Richard Burns Rally")
+
+# Display the head of the DataFrame
+print(rbr_tracks_df.head())
