@@ -25,5 +25,7 @@ df = get_or_create_df(lambda: t.get_telemetry_df())
 # fig = lap_fig(df)
 # fig.show()
 
-fig = plot_3d_map(df)
+# fig = plot_3d_map(df)
+
+fig = plot_2d_map(df)
 fig.show()

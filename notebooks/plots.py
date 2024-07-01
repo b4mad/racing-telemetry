@@ -102,7 +102,7 @@ def fig_add_features(fig, features, color="red"):
 def plot_3d_map(df):
     """
     Create a 3D map using Plotly with WorldPosition coordinates.
-    
+
     :param df: DataFrame containing WorldPosition_x, WorldPosition_y, and WorldPosition_z columns
     :return: Plotly Figure object
     """
@@ -125,6 +125,39 @@ def plot_3d_map(df):
             aspectmode='data'
         ),
         title='3D Map of World Positions'
+    )
+
+    return fig
+
+def plot_2d_map(df):
+    """
+    Create a 2D map using Plotly with WorldPosition coordinates.
+
+    :param df: DataFrame containing WorldPosition_x and WorldPosition_y columns
+    :return: Plotly Figure object
+    """
+    fig = go.Figure(data=[go.Scatter(
+        x=df['WorldPosition_x'],
+        y=df['WorldPosition_y'],
+        mode='lines',
+        line=dict(
+            color='blue',
+            width=2
+        )
+    )])
+
+    fig.update_layout(
+        xaxis_title='X Position',
+        yaxis_title='Y Position',
+        title='2D Map of World Positions',
+        xaxis=dict(
+            scaleanchor="y",
+            scaleratio=1,
+        ),
+        yaxis=dict(
+            scaleanchor="x",
+            scaleratio=1,
+        )
     )
 
     return fig
