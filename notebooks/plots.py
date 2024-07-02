@@ -182,6 +182,18 @@ def plot_2d_map(data, landmarks=None):
                 name=f"{landmark['name']}"
             ))
 
+    # Get the first DataFrame if data is a list, otherwise use data itself
+    first_df = data[0] if isinstance(data, list) else data
+
+    # Calculate the range for x and y axes
+    x_min, x_max = first_df['WorldPosition_x'].min(), first_df['WorldPosition_x'].max()
+    y_min, y_max = first_df['WorldPosition_y'].min(), first_df['WorldPosition_y'].max()
+
+    # Add a small margin (e.g., 5%) to the range
+    margin = 0.05
+    x_range = [x_min - margin * (x_max - x_min), x_max + margin * (x_max - x_min)]
+    y_range = [y_min - margin * (y_max - y_min), y_max + margin * (y_max - y_min)]
+
     fig.update_layout(
         xaxis_title='X Position',
         yaxis_title='Y Position',
@@ -189,10 +201,12 @@ def plot_2d_map(data, landmarks=None):
         xaxis=dict(
             scaleanchor="y",
             scaleratio=1,
+            range=x_range,
         ),
         yaxis=dict(
             scaleanchor="x",
             scaleratio=1,
+            range=y_range,
         )
     )
 

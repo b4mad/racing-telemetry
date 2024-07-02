@@ -1,2 +1,2 @@
 .aider*
-notebooks/cached_*.pkl
+notebooks/cache/*.pkl

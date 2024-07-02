@@ -1,4 +1,5 @@
 import os
+import sys
 from typing import Optional
 from sqlalchemy import create_engine, func, text
 from sqlalchemy.orm import sessionmaker
@@ -51,6 +52,8 @@ class PostgresRetrievalStrategy(RetrievalStrategy):
                 query = query.join(self.Driver).filter(self.Driver.name == driver_name)
 
             if not group_by:
+                # s = query.statement
+                # print(s.compile(compile_kwargs={"literal_binds": True}))
                 return query.limit(limit).all()
 
             query = query.with_entities(func.count(self.Session.id).label('count'))

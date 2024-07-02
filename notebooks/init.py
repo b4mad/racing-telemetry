@@ -16,9 +16,35 @@ sys.path.append(project_root)
 from telemetry import Telemetry
 
 
+def plot_sessions(session_ids, landmarks=False):
+    telemetry = Telemetry()
+    telemetry.set_pandas_adapter()
+    landmark_df = None
+    fig = None
+    laps = []
+
+    for session_id in session_ids:
+        telemetry.set_filter({'session_id': session_id})
+        df = get_or_create_df(lambda: telemetry.get_telemetry_df(), name=str(session_id))
+        if not df.empty:
+            laps.append(df)
+
+
+    if landmarks and laps:
+        game = laps[0]['GameName'].iloc[0]
+        track = laps[0]['TrackCode'].iloc[0]
+        landmark_df = telemetry.landmarks(game=game, track=track)
+
+    if laps:
+        fig = plot_2d_map(laps, landmarks=landmark_df)
+
+    return fig
+
+
 def get_or_create_df(create_df_func, name=None):
     # Get the directory of the current file
     current_dir = os.path.dirname(os.path.abspath(__file__))
+    current_dir = os.path.join(current_dir, 'cache')
     if name:
         CACHE_FILE = os.path.join(current_dir, f'cached_{name}.pkl')
     else:

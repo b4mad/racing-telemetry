@@ -2,15 +2,24 @@
 from init import *
 import os
 
-# Get the directory of the current file
-current_dir = os.path.dirname(os.path.abspath(__file__))
-CACHE_FILE = os.path.join(current_dir, 'cached_df.pkl')
+# * Palvaanjärvi Sprint
+# * right/left: 1719855408 / 1719855670
+# fig = plot_sessions([1719855408, 1719855670], landmarks=True)
+# fig.show()
+
+# * Lyon - Gerland
+# * right/left: 1719854504 / 1719854622
+fig = plot_sessions([1719854504, 1719854622], landmarks=True)
+fig.show()
+
+sys.exit(0)
 
 
 t = Telemetry()
 t.set_pandas_adapter()
-session_id = 1718699812
-t.set_filter({'session_id': session_id})
+session_id = 1719855408
+driver = "durandom"
+t.set_filter({'session_id': session_id, 'driver': 'durandom'})
 
 lap = get_or_create_df(lambda: t.get_telemetry_df(), name=session_id)
 
@@ -35,7 +44,7 @@ track = lap["TrackCode"].iloc[0]
 
 # get all sessions with the same track
 print(f"Fetching sessions for track {track}")
-sessions = t.sessions(track=track)
+sessions = t.sessions(track=track, driver=driver, limit=10)
 # print(sessions)
 #        id  session_id                            start                              end  ...  game_id  session_type_id                          created                         modified
 # 0  217034  1699005080 2023-11-03 10:51:20.663487+00:00 2023-11-03 10:51:21.098663+00:00  ...        4                5 2023-11-03 10:51:21.150090+00:00 2023-11-03 10:51:21.150090+00:00
@@ -45,7 +54,7 @@ sessions = t.sessions(track=track)
 
 laps = [lap]
 for session_id in sessions["session_id"]:
-    t.set_filter({'session_id': session_id})
+    t.set_filter({'session_id': session_id, 'driver': 'durandom'})
     print(f"Fetching session {session_id}")
     lap = get_or_create_df(lambda: t.get_telemetry_df(), name=session_id)
     if not lap.empty:

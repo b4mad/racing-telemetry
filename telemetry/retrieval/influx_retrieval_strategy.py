@@ -1,7 +1,6 @@
 from datetime import datetime
-import logging
 import os
-import sys
+import pandas as pd
 
 import influxdb_client
 from telemetry.retrieval.retrieval_strategy import RetrievalStrategy
@@ -54,8 +53,9 @@ class InfluxRetrievalStrategy(RetrievalStrategy):
         if isinstance(filters, int):
             return self.session_df(session_id=filters)
         if isinstance(filters, dict):
-            if "session_id" in filters:
-                return self.session_df(session_id=filters["session_id"])
+            return self.session_df(**filters)
+            # if "session_id" in filters:
+            #     return self.session_df(session_id=filters["session_id"])
             # if "session_id" in filters and "lap_number" in filters:
             #     return self.session_df(
             #         session_id=filters["session_id"], lap_number=filters["lap_number"]
@@ -83,6 +83,8 @@ class InfluxRetrievalStrategy(RetrievalStrategy):
         aggregate="",
         fields=[],
         drop_tags=False,
+        driver="",
+        session_type="Race"
     ):
         if isinstance(start, datetime):
             start = start.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
@@ -105,6 +107,16 @@ class InfluxRetrievalStrategy(RetrievalStrategy):
                 or r["_field"] == "{field}"
                 """
             query += ")\n"
+
+        if session_type:
+            query += f"""
+            |> filter(fn: (r) => r["SessionTypeName"] == "{session_type}")
+            """
+
+        if driver:
+            query += f"""
+            |> filter(fn: (r) => r["user"] == "{driver}")
+            """
 
         if aggregate:
             # downsample to 1Hz
@@ -133,6 +145,9 @@ class InfluxRetrievalStrategy(RetrievalStrategy):
 
         # print(query)
         df = self.query_api.query_data_frame(query=query)
+        # set pd options to display all columns
+        # pd.set_option("display.max_columns", None)
+        # print(df)
         if df.empty:
             return df
 
@@ -141,9 +156,20 @@ class InfluxRetrievalStrategy(RetrievalStrategy):
             # flip y axis
             df["x"] = df["WorldPosition_x"]
             df["y"] = df["WorldPosition_z"] * -1
+            df["WorldPosition_x"] = df["x"]
+            df["WorldPosition_y"] = df["y"]
         if game == "Automobilista 2":
             df["x"] = df["WorldPosition_x"]
             df["y"] = df["WorldPosition_z"]
+            df["WorldPosition_x"] = df["x"]
+            df["WorldPosition_y"] = df["y"]
+        if game == "Richard Burns Rally":
+            # rotate 90 degrees to the left
+            df["x"] = df["WorldPosition_y"]
+            df["y"] = df["WorldPosition_x"]
+            df["WorldPosition_x"] = -df["x"]
+            df["WorldPosition_y"] = df["y"]
+
 
         df["id"] = df["SessionId"].astype(str) + "-" + df["CurrentLap"].astype(str)
 
