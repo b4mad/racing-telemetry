@@ -15,8 +15,37 @@ sys.path.append(project_root)
 
 from telemetry import Telemetry
 
-
 def plot_sessions(session_ids, landmarks=False):
+    telemetry = Telemetry()
+    telemetry.set_pandas_adapter()
+    landmark_df = None
+    fig = None
+    laps = []
+
+    for session_id in session_ids:
+        telemetry.set_filter({'session_id': session_id})
+        df = get_or_create_df(lambda: telemetry.get_telemetry_df(), name=str(session_id))
+        if not df.empty:
+            laps.append(df)
+
+    if laps:
+        fig = lap_fig(laps[0])  # Initialize the figure with the first lap
+
+        for lap in laps[1:]:
+            fig = lap_fig(lap, fig=fig)  # Add subsequent laps to the figure
+
+    if landmarks and laps:
+        game = laps[0]['GameName'].iloc[0]
+        track = laps[0]['TrackCode'].iloc[0]
+        landmark_df = telemetry.landmarks(game=game, track=track)
+        if landmark_df is not None:
+            for _, landmark in landmark_df.iterrows():
+                fig = fig_add_shape(fig, x0=landmark['start'], x1=landmark['start'], color='red')
+
+    return fig
+
+
+def plot_2d_map_sessions(session_ids, landmarks=False):
     telemetry = Telemetry()
     telemetry.set_pandas_adapter()
     landmark_df = None
@@ -62,4 +91,8 @@ def get_or_create_df(create_df_func, name=None):
     print("DataFrame cached to disk.")
 
     return df
+
+
+
+
 
