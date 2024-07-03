@@ -71,6 +71,15 @@ class Streaming:
 
         return self.total_speed / self.count
 
+    def _calculate_elapsed_time(self, current_lap_time: float) -> float:
+        """Calculate elapsed time since last update."""
+        if self.last_lap_time == 0:
+            self.last_lap_time = current_lap_time
+            return 0
+        elapsed_time = current_lap_time - self.last_lap_time
+        self.last_lap_time = current_lap_time
+        return elapsed_time
+
     def coasting_time(self, telemetry: Dict) -> float:
         """
         Calculate the time spent coasting (no Throttle or Brake applied).
@@ -81,20 +90,9 @@ class Streaming:
         Returns:
             float: The total time spent coasting in seconds.
         """
-        current_lap_time = telemetry.get("CurrentLapTime", 0)
-        throttle = telemetry.get("Throttle", 0)
-        brake = telemetry.get("Brake", 0)
-
-        if self.last_lap_time == 0:
-            self.last_lap_time = current_lap_time
-            return 0
-
-        elapsed_time = current_lap_time - self.last_lap_time
-        self.last_lap_time = current_lap_time
-
-        if throttle == 0 and brake == 0:
+        elapsed_time = self._calculate_elapsed_time(telemetry.get("CurrentLapTime", 0))
+        if telemetry.get("Throttle", 0) == 0 and telemetry.get("Brake", 0) == 0:
             self.total_coasting_time += elapsed_time
-
         return self.total_coasting_time
 
     def raceline_yaw(self, telemetry: Dict) -> float:
