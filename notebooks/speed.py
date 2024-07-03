@@ -15,17 +15,18 @@ lap = get_or_create_df(lambda: t.get_telemetry_df(), name=session_id)
 
 avg_speed = average_speed(lap)
 print(f"Average speed for session {session_id}: {avg_speed:.2f} m/s")
+# Average speed for session 1719933663: 32.75 m/s
 
-print("\nStreaming average speed calculation:")
+print("\nStreaming average speed calculation and adding features to dataframe:")
 streaming = Streaming()
-for _, row in lap.iterrows():
+for index, row in lap.iterrows():
     streaming.notify(row.to_dict())
+    features = streaming.get_features()
+    for feature, value in features.items():
+        lap.at[index, feature] = value[-1] if isinstance(value, list) else value
 
-features = streaming.get_features()
-print(features)
-# streaming_avg = features['average_speed'][-1] if features['average_speed'] else None
+print("\nFinal dataframe with added features:")
+print(lap[['SpeedMs', 'average_speed', 'coasting_time']].tail())
 
-# if streaming_avg is not None:
-#     print(f"Average speed for session {session_id}: {streaming_avg:.2f} m/s")
-# else:
-#     print("No data available for average speed calculation.")
+print("\nFinal computed features:")
+print(streaming.get_features())
