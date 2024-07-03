@@ -1,3 +1,6 @@
 .aider*
 .plandex
 .cache/
+build/
+dist/
+racing_telemetry.egg-info/

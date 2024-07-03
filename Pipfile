@@ -9,6 +9,9 @@ pytest-recording = "*"
 vcrpy = "*"
 aiohttp = "*"
 jupyter = "*"
+setuptools = "*"
+wheel = "*"
+twine = "*"
 
 [packages]
 gql = "*"

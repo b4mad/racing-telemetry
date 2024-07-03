@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name='racing-telemetry',
     version='0.1.0',
-    packages=find_packages(include=['telemetry', 'telemetry.retrieval', 'telemetry.adapter']),
+    packages=find_packages(include=['telemetry']),
     install_requires=[
     ],
     author='Marcel Hild',
