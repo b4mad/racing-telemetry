@@ -40,6 +40,12 @@ class Streaming:
         Args:
             telemetry (Dict): The incoming telemetry data.
         """
+        self.elapsed_time = self._calculate_elapsed_time(telemetry.get("CurrentLapTime", 0))
+        self.dx, self.dy = self._calculate_position_delta(
+            telemetry.get("WorldPosition_x", 0),
+            telemetry.get("WorldPosition_y", 0)
+        )
+
         for feature_name, feature_func in self.features.items():
             result = feature_func(telemetry)
             self.computed_features[feature_name] = result
@@ -80,6 +86,16 @@ class Streaming:
         self.last_lap_time = current_lap_time
         return elapsed_time
 
+    def _calculate_position_delta(self, current_x: float, current_y: float) -> tuple[float, float]:
+        """Calculate the change in position since last update."""
+        if self.previous_x == 0 and self.previous_y == 0:
+            self.previous_x, self.previous_y = current_x, current_y
+            return 0, 0
+        dx = current_x - self.previous_x
+        dy = current_y - self.previous_y
+        self.previous_x, self.previous_y = current_x, current_y
+        return dx, dy
+
     def coasting_time(self, telemetry: Dict) -> float:
         """
         Calculate the time spent coasting (no Throttle or Brake applied).
@@ -90,9 +106,8 @@ class Streaming:
         Returns:
             float: The total time spent coasting in seconds.
         """
-        elapsed_time = self._calculate_elapsed_time(telemetry.get("CurrentLapTime", 0))
         if telemetry.get("Throttle", 0) == 0 and telemetry.get("Brake", 0) == 0:
-            self.total_coasting_time += elapsed_time
+            self.total_coasting_time += self.elapsed_time
         return self.total_coasting_time
 
     def raceline_yaw(self, telemetry: Dict) -> float:
@@ -105,34 +120,17 @@ class Streaming:
         Returns:
             float: The calculated yaw angle between -180 and 180 degrees.
         """
-        current_x = telemetry.get("WorldPosition_x", 0)
-        current_y = telemetry.get("WorldPosition_y", 0)
 
-        if self.previous_x == 0 and self.previous_y == 0:
-            self.previous_x = current_x
-            self.previous_y = current_y
+        dx, dy = self.dx, self.dy
+
+        if dx == 0 and dy == 0:
             return 0
-
-        dx = current_x - self.previous_x
-        dy = current_y - self.previous_y
 
         yaw = math.degrees(math.atan2(dy, dx))
 
         yaw = (yaw - 90) % 360
         if yaw > 180:
             yaw -= 360
-
-        # if 0 <= yaw < 90:
-        #     yaw = yaw - 90
-        # elif -90 <= yaw < 0:
-        #     yaw = yaw - 90
-        # elif 90 <= yaw < 180:
-        #     yaw = yaw - 90
-        # elif -180 <= yaw < -90:
-        #     yaw = yaw + 270
-
-        self.previous_x = current_x
-        self.previous_y = current_y
 
         return yaw
 
@@ -146,29 +144,14 @@ class Streaming:
         Returns:
             float: The calculated ground speed in meters per second.
         """
-        current_x = telemetry.get("WorldPosition_x", 0)
-        current_y = telemetry.get("WorldPosition_y", 0)
-        current_time = telemetry.get("CurrentLapTime", 0)
 
-        if self.previous_x == 0 and self.previous_y == 0:
-            self.previous_x = current_x
-            self.previous_y = current_y
-            self.previous_time = current_time
+        if self.elapsed_time == 0:
             return 0
 
-        dx = current_x - self.previous_x
-        dy = current_y - self.previous_y
-        dt = current_time - self.previous_time
-
-        if dt == 0:
-            return 0
+        dx, dy = self.dx, self.dy
 
         distance = math.sqrt(dx**2 + dy**2)
-        speed = distance / dt
-
-        self.previous_x = current_x
-        self.previous_y = current_y
-        self.previous_time = current_time
+        speed = distance / self.elapsed_time
 
         return speed
 
