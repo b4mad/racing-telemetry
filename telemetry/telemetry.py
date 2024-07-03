@@ -44,8 +44,7 @@ class Telemetry:
         self.filter = filter
 
     def get_data(self, adapter: Adapter = TransparentAdapter()) -> Any:
-        self.strategy: GraphQLRetrievalStrategy = GraphQLRetrievalStrategy()
-        raw_data = self.strategy.retrieve_data(self.filter)
+        raw_data = self.graphql_strategy.retrieve_data(self.filter)
         return adapter.convert(raw_data)
 
     def get_data_df(self) -> Any:
