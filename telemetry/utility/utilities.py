@@ -1,6 +1,6 @@
 import pandas as pd
 import os
-from typing import List, Optional
+from typing import Callable, List, Optional
 from plotly.graph_objs import Figure
 
 from telemetry.telemetry import Telemetry
@@ -21,7 +21,7 @@ def plot_sessions(session_ids: List[str], landmarks: bool = False, columns: Opti
     telemetry = Telemetry()
     telemetry.set_pandas_adapter()
     landmark_df = None
-    fig = None
+    fig = Figure()
     laps = []
 
     for session_id in session_ids:
@@ -63,7 +63,7 @@ def plot_2d_map_sessions(session_ids: List[str], landmarks: bool = False) -> Fig
     telemetry = Telemetry()
     telemetry.set_pandas_adapter()
     landmark_df = None
-    fig = None
+    fig = Figure()
     laps = []
 
     for session_id in session_ids:
@@ -84,7 +84,7 @@ def plot_2d_map_sessions(session_ids: List[str], landmarks: bool = False) -> Fig
     return fig
 
 
-def get_or_create_df(create_df_func: callable, name: Optional[str] = None) -> pd.DataFrame:
+def get_or_create_df(create_df_func: Callable, name: Optional[str] = None) -> pd.DataFrame:
     """
     Get a DataFrame from cache or create a new one if not found in cache.
 
