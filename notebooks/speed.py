@@ -18,7 +18,14 @@ print(f"Average speed for session {session_id}: {avg_speed:.2f} m/s")
 
 print("\nStreaming average speed calculation:")
 streaming = Streaming()
-for i, speed in enumerate(lap['SpeedMs'].dropna(), 1):
-    streaming_avg = streaming.average_speed(speed)
+for _, row in lap.iterrows():
+    streaming.notify(row.to_dict())
 
-print(f"Average speed for session {session_id}: {streaming_avg:.2f} m/s")
+features = streaming.get_features()
+print(features)
+# streaming_avg = features['average_speed'][-1] if features['average_speed'] else None
+
+# if streaming_avg is not None:
+#     print(f"Average speed for session {session_id}: {streaming_avg:.2f} m/s")
+# else:
+#     print("No data available for average speed calculation.")
