@@ -32,7 +32,7 @@ class TestStreaming(unittest.TestCase):
         cls.features_file = 'tests/data/test_streaming.json'
         if not os.path.exists(cls.features_file):
             with open(cls.features_file, 'w') as f:
-                json.dump(cls.collected_features, f)
+                json.dump(cls.collected_features, f, indent=4)
         else:
             with open(cls.features_file, 'r') as f:
                 cls.expected_features = json.load(f)
