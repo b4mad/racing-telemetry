@@ -1,7 +1,8 @@
 .PHONY: test build upload clean
 
 test:
-	PYTHONPATH=. pipenv run pytest -vrP
+    # TEST_PATTERN="test_average_speed" make test
+	PYTHONPATH=. pipenv run pytest -vrP $(if $(TEST_PATTERN),-k "$(TEST_PATTERN)",)
 
 graphql-schema:
 	pipenv run gql-cli http://telemetry.b4mad.racing:30050/graphql --print-schema --schema-download  > telemetry/retrieval/schema.graphql

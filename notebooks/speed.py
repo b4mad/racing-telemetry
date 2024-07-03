@@ -32,6 +32,6 @@ print("\nFinal computed features:")
 print(streaming.get_features())
 
 # Create the lap figure
-lap_fig(lap, columns=["SpeedMs", "Throttle", "Brake", "average_speed", "coasting_time"]).show()
-# lap_fig(lap, columns=["SpeedMs", "ground_speed"]).show()
+# lap_fig(lap, columns=["SpeedMs", "Throttle", "Brake", "average_speed", "coasting_time"]).show()
+lap_fig(lap, columns=["SpeedMs", "ground_speed"]).show()
 # lap_fig(lap, columns=["Throttle", "Brake", "coasting_time", "CurrentLapTime"]).show()
