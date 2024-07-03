@@ -15,7 +15,7 @@ sys.path.append(project_root)
 
 from telemetry import Telemetry
 
-def plot_sessions(session_ids, landmarks=False):
+def plot_sessions(session_ids, landmarks=False, columns=None):
     telemetry = Telemetry()
     telemetry.set_pandas_adapter()
     landmark_df = None
@@ -29,10 +29,12 @@ def plot_sessions(session_ids, landmarks=False):
             laps.append(df)
 
     if laps:
-        fig = lap_fig(laps[0])  # Initialize the figure with the first lap
+        if columns:
+            columns.extend(columns)
+        fig = lap_fig(laps[0], columns=columns)  # Initialize the figure with the first lap
 
         for lap in laps[1:]:
-            fig = lap_fig(lap, fig=fig)  # Add subsequent laps to the figure
+            fig = lap_fig(lap, fig=fig, columns=columns)  # Add subsequent laps to the figure
 
     if landmarks and laps:
         game = laps[0]['GameName'].iloc[0]
