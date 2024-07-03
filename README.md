@@ -1,53 +1,71 @@
-# Telemetry
+# Racing-Telemetry
 
-This repository contains Jupyter notebooks for analyzing racing data and a Python library for telemetry data analysis.
+Racing-Telemetry is a Python library for analyzing racing data, providing tools for data retrieval, processing, and visualization.
 
-## Directory Structure
+## Installation
 
-- `notebooks/`: Jupyter notebooks for data analysis.
-- `telemetry/`: Python library for telemetry data analysis.
-- `tests/`: Unit tests for the library.
-- `setup.py`: Packaging and distribution configuration.
-- `README.md`: Project overview.
-- `.gitignore`: Git ignore file.
-
-## Installation with Pipenv
-
-To install the library using Pipenv, run:
+You can install the library using pip:
 
 ```bash
-pipenv install
-```
-
-To activate the virtual environment, use:
-
-```bash
-pipenv shell
-```
-
-## Installation with pip
-
-To install the library, run:
-
-```bash
-pip install .
-```
-
-## Running Tests
-
-To run the tests, use:
-
-```bash
-pipenv run pytest
+pip install racing-telemetry
 ```
 
 ## Usage
 
-You can use the library in your notebooks as follows:
+Here are some examples of how to use the Telemetry library:
+
+### Basic Usage
 
 ```python
 from telemetry import Telemetry
+from telemetry.plot.plots import lap_fig, plot_2d_map
+from telemetry.analysis.streaming import Streaming
 
-# Example usage
-telemetry = Telemetry()
+# Initialize Telemetry
+t = Telemetry()
+
+# Set Pandas adapter for data conversion
+t.set_pandas_adapter()
+
+# Set filter for specific session and driver
+t.set_filter({'session_id': 1719933663, 'driver': 'durandom'})
+
+# Retrieve telemetry data
+lap_data = t.get_telemetry_df()
+
+# Calculate average speed
+from telemetry.analysis import average_speed
+avg_speed = average_speed(lap_data)
+print(f"Average speed: {avg_speed:.2f} m/s")
+
+# Create a lap figure
+fig = lap_fig(lap_data, columns=["SpeedMs", "Throttle", "Brake"])
+fig.show()
+
+# Create a 2D map
+map_fig = plot_2d_map(lap_data)
+map_fig.show()
+
+# Use streaming analysis
+streaming = Streaming()
+for index, row in lap_data.iterrows():
+    streaming.notify(row.to_dict())
+    features = streaming.get_features()
+    print(f"Lap time: {row['CurrentLapTime']:.2f}, Average speed: {features['average_speed'][-1]:.2f}, Coasting time: {features['coasting_time'][-1]:.2f}")
 ```
+
+## Features
+
+- Data retrieval from various sources (GraphQL, InfluxDB, PostgreSQL)
+- Data adaptation and conversion
+- Basic statistical analysis
+- Real-time streaming analysis
+- Visualization tools for lap data and track maps
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
