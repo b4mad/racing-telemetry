@@ -41,11 +41,6 @@ def get_color_from_string(s):
 
 def lap_fig(df, mode=None, columns=["Throttle", "Brake"], fig=None, full_range=False):
     fig = fig or go.Figure()
-    # fig = fig or go.Figure(layout=go.Layout(
-    #     autosize=False,
-    #     width=800,  # specify the width in pixels
-    #     height=600  # specify the height in pixels
-    # ))
 
     for column in columns:
         color = get_color_from_string(column)
@@ -58,6 +53,19 @@ def lap_fig(df, mode=None, columns=["Throttle", "Brake"], fig=None, full_range=F
             line=dict(color=color),
             showlegend=True,
         )
+
+    # Add title with TrackCode and CarModel
+    title = ""
+    track_code = df["TrackCode"].iloc[0]
+    car_model = df["CarModel"].iloc[0]
+    if track_code:
+        title += f"Track: {track_code}"
+    if car_model:
+        title += f" - Car: {car_model}" if title else f"Car: {car_model}"
+
+    if title:
+
+        fig.update_layout(title=title)
 
     # Set the range of the x-axis and the distance between tick marks
     # set start to the nearest 100 meters
