@@ -18,7 +18,7 @@ print(f"Average speed for session {session_id}: {avg_speed:.2f} m/s")
 # Average speed for session 1719933663: 32.75 m/s
 
 print("\nStreaming average speed calculation and adding features to dataframe:")
-streaming = Streaming()
+streaming = Streaming(average_speed=True, coasting_time=True)
 for index, row in lap.iterrows():
     streaming.notify(row.to_dict())
     features = streaming.get_features()
