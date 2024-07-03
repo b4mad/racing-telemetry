@@ -1,19 +1,17 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='telemetry',
+    name='racing-telemetry',
     version='0.1.0',
     packages=find_packages(include=['telemetry', 'telemetry.retrieval', 'telemetry.adapter']),
     install_requires=[
-        'graphene',
-        # Add any dependencies here
     ],
-    author='Your Name',
-    author_email='your.email@example.com',
+    author='Marcel Hild',
+    author_email='hild@b4mad.net',
     description='A library for telemetry data analysis',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
-    url='https://github.com/yourusername/racing-data-analysis',
+    url='https://github.com/b4mad/racing-telemetry',
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: MIT License',

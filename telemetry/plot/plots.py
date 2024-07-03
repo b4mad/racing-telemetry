@@ -64,7 +64,6 @@ def lap_fig(df, mode=None, columns=["Throttle", "Brake"], fig=None, full_range=F
         title += f" - Car: {car_model}" if title else f"Car: {car_model}"
 
     if title:
-
         fig.update_layout(title=title)
 
     # Set the range of the x-axis and the distance between tick marks
