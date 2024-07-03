@@ -1,3 +1,3 @@
 .aider*
 .plandex
-notebooks/cache/*.pkl
+.cache/

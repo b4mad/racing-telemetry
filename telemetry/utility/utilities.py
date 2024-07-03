@@ -1,5 +1,6 @@
 import plotly.express as px
 import pandas as pd
+import os
 
 from telemetry.telemetry import Telemetry
 from telemetry.plot import *
@@ -62,9 +63,10 @@ def plot_2d_map_sessions(session_ids, landmarks=False):
 
 
 def get_or_create_df(create_df_func, name=None):
-    # Get the directory of the current file
+    # Get the directory of the calling function
+
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    current_dir = os.path.join(current_dir, 'cache')
+    current_dir = os.path.join(current_dir, '../../.cache')
     if name:
         CACHE_FILE = os.path.join(current_dir, f'cached_{name}.pkl')
     else:
