@@ -30,3 +30,17 @@ print(lap[['SpeedMs', 'average_speed', 'coasting_time']].tail())
 
 print("\nFinal computed features:")
 print(streaming.get_features())
+
+# Create the lap figure
+# fig = lap_fig(lap, columns=["SpeedMs", "Throttle", "Brake", "average_speed", "coasting_time"])
+fig = lap_fig(lap, columns=["Throttle", "Brake", "coasting_time", "CurrentLapTime"])
+
+# Update the layout
+fig.update_layout(
+    title="Lap Telemetry with Streaming Features",
+    xaxis_title="Distance Round Track (m)",
+    yaxis_title="Value",
+    legend_title="Metrics"
+)
+# Show the figure
+fig.show()

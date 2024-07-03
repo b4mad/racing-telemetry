@@ -1,4 +1,5 @@
 import plotly.graph_objects as go
+import hashlib
 
 
 def telemetry_for_fig(segment, track_length=None):
@@ -26,6 +27,18 @@ def features_for_fig(segment, track_length, features):
     return features
 
 
+def get_color_from_string(s):
+    """Generate a color based on the hash of the input string, with defaults for Brake and Throttle."""
+    if s == "Brake":
+        return "red"
+    elif s == "Throttle":
+        return "green"
+    else:
+        hash_object = hashlib.md5(s.encode())
+        hash_hex = hash_object.hexdigest()
+        r, g, b = int(hash_hex[:2], 16), int(hash_hex[2:4], 16), int(hash_hex[4:6], 16)
+        return f'rgb({r},{g},{b})'
+
 def lap_fig(df, mode=None, columns=["Throttle", "Brake"], fig=None, full_range=False):
     fig = fig or go.Figure()
     # fig = fig or go.Figure(layout=go.Layout(
@@ -35,9 +48,7 @@ def lap_fig(df, mode=None, columns=["Throttle", "Brake"], fig=None, full_range=F
     # ))
 
     for column in columns:
-        color = "red"
-        if column == "Throttle":
-            color = "green"
+        color = get_color_from_string(column)
         fig.add_scatter(
             x=df["DistanceRoundTrack"],
             y=df[column],
