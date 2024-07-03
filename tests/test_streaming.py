@@ -19,14 +19,18 @@ class TestStreaming(unittest.TestCase):
         assert isinstance(cls.session_data, pd.DataFrame)
         assert len(cls.session_data) > 0
 
-        # Initialize the Streaming class with average_speed and coasting_time enabled
-        cls.streaming = Streaming(average_speed=True, coasting_time=True)
+        # Initialize the Streaming class with all features enabled
+        cls.streaming = Streaming(average_speed=True, coasting_time=True, raceline_yaw=True, ground_speed=True)
 
         # Process each row of the session data and collect features
         cls.collected_features = []
         for _, telemetry in cls.session_data.iterrows():
             cls.streaming.notify(telemetry)
-            cls.collected_features.append(cls.streaming.get_features().copy())
+            features = cls.streaming.get_features().copy()
+            features['CurrentLapTime'] = telemetry['CurrentLapTime']
+            features['Yaw'] = telemetry['Yaw']
+            features['SpeedMs'] = telemetry['SpeedMs']
+            cls.collected_features.append(features)
 
         # Save or load the collected features
         cls.features_file = 'tests/data/test_streaming.json'
@@ -57,6 +61,27 @@ class TestStreaming(unittest.TestCase):
 
         # Coasting time should be less than or equal to total session time
         self.assertLessEqual(self.collected_features[-1]['coasting_time'], total_session_time)
+
+    def test_raceline_yaw(self):
+        # Compare collected raceline_yaw with expected values
+        for i, (collected, expected) in enumerate(zip(self.collected_features, self.expected_features)):
+            self.assertIn('raceline_yaw', collected)
+            self.assertIsInstance(collected['raceline_yaw'], float)
+            self.assertAlmostEqual(collected['raceline_yaw'], expected['raceline_yaw'], places=2,
+                                   msg=f"Mismatch at index {i}")
+            # Check if the yaw is within the expected range (-180 to 180 degrees)
+            self.assertGreaterEqual(collected['raceline_yaw'], -180)
+            self.assertLessEqual(collected['raceline_yaw'], 180)
+
+    def test_ground_speed(self):
+        # Compare collected ground_speed with expected values
+        for i, (collected, expected) in enumerate(zip(self.collected_features, self.expected_features)):
+            self.assertIn('ground_speed', collected)
+            self.assertIsInstance(collected['ground_speed'], float)
+            self.assertAlmostEqual(collected['ground_speed'], expected['ground_speed'], places=2,
+                                   msg=f"Mismatch at index {i}")
+            # Check if the ground speed is non-negative
+            self.assertGreaterEqual(collected['ground_speed'], 0)
 
 if __name__ == '__main__':
     unittest.main()

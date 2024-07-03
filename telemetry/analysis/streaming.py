@@ -16,11 +16,11 @@ class Streaming:
             self.configure_feature("raceline_yaw", self.raceline_yaw)
         if ground_speed:
             self.configure_feature("ground_speed", self.ground_speed)
-        self.last_lap_time: float = 0
-        self.total_coasting_time: float = 0
-        self.previous_x: float = 0
-        self.previous_y: float = 0
-        self.previous_time: float = 0
+
+        self.last_lap_time: float = 0.0
+        self.last_x: float = 0.0
+        self.last_y: float = 0.0
+        self.total_coasting_time: float = 0.0
 
     def configure_feature(self, name: str, feature_func: Callable):
         """
@@ -31,7 +31,7 @@ class Streaming:
             feature_func (Callable): The function to compute the feature.
         """
         self.features[name] = feature_func
-        self.computed_features[name] = 0
+        self.computed_features[name] = 0.0
 
     def notify(self, telemetry: Dict):
         """
@@ -40,10 +40,10 @@ class Streaming:
         Args:
             telemetry (Dict): The incoming telemetry data.
         """
-        self.elapsed_time = self._calculate_elapsed_time(telemetry.get("CurrentLapTime", 0))
+        self.elapsed_time = self._calculate_elapsed_time(telemetry.get("CurrentLapTime", 0.0))
         self.dx, self.dy = self._calculate_position_delta(
-            telemetry.get("WorldPosition_x", 0),
-            telemetry.get("WorldPosition_y", 0)
+            telemetry.get("WorldPosition_x", 0.0),
+            telemetry.get("WorldPosition_y", 0.0)
         )
 
         for feature_name, feature_func in self.features.items():
@@ -59,7 +59,26 @@ class Streaming:
         """
         return self.computed_features
 
-    def average_speed(self, current_speed: float) -> Optional[float]:
+    def _calculate_elapsed_time(self, current_lap_time: float) -> float:
+        """Calculate elapsed time since last update."""
+        if self.last_lap_time == 0:
+            self.last_lap_time = current_lap_time
+            return 0
+        elapsed_time = current_lap_time - self.last_lap_time
+        self.last_lap_time = current_lap_time
+        return elapsed_time
+
+    def _calculate_position_delta(self, current_x: float, current_y: float) -> tuple[float, float]:
+        """Calculate the change in position since last update."""
+        if self.last_x == 0 and self.last_y == 0:
+            self.last_x, self.last_y = current_x, current_y
+            return 0.0, 0.0
+        dx = current_x - self.last_x
+        dy = current_y - self.last_y
+        self.last_x, self.last_y = current_x, current_y
+        return dx, dy
+
+    def average_speed(self, current_speed: float) -> float:
         """
         Calculate the running average speed.
 
@@ -73,28 +92,9 @@ class Streaming:
         self.count += 1
 
         if self.count == 0:
-            return None
+            return 0.0
 
         return self.total_speed / self.count
-
-    def _calculate_elapsed_time(self, current_lap_time: float) -> float:
-        """Calculate elapsed time since last update."""
-        if self.last_lap_time == 0:
-            self.last_lap_time = current_lap_time
-            return 0
-        elapsed_time = current_lap_time - self.last_lap_time
-        self.last_lap_time = current_lap_time
-        return elapsed_time
-
-    def _calculate_position_delta(self, current_x: float, current_y: float) -> tuple[float, float]:
-        """Calculate the change in position since last update."""
-        if self.previous_x == 0 and self.previous_y == 0:
-            self.previous_x, self.previous_y = current_x, current_y
-            return 0, 0
-        dx = current_x - self.previous_x
-        dy = current_y - self.previous_y
-        self.previous_x, self.previous_y = current_x, current_y
-        return dx, dy
 
     def coasting_time(self, telemetry: Dict) -> float:
         """
@@ -124,7 +124,7 @@ class Streaming:
         dx, dy = self.dx, self.dy
 
         if dx == 0 and dy == 0:
-            return 0
+            return 0.0
 
         yaw = math.degrees(math.atan2(dy, dx))
 
@@ -146,7 +146,7 @@ class Streaming:
         """
 
         if self.elapsed_time == 0:
-            return 0
+            return 0.0
 
         dx, dy = self.dx, self.dy
 
