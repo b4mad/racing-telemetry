@@ -5,8 +5,8 @@ from telemetry.analysis import *
 t = Telemetry()
 t.set_pandas_adapter()
 session_id = 1719854504
-# session_id = 1719855408
-# session_id = 1719991508
+session_id = 1719855408
+session_id = 1719991508
 driver = "durandom"
 t.set_filter({'session_id': session_id, 'driver': 'durandom'})
 

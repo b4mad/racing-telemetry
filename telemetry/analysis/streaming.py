@@ -2,7 +2,7 @@ from typing import Optional, Dict, Callable, List
 import math
 
 class Streaming:
-    def __init__(self, average_speed: bool = False, coasting_time: bool = False, raceline_yaw: bool = False, **kwargs):
+    def __init__(self, average_speed: bool = False, coasting_time: bool = False, raceline_yaw: bool = False, ground_speed: bool = False, **kwargs):
         self.total_speed: float = 0.0
         self.count: int = 0
         self.features: Dict[str, Callable] = {}
@@ -10,17 +10,17 @@ class Streaming:
 
         if average_speed:
             self.configure_feature("average_speed", lambda telemetry: self.average_speed(telemetry.get("SpeedMs", 0)))
-            self.computed_features["average_speed"] = 0
         if coasting_time:
             self.configure_feature("coasting_time", self.coasting_time)
-            self.computed_features["coasting_time"] = 0
         if raceline_yaw:
             self.configure_feature("raceline_yaw", self.raceline_yaw)
-            self.computed_features["raceline_yaw"] = 0
+        if ground_speed:
+            self.configure_feature("ground_speed", self.ground_speed)
         self.last_lap_time: float = 0
         self.total_coasting_time: float = 0
         self.previous_x: float = 0
         self.previous_y: float = 0
+        self.previous_time: float = 0
 
     def configure_feature(self, name: str, feature_func: Callable):
         """
@@ -31,7 +31,7 @@ class Streaming:
             feature_func (Callable): The function to compute the feature.
         """
         self.features[name] = feature_func
-        self.computed_features[name] = []
+        self.computed_features[name] = 0
 
     def notify(self, telemetry: Dict):
         """
@@ -137,4 +137,40 @@ class Streaming:
         self.previous_y = current_y
 
         return yaw
+
+    def ground_speed(self, telemetry: Dict) -> float:
+        """
+        Calculate the ground speed based on x and y coordinates traveled between ticks.
+
+        Args:
+            telemetry (Dict): The incoming telemetry data.
+
+        Returns:
+            float: The calculated ground speed in meters per second.
+        """
+        current_x = telemetry.get("WorldPosition_x", 0)
+        current_y = telemetry.get("WorldPosition_y", 0)
+        current_time = telemetry.get("CurrentLapTime", 0)
+
+        if self.previous_x == 0 and self.previous_y == 0:
+            self.previous_x = current_x
+            self.previous_y = current_y
+            self.previous_time = current_time
+            return 0
+
+        dx = current_x - self.previous_x
+        dy = current_y - self.previous_y
+        dt = current_time - self.previous_time
+
+        if dt == 0:
+            return 0
+
+        distance = math.sqrt(dx**2 + dy**2)
+        speed = distance / dt
+
+        self.previous_x = current_x
+        self.previous_y = current_y
+        self.previous_time = current_time
+
+        return speed
 

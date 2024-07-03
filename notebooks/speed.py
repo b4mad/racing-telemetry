@@ -18,12 +18,12 @@ print(f"Average speed for session {session_id}: {avg_speed:.2f} m/s")
 # Average speed for session 1719933663: 32.75 m/s
 
 print("\nStreaming average speed calculation and adding features to dataframe:")
-streaming = Streaming(average_speed=True, coasting_time=True)
+streaming = Streaming(average_speed=True, coasting_time=True, ground_speed=True)
 for index, row in lap.iterrows():
     streaming.notify(row.to_dict())
     features = streaming.get_features()
     for feature, value in features.items():
-        lap.at[index, feature] = value[-1] if isinstance(value, list) else value
+        lap.at[index, feature] = value
 
 print("\nFinal dataframe with added features:")
 print(lap[['SpeedMs', 'average_speed', 'coasting_time']].tail())
@@ -33,7 +33,8 @@ print(streaming.get_features())
 
 # Create the lap figure
 # fig = lap_fig(lap, columns=["SpeedMs", "Throttle", "Brake", "average_speed", "coasting_time"])
-fig = lap_fig(lap, columns=["Throttle", "Brake", "coasting_time", "CurrentLapTime"])
+fig = lap_fig(lap, columns=["SpeedMs", "ground_speed"])
+# fig = lap_fig(lap, columns=["Throttle", "Brake", "coasting_time", "CurrentLapTime"])
 
 # Show the figure
 fig.show()
