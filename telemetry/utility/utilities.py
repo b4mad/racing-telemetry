@@ -1,11 +1,23 @@
-import plotly.express as px
 import pandas as pd
 import os
+from typing import List, Optional
+from plotly.graph_objs import Figure
 
 from telemetry.telemetry import Telemetry
 from telemetry.plot import *
 
-def plot_sessions(session_ids, landmarks=False, columns=None):
+def plot_sessions(session_ids: List[str], landmarks: bool = False, columns: Optional[List[str]] = None) -> Figure:
+    """
+    Plot telemetry data for multiple sessions.
+
+    Args:
+        session_ids (list): List of session IDs to plot.
+        landmarks (bool, optional): Whether to include landmarks in the plot. Defaults to False.
+        columns (list, optional): List of additional columns to include in the plot. Defaults to None.
+
+    Returns:
+        plotly.graph_objs._figure.Figure: A Plotly figure object containing the plotted sessions.
+    """
     telemetry = Telemetry()
     telemetry.set_pandas_adapter()
     landmark_df = None
@@ -37,7 +49,17 @@ def plot_sessions(session_ids, landmarks=False, columns=None):
     return fig
 
 
-def plot_2d_map_sessions(session_ids, landmarks=False):
+def plot_2d_map_sessions(session_ids: List[str], landmarks: bool = False) -> Figure:
+    """
+    Plot a 2D map of telemetry data for multiple sessions.
+
+    Args:
+        session_ids (list): List of session IDs to plot.
+        landmarks (bool, optional): Whether to include landmarks in the plot. Defaults to False.
+
+    Returns:
+        plotly.graph_objs._figure.Figure: A Plotly figure object containing the 2D map of the sessions.
+    """
     telemetry = Telemetry()
     telemetry.set_pandas_adapter()
     landmark_df = None
@@ -62,22 +84,32 @@ def plot_2d_map_sessions(session_ids, landmarks=False):
     return fig
 
 
-def get_or_create_df(create_df_func, name=None):
+def get_or_create_df(create_df_func: callable, name: Optional[str] = None) -> pd.DataFrame:
+    """
+    Get a DataFrame from cache or create a new one if not found in cache.
+
+    Args:
+        create_df_func (callable): Function to create the DataFrame if not found in cache.
+        name (str, optional): Name to use for the cached file. Defaults to None.
+
+    Returns:
+        pandas.DataFrame: The loaded or newly created DataFrame.
+    """
     # Get the directory of the calling function
 
-    current_dir = os.path.dirname(os.path.abspath(__file__))
+    current_dir: str = os.path.dirname(os.path.abspath(__file__))
     current_dir = os.path.join(current_dir, '../../.cache')
     if name:
-        CACHE_FILE = os.path.join(current_dir, f'cached_{name}.pkl')
+        CACHE_FILE: str = os.path.join(current_dir, f'cached_{name}.pkl')
     else:
-        CACHE_FILE = os.path.join(current_dir, 'cached_df.pkl')
+        CACHE_FILE: str = os.path.join(current_dir, 'cached_df.pkl')
 
     if os.path.exists(CACHE_FILE):
         print("Loading DataFrame from cache...")
         return pd.read_pickle(CACHE_FILE)
 
     print("DataFrame not found in cache. Creating a new one...")
-    df = create_df_func()
+    df: pd.DataFrame = create_df_func()
 
     # Cache the DataFrame
     df.to_pickle(CACHE_FILE)
