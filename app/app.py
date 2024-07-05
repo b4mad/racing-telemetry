@@ -4,6 +4,7 @@ from dash.dependencies import Input, Output, State
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import math
 from telemetry import Telemetry
 from telemetry.utility.utilities import get_or_create_df
 from telemetry.plot.plots import plot_2d_map, lap_fig
@@ -98,6 +99,39 @@ def update_map_view(df, shared_range, slider_value):
         xaxis=dict(range=[min_x - margin, max_x + margin]),
         yaxis=dict(range=[min_y - margin, max_y + margin])
     )
+
+    if slider_value is not None:
+        # Find the closest point to the slider value
+        closest_point = df.iloc[(df['DistanceRoundTrack'] - slider_value).abs().argsort()[:1]]
+        x = closest_point['WorldPosition_x'].values[0]
+        y = closest_point['WorldPosition_y'].values[0]
+        yaw = closest_point['Yaw'].values[0]
+
+        # Draw circle
+        circle_size = 20
+        map_fig.add_shape(
+            type="circle",
+            xref="x", yref="y",
+            x0=x - circle_size, y0=y - circle_size,
+            x1=x + circle_size, y1=y + circle_size,
+            line_color="red"
+        )
+
+        # Draw arrow
+        arrow_length = 100
+        arrow_x = x + math.cos(math.radians(yaw)) * arrow_length
+        arrow_y = y + math.sin(math.radians(yaw)) * arrow_length
+        map_fig.add_annotation(
+            x=x, y=y,
+            ax=arrow_x, ay=arrow_y,
+            xref="x", yref="y", axref="x", ayref="y",
+            showarrow=True,
+            arrowhead=2,
+            arrowsize=1.5,
+            arrowwidth=2,
+            arrowcolor="green"
+        )
+
     return map_fig
 
 def update_slider(df, shared_range, current_value):

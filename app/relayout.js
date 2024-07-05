@@ -1,52 +1,37 @@
-    const relayoutCallback = function(eventdata) {
-        if (eventdata['xaxis.range[0]'] && eventdata['xaxis.range[1]']) {
-            graphDivs.forEach(graphDiv => {
-                if (graphDiv === timeGraphDiv) {
-                    return;
+                // draw a circle at the x, y position of the closest point
+                trace = mapDiv.data[0];
+                const circleSize = 20;
+                const circle = {
+                    type: 'circle',
+                    xref: 'x',
+                    yref: 'y',
+                    x0: trace.x[point.pointIndex] - circleSize,
+                    y0: trace.y[point.pointIndex] - circleSize,
+                    x1: trace.x[point.pointIndex] + circleSize,
+                    y1: trace.y[point.pointIndex] + circleSize,
+                    line: { color: 'red' }
+                };
+
+                // add an arrow to the circle, pointing in the direction of the yaw
+                // Convert degrees to radians
+                function degreesToRadians(degrees) {
+                    return degrees * (Math.PI / 180);
                 }
-                Plotly.relayout(graphDiv, {
-                    'xaxis.range[0]': eventdata['xaxis.range[0]'],
-                    'xaxis.range[1]': eventdata['xaxis.range[1]']
+
+                const arrowLength = 100;
+                const arrow = {
+                    type: 'line',
+                    x0: trace.x[point.pointIndex],
+                    y0: trace.y[point.pointIndex],
+                    x1: trace.x[point.pointIndex] + Math.cos(degreesToRadians(trace.yaw[point.pointIndex])) * arrowLength,
+                    y1: trace.y[point.pointIndex] + Math.sin(degreesToRadians(trace.yaw[point.pointIndex])) * arrowLength,
+                    line: { color: 'green' }
+                };
+                // console.log(trace.yaw[point.pointIndex]);
+
+                Plotly.relayout(mapDiv, {
+                    shapes: [
+                        circle,
+                        arrow
+                    ]
                 });
-            });
-
-            const trace = speedGraphDiv.data[graphIndex];
-            const minDistance = parseFloat(eventdata['xaxis.range[0]']);
-            const maxDistance = parseFloat(eventdata['xaxis.range[1]']);
-            // find the first point where the distance is greater than the minDistance
-            const maxIndex = trace.x.findIndex(x => x > maxDistance);
-            const minIndex = trace.x.findIndex(x => x > minDistance);
-
-            const mapTrace = mapDiv.data[0];
-            // in mapTrace, iterate from minIndex to maxIndex and find the smallest and largest x and y values
-            let smallestX = mapTrace.x[minIndex];
-            let largestX = mapTrace.x[minIndex];
-            let smallestY = mapTrace.y[minIndex];
-            let largestY = mapTrace.y[minIndex];
-
-            for (let i = minIndex; i <= maxIndex; i++) {
-                const x = mapTrace.x[i];
-                const y = mapTrace.y[i];
-                if (x < smallestX) {
-                    smallestX = x;
-                }
-                if (x > largestX) {
-                    largestX = x;
-                }
-                if (y < smallestY) {
-                    smallestY = y;
-                }
-                if (y > largestY) {
-                    largestY = y;
-                }
-            }
-
-            const margin = 50;
-            Plotly.relayout(mapDiv, {
-                'xaxis.range[0]': smallestX - margin,
-                'xaxis.range[1]': largestX + margin,
-                'yaxis.range[0]': smallestY - margin,
-                'yaxis.range[1]': largestY + margin,
-            });
-        }
-    }
