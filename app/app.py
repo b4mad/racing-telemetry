@@ -86,7 +86,10 @@ app.index_string = '''
      Output('gear-view', 'figure'),
      Output('steer-view', 'figure'),
      Output('time-view', 'figure'),
-     Output('shared-range', 'data')],
+     Output('shared-range', 'data'),
+     Output('distance-slider', 'min'),
+     Output('distance-slider', 'max'),
+     Output('distance-slider', 'value')],
     [Input('map-view', 'relayoutData'),
      Input('speed-view', 'relayoutData'),
      Input('throttle-view', 'relayoutData'),
@@ -155,7 +158,16 @@ def update_views(map_relayout, speed_relayout, throttle_relayout, brake_relayout
             else:
                 fig.update_xaxes(range=shared_range)
 
-    return *figures, shared_range
+    slider_min = df['DistanceRoundTrack'].min()
+    slider_max = df['DistanceRoundTrack'].max()
+    new_slider_value = slider_value
+
+    if shared_range:
+        slider_min = max(slider_min, shared_range[0])
+        slider_max = min(slider_max, shared_range[1])
+        new_slider_value = max(slider_min, min(slider_value, slider_max))
+
+    return *figures, shared_range, slider_min, slider_max, new_slider_value
 
 if __name__ == '__main__':
     app.run_server(debug=True)
