@@ -28,5 +28,25 @@
             //     "RedirectOutput"
             // ]
         },
+        {
+            "name": "Dash App",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/app/app.py",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "envFile": "${workspaceFolder}/.env",
+            "debugOptions": [
+                "RedirectOutput"
+            ],
+            "serverReadyAction": {
+                "pattern": "Running on (https?://\\S+|[0-9]+)",
+                "uriFormat": "http://localhost:%s",
+                "action": "debugWithChrome"
+            }
+        }
     ]
 }
