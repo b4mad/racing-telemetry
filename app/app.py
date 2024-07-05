@@ -22,8 +22,19 @@ telemetry.set_filter({'session_id': session_id, 'driver': 'durandom'})
 # Use get_or_create_df to retrieve the DataFrame
 df = get_or_create_df(lambda: telemetry.get_telemetry_df(), name=session_id)
 
+# Get the list of drivers
+drivers = telemetry.drivers()['name'].tolist()
+
 # Layout of the app
 app.layout = html.Div([
+    html.Div([
+        dcc.Dropdown(
+            id='driver-dropdown',
+            options=[{'label': driver, 'value': driver} for driver in drivers],
+            value=driver,
+            style={'width': '100%'}
+        )
+    ], style={'width': '100%', 'padding': '10px'}),
     html.Div([
         html.Div([
             dcc.Graph(id='map-view', style={'height': '100%'})
@@ -184,12 +195,21 @@ def update_lap_figures(df, shared_range, slider_value):
      Input('gear-view', 'relayoutData'),
      Input('steer-view', 'relayoutData'),
      Input('time-view', 'relayoutData'),
-     Input('distance-slider', 'value')],
+     Input('distance-slider', 'value'),
+     Input('driver-dropdown', 'value')],
     [State('shared-range', 'data')]
 )
-def update_views(map_relayout, speed_relayout, throttle_relayout, brake_relayout, gear_relayout, steer_relayout, time_relayout, slider_value, shared_range):
+def update_views(map_relayout, speed_relayout, throttle_relayout, brake_relayout, gear_relayout, steer_relayout, time_relayout, slider_value, selected_driver, shared_range):
+    global df
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
+
+    if trigger_id == 'driver-dropdown':
+        # Update the DataFrame for the new driver
+        telemetry.set_filter({'session_id': session_id, 'driver': selected_driver})
+        df = get_or_create_df(lambda: telemetry.get_telemetry_df(), name=f"{session_id}_{selected_driver}")
+        shared_range = None
+        slider_value = df['DistanceRoundTrack'].min()
 
     relayout_data = None
     for view, data in zip(['map-view', 'speed-view', 'throttle-view', 'brake-view', 'gear-view', 'steer-view', 'time-view'],
