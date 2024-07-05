@@ -138,9 +138,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             });
 
-            const trace = speedGraphDiv.data[0];
-            const minDistance = eventdata['xaxis.range[0]'];
-            const maxDistance = eventdata['xaxis.range[1]'];
+            const trace = speedGraphDiv.data[graphIndex];
+            const minDistance = parseFloat(eventdata['xaxis.range[0]']);
+            const maxDistance = parseFloat(eventdata['xaxis.range[1]']);
             // find the first point where the distance is greater than the minDistance
             const maxIndex = trace.x.findIndex(x => x > maxDistance);
             const minIndex = trace.x.findIndex(x => x > minDistance);

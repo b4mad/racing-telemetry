@@ -114,12 +114,16 @@ def update_views(map_relayout, speed_relayout, throttle_relayout, brake_relayout
         for fig in figures:
             if fig == map_fig:
                 # For the map view, we need to update both x and y axes
-                min_x, max_x = shared_range
-                min_y = df[df['DistanceRoundTrack'] >= min_x]['WorldPosition_y'].min()
-                max_y = df[df['DistanceRoundTrack'] <= max_x]['WorldPosition_y'].max()
+                min_distance, max_distance = shared_range
+                filtered_df = df[(df['DistanceRoundTrack'] >= min_distance) & (df['DistanceRoundTrack'] <= max_distance)]
+                min_x = filtered_df['WorldPosition_x'].min()
+                max_x = filtered_df['WorldPosition_x'].max()
+                min_y = filtered_df['WorldPosition_y'].min()
+                max_y = filtered_df['WorldPosition_y'].max()
+                margin = 50  # Add a margin around the visible area
                 fig.update_layout(
-                    xaxis=dict(range=[min_x, max_x]),
-                    yaxis=dict(range=[min_y, max_y])
+                    xaxis=dict(range=[min_x - margin, max_x + margin]),
+                    yaxis=dict(range=[min_y - margin, max_y + margin])
                 )
             else:
                 fig.update_xaxes(range=shared_range)
