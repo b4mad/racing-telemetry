@@ -39,7 +39,9 @@ def get_color_from_string(s):
         r, g, b = int(hash_hex[:2], 16), int(hash_hex[2:4], 16), int(hash_hex[4:6], 16)
         return f'rgb({r},{g},{b})'
 
-def lap_fig(df, mode=None, columns=["Throttle", "Brake"], fig=None, full_range=False, title=None):
+def lap_fig(df, mode=None, columns=["Throttle", "Brake"], fig=None,
+            full_range=True, title=None, show_x_axis=False,
+            show_legend=True):
     # Add title with TrackCode and CarModel if not provided
     if title is None:
         title = ""
@@ -51,25 +53,27 @@ def lap_fig(df, mode=None, columns=["Throttle", "Brake"], fig=None, full_range=F
             title += f" - Car: {car_model}" if title else f"Car: {car_model}"
 
     layout_base = {
-        'height': 150,  # Increased height to accommodate title
+        'height': 100,  # Increased height to accommodate title
         'xaxis': {
             'showgrid': True,
             'zeroline': False,
             'gridcolor': '#E2E2E2',
             'side': 'top',
-            'fixedrange': False,  # Allow zoom
+            'fixedrange': False,
+            'visible': show_x_axis,  # Make x-axis visibility optional
+            # 'showticklabels': True,  # Show tick labels only when x-axis is visible
         },
         'yaxis': {
             'showline': False,
             'gridcolor': '#E2E2E2',
-            'fixedrange': False,  # Allow zoom
+            'fixedrange': True,
             'title': title
         },
         'margin': {
             'l': 50,
             'r': 0,
             'b': 10,
-            't': 50,  # Increased top margin for title
+            't': 5,  # Increased top margin for title
             'pad': 4
         },
         'paper_bgcolor': '#ffffff',
@@ -89,7 +93,7 @@ def lap_fig(df, mode=None, columns=["Throttle", "Brake"], fig=None, full_range=F
             mode=mode,
             name=column,
             line=dict(color=color),
-            showlegend=True,
+            showlegend=show_legend,
         )
 
     # Set the range of the x-axis and the distance between tick marks
