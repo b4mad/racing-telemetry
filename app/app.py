@@ -33,7 +33,7 @@ app.layout = html.Div([
             dcc.Graph(id='gear-view', style={'height': '16.67%'}),
             dcc.Graph(id='steer-view', style={'height': '16.67%'}),
             dcc.Graph(id='time-view', style={'height': '16.67%'})
-        ], style={'width': '50%', 'height': '100%', 'display': 'inline-block', 'flexDirection': 'column'})
+        ], style={'width': '50%', 'height': '100%', 'display': 'inline-block', 'flexDirection': 'column', 'margin-right': '20px'})
     ], style={'display': 'flex', 'height': '100vh'}),
     dcc.Store(id='shared-range')
 ], style={'height': '100vh', 'width': '100vw'})
@@ -106,13 +106,13 @@ def update_views(speed_relayout, throttle_relayout, brake_relayout, gear_relayou
 
     if relayout_data and 'xaxis.range[0]' in relayout_data and 'xaxis.range[1]' in relayout_data:
         shared_range = [relayout_data['xaxis.range[0]'], relayout_data['xaxis.range[1]']]
-    
-    speed_fig = lap_fig(df, columns=["SpeedMs"], title="Speed (m/s)")
-    throttle_fig = lap_fig(df, columns=["Throttle"], title="Throttle")
-    brake_fig = lap_fig(df, columns=["Brake"], title="Brake")
-    gear_fig = lap_fig(df, columns=["Gear"], title="Gear")
-    steer_fig = lap_fig(df, columns=["SteeringAngle"], title="Steering Angle")
-    time_fig = lap_fig(df, columns=["CurrentLapTime"], title="Lap Time")
+
+    speed_fig = lap_fig(df, columns=["SpeedMs"], title="Speed (m/s)", show_legend=False)
+    throttle_fig = lap_fig(df, columns=["Throttle"], title="Throttle", show_legend=False)
+    brake_fig = lap_fig(df, columns=["Brake"], title="Brake", show_legend=False)
+    gear_fig = lap_fig(df, columns=["Gear"], title="Gear", show_legend=False)
+    steer_fig = lap_fig(df, columns=["SteeringAngle"], title="Steering Angle", show_legend=False)
+    time_fig = lap_fig(df, columns=["CurrentLapTime"], title="Lap Time", show_legend=False)
 
     figures = [speed_fig, throttle_fig, brake_fig, gear_fig, steer_fig, time_fig]
 
