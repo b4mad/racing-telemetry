@@ -1,8 +1,8 @@
 import dash
-from dash import dcc
-from dash import html
+from dash import dcc, html
 from dash.dependencies import Input, Output, State
 import plotly.express as px
+import plotly.graph_objects as go
 from telemetry import Telemetry
 from telemetry.utility.utilities import get_or_create_df
 from telemetry.plot.plots import plot_2d_map, lap_fig
@@ -27,6 +27,15 @@ app.layout = html.Div([
             dcc.Graph(id='map-view', style={'height': '100%'})
         ], style={'width': '50%', 'height': '100%', 'display': 'inline-block'}),
         html.Div([
+            dcc.RangeSlider(
+                id='distance-slider',
+                min=df['DistanceRoundTrack'].min(),
+                max=df['DistanceRoundTrack'].max(),
+                step=1,
+                value=[df['DistanceRoundTrack'].min(), df['DistanceRoundTrack'].max()],
+                marks={i: str(i) for i in range(int(df['DistanceRoundTrack'].min()), int(df['DistanceRoundTrack'].max()), 1000)},
+                updatemode='mouseup'
+            ),
             dcc.Graph(id='speed-view', style={'height': '16.67%'}),
             dcc.Graph(id='throttle-view', style={'height': '16.67%'}),
             dcc.Graph(id='brake-view', style={'height': '16.67%'}),
@@ -76,17 +85,19 @@ app.index_string = '''
      Output('gear-view', 'figure'),
      Output('steer-view', 'figure'),
      Output('time-view', 'figure'),
-     Output('shared-range', 'data')],
+     Output('shared-range', 'data'),
+     Output('distance-slider', 'value')],
     [Input('map-view', 'relayoutData'),
      Input('speed-view', 'relayoutData'),
      Input('throttle-view', 'relayoutData'),
      Input('brake-view', 'relayoutData'),
      Input('gear-view', 'relayoutData'),
      Input('steer-view', 'relayoutData'),
-     Input('time-view', 'relayoutData')],
+     Input('time-view', 'relayoutData'),
+     Input('distance-slider', 'value')],
     [State('shared-range', 'data')]
 )
-def update_views(map_relayout, speed_relayout, throttle_relayout, brake_relayout, gear_relayout, steer_relayout, time_relayout, shared_range):
+def update_views(map_relayout, speed_relayout, throttle_relayout, brake_relayout, gear_relayout, steer_relayout, time_relayout, slider_value, shared_range):
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
 
@@ -99,6 +110,8 @@ def update_views(map_relayout, speed_relayout, throttle_relayout, brake_relayout
 
     if relayout_data and 'xaxis.range[0]' in relayout_data and 'xaxis.range[1]' in relayout_data:
         shared_range = [relayout_data['xaxis.range[0]'], relayout_data['xaxis.range[1]']]
+    elif trigger_id == 'distance-slider':
+        shared_range = slider_value
 
     map_fig = plot_2d_map([df])
     speed_fig = lap_fig(df, columns=["SpeedMs"], title="Speed (m/s)", show_legend=False)
@@ -128,7 +141,7 @@ def update_views(map_relayout, speed_relayout, throttle_relayout, brake_relayout
             else:
                 fig.update_xaxes(range=shared_range)
 
-    return *figures, shared_range
+    return *figures, shared_range, shared_range
 
 if __name__ == '__main__':
     app.run_server(debug=True)
