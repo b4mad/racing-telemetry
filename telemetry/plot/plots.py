@@ -39,7 +39,17 @@ def get_color_from_string(s):
         r, g, b = int(hash_hex[:2], 16), int(hash_hex[2:4], 16), int(hash_hex[4:6], 16)
         return f'rgb({r},{g},{b})'
 
-def lap_fig(df, mode=None, columns=["Throttle", "Brake"], fig=None, full_range=False):
+def lap_fig(df, mode=None, columns=["Throttle", "Brake"], fig=None, full_range=False, title=None):
+    # Add title with TrackCode and CarModel if not provided
+    if title is None:
+        title = ""
+        track_code = df["TrackCode"].iloc[0]
+        car_model = df["CarModel"].iloc[0]
+        if track_code:
+            title += f"Track: {track_code}"
+        if car_model:
+            title += f" - Car: {car_model}" if title else f"Car: {car_model}"
+
     layout_base = {
         'height': 150,  # Increased height to accommodate title
         'xaxis': {
@@ -53,6 +63,7 @@ def lap_fig(df, mode=None, columns=["Throttle", "Brake"], fig=None, full_range=F
             'showline': False,
             'gridcolor': '#E2E2E2',
             'fixedrange': False,  # Allow zoom
+            'title': title
         },
         'margin': {
             'l': 50,
@@ -64,6 +75,7 @@ def lap_fig(df, mode=None, columns=["Throttle", "Brake"], fig=None, full_range=F
         'paper_bgcolor': '#ffffff',
         'plot_bgcolor': '#ffffff'
     }
+
     fig = fig or go.Figure(layout=layout_base)
     if fig:
         fig.update_layout(layout_base)
@@ -79,18 +91,6 @@ def lap_fig(df, mode=None, columns=["Throttle", "Brake"], fig=None, full_range=F
             line=dict(color=color),
             showlegend=True,
         )
-
-    # Add title with TrackCode and CarModel
-    title = ""
-    track_code = df["TrackCode"].iloc[0]
-    car_model = df["CarModel"].iloc[0]
-    if track_code:
-        title += f"Track: {track_code}"
-    if car_model:
-        title += f" - Car: {car_model}" if title else f"Car: {car_model}"
-
-    if title:
-        fig.update_layout(title=title)
 
     # Set the range of the x-axis and the distance between tick marks
     # set start to the nearest 100 meters

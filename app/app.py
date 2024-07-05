@@ -77,8 +77,7 @@ def update_map_view(_):
     [Input('speed-view', 'id')]
 )
 def update_speed_view(_):
-    fig = lap_fig(df, columns=["SpeedMs"])
-    fig.update_layout(title="Speed")
+    fig = lap_fig(df, columns=["SpeedMs"], title="SpeedMs")
     return fig
 
 # Callback to update the throttle view
@@ -87,8 +86,7 @@ def update_speed_view(_):
     [Input('throttle-view', 'id')]
 )
 def update_throttle_view(_):
-    fig = lap_fig(df, columns=["Throttle"])
-    fig.update_layout(title="Throttle")
+    fig = lap_fig(df, columns=["Throttle"], title="Throttle")
     return fig
 
 if __name__ == '__main__':
