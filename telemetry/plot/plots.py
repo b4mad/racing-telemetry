@@ -40,7 +40,33 @@ def get_color_from_string(s):
         return f'rgb({r},{g},{b})'
 
 def lap_fig(df, mode=None, columns=["Throttle", "Brake"], fig=None, full_range=False):
-    fig = fig or go.Figure()
+    layout_base = {
+        'height': 150,  # Increased height to accommodate title
+        'xaxis': {
+            'showgrid': True,
+            'zeroline': False,
+            'gridcolor': '#E2E2E2',
+            'side': 'top',
+            'fixedrange': False,  # Allow zoom
+        },
+        'yaxis': {
+            'showline': False,
+            'gridcolor': '#E2E2E2',
+            'fixedrange': False,  # Allow zoom
+        },
+        'margin': {
+            'l': 50,
+            'r': 0,
+            'b': 10,
+            't': 50,  # Increased top margin for title
+            'pad': 4
+        },
+        'paper_bgcolor': '#ffffff',
+        'plot_bgcolor': '#ffffff'
+    }
+    fig = fig or go.Figure(layout=layout_base)
+    if fig:
+        fig.update_layout(layout_base)
 
     for column in columns:
         color = get_color_from_string(column)

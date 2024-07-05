@@ -23,12 +23,44 @@ df = get_or_create_df(lambda: telemetry.get_telemetry_df(), name=session_id)
 # Layout of the app
 app.layout = html.Div([
     html.Div([
-        dcc.Graph(id='map-view')
-    ], style={'width': '50%', 'display': 'inline-block'}),
-    html.Div([
-        dcc.Graph(id='telemetry-view')
-    ], style={'width': '50%', 'display': 'inline-block'})
-])
+        html.Div([
+            dcc.Graph(id='map-view', style={'height': '100%'})
+        ], style={'width': '50%', 'height': '100%', 'display': 'inline-block'}),
+        html.Div([
+            dcc.Graph(id='speed-view', style={'height': '50%'}),
+            dcc.Graph(id='throttle-view', style={'height': '50%'})
+        ], style={'width': '50%', 'height': '100%', 'display': 'inline-block', 'flexDirection': 'column'})
+    ], style={'display': 'flex', 'height': '100vh'})
+], style={'height': '100vh', 'width': '100vw'})
+
+# Add CSS to ensure full height and width
+app.index_string = '''
+<!DOCTYPE html>
+<html>
+    <head>
+        {%metas%}
+        <title>{%title%}</title>
+        {%favicon%}
+        {%css%}
+        <style>
+            html, body {
+                margin: 0;
+                padding: 0;
+                height: 100%;
+                width: 100%;
+            }
+        </style>
+    </head>
+    <body>
+        {%app_entry%}
+        <footer>
+            {%config%}
+            {%scripts%}
+            {%renderer%}
+        </footer>
+    </body>
+</html>
+'''
 
 # Callback to update the map view
 @app.callback(
@@ -39,13 +71,24 @@ def update_map_view(_):
     fig = plot_2d_map([df])
     return fig
 
-# Callback to update the telemetry data view
+# Callback to update the speed view
 @app.callback(
-    Output('telemetry-view', 'figure'),
-    [Input('telemetry-view', 'id')]
+    Output('speed-view', 'figure'),
+    [Input('speed-view', 'id')]
 )
-def update_telemetry_view(_):
+def update_speed_view(_):
     fig = lap_fig(df, columns=["SpeedMs"])
+    fig.update_layout(title="Speed")
+    return fig
+
+# Callback to update the throttle view
+@app.callback(
+    Output('throttle-view', 'figure'),
+    [Input('throttle-view', 'id')]
+)
+def update_throttle_view(_):
+    fig = lap_fig(df, columns=["Throttle"])
+    fig.update_layout(title="Throttle")
     return fig
 
 if __name__ == '__main__':
