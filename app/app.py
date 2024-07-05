@@ -67,25 +67,18 @@ app.index_string = '''
 </html>
 '''
 
-# Callback to update the map view
+# Callback to update all views
 @app.callback(
-    Output('map-view', 'figure'),
-    [Input('map-view', 'id')]
-)
-def update_map_view(_):
-    fig = plot_2d_map([df])
-    return fig
-
-# Callback to update the speed and throttle views
-@app.callback(
-    [Output('speed-view', 'figure'),
+    [Output('map-view', 'figure'),
+     Output('speed-view', 'figure'),
      Output('throttle-view', 'figure'),
      Output('brake-view', 'figure'),
      Output('gear-view', 'figure'),
      Output('steer-view', 'figure'),
      Output('time-view', 'figure'),
      Output('shared-range', 'data')],
-    [Input('speed-view', 'relayoutData'),
+    [Input('map-view', 'relayoutData'),
+     Input('speed-view', 'relayoutData'),
      Input('throttle-view', 'relayoutData'),
      Input('brake-view', 'relayoutData'),
      Input('gear-view', 'relayoutData'),
@@ -93,13 +86,13 @@ def update_map_view(_):
      Input('time-view', 'relayoutData')],
     [State('shared-range', 'data')]
 )
-def update_views(speed_relayout, throttle_relayout, brake_relayout, gear_relayout, steer_relayout, time_relayout, shared_range):
+def update_views(map_relayout, speed_relayout, throttle_relayout, brake_relayout, gear_relayout, steer_relayout, time_relayout, shared_range):
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
 
     relayout_data = None
-    for view, data in zip(['speed-view', 'throttle-view', 'brake-view', 'gear-view', 'steer-view', 'time-view'],
-                          [speed_relayout, throttle_relayout, brake_relayout, gear_relayout, steer_relayout, time_relayout]):
+    for view, data in zip(['map-view', 'speed-view', 'throttle-view', 'brake-view', 'gear-view', 'steer-view', 'time-view'],
+                          [map_relayout, speed_relayout, throttle_relayout, brake_relayout, gear_relayout, steer_relayout, time_relayout]):
         if trigger_id == view:
             relayout_data = data
             break
@@ -107,6 +100,7 @@ def update_views(speed_relayout, throttle_relayout, brake_relayout, gear_relayou
     if relayout_data and 'xaxis.range[0]' in relayout_data and 'xaxis.range[1]' in relayout_data:
         shared_range = [relayout_data['xaxis.range[0]'], relayout_data['xaxis.range[1]']]
 
+    map_fig = plot_2d_map([df])
     speed_fig = lap_fig(df, columns=["SpeedMs"], title="Speed (m/s)", show_legend=False)
     throttle_fig = lap_fig(df, columns=["Throttle"], title="Throttle", show_legend=False)
     brake_fig = lap_fig(df, columns=["Brake"], title="Brake", show_legend=False)
@@ -114,11 +108,21 @@ def update_views(speed_relayout, throttle_relayout, brake_relayout, gear_relayou
     steer_fig = lap_fig(df, columns=["SteeringAngle"], title="Steering Angle", show_legend=False)
     time_fig = lap_fig(df, columns=["CurrentLapTime"], title="Lap Time", show_legend=False)
 
-    figures = [speed_fig, throttle_fig, brake_fig, gear_fig, steer_fig, time_fig]
+    figures = [map_fig, speed_fig, throttle_fig, brake_fig, gear_fig, steer_fig, time_fig]
 
     if shared_range:
         for fig in figures:
-            fig.update_xaxes(range=shared_range)
+            if fig == map_fig:
+                # For the map view, we need to update both x and y axes
+                min_x, max_x = shared_range
+                min_y = df[df['DistanceRoundTrack'] >= min_x]['WorldPosition_y'].min()
+                max_y = df[df['DistanceRoundTrack'] <= max_x]['WorldPosition_y'].max()
+                fig.update_layout(
+                    xaxis=dict(range=[min_x, max_x]),
+                    yaxis=dict(range=[min_y, max_y])
+                )
+            else:
+                fig.update_xaxes(range=shared_range)
 
     return *figures, shared_range
 
