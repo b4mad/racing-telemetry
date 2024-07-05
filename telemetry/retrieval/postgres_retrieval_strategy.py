@@ -26,6 +26,7 @@ class PostgresRetrievalStrategy(RetrievalStrategy):
         self.Track = Base.classes.telemetry_track
         self.Landmark = Base.classes.telemetry_landmark
         self.Lap = Base.classes.telemetry_lap
+        self.Car = Base.classes.telemetry_car
 
     def retrieve_data(self, query):
         with self.db_session() as session:
@@ -118,5 +119,14 @@ class PostgresRetrievalStrategy(RetrievalStrategy):
 
             if kind:
                 query = query.filter(self.Landmark.kind == kind)
+
+            return query.all()
+
+    def cars(self, game=None):
+        with self.db_session() as session:
+            query = session.query(self.Car)
+
+            if game:
+                query = query.join(self.Game).filter(self.Game.name == game)
 
             return query.all()

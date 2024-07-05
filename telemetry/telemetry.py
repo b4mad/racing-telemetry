@@ -40,6 +40,11 @@ class Telemetry:
             self.postgres_strategy.landmarks(game_name=game, track_name=track, kind=kind)
         )
 
+    def cars(self, game: Optional[str] = None) -> Any:
+        return self.adapter.convert(
+            self.postgres_strategy.cars(game=game)
+        )
+
     def set_filter(self, filter: Dict[str, Any]) -> None:
         self.filter = filter
 
