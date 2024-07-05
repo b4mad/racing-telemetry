@@ -77,6 +77,59 @@ app.index_string = '''
 </html>
 '''
 
+def update_map_view(df, shared_range, slider_value):
+    map_fig = plot_2d_map([df])
+    
+    if shared_range:
+        min_distance, max_distance = shared_range
+    elif slider_value is not None:
+        min_distance = df['DistanceRoundTrack'].min()
+        max_distance = slider_value
+    else:
+        return map_fig
+
+    filtered_df = df[(df['DistanceRoundTrack'] >= min_distance) & (df['DistanceRoundTrack'] <= max_distance)]
+    min_x = filtered_df['WorldPosition_x'].min()
+    max_x = filtered_df['WorldPosition_x'].max()
+    min_y = filtered_df['WorldPosition_y'].min()
+    max_y = filtered_df['WorldPosition_y'].max()
+    margin = 50  # Add a margin around the visible area
+    map_fig.update_layout(
+        xaxis=dict(range=[min_x - margin, max_x + margin]),
+        yaxis=dict(range=[min_y - margin, max_y + margin])
+    )
+    return map_fig
+
+def update_slider(df, shared_range, current_value):
+    slider_min = df['DistanceRoundTrack'].min()
+    slider_max = df['DistanceRoundTrack'].max()
+    new_slider_value = current_value
+
+    if shared_range:
+        slider_min = max(slider_min, shared_range[0])
+        slider_max = min(slider_max, shared_range[1])
+        new_slider_value = max(slider_min, min(current_value, slider_max))
+
+    return slider_min, slider_max, new_slider_value
+
+def update_lap_figures(df, shared_range, slider_value):
+    figures = []
+    for column, title in [
+        (["SpeedMs"], "Speed (m/s)"),
+        (["Throttle"], "Throttle"),
+        (["Brake"], "Brake"),
+        (["Gear"], "Gear"),
+        (["SteeringAngle"], "Steering Angle"),
+        (["CurrentLapTime"], "Lap Time")
+    ]:
+        fig = lap_fig(df, columns=column, title=title, show_legend=False)
+        if shared_range:
+            fig.update_xaxes(range=shared_range)
+        if slider_value is not None:
+            fig.add_vline(x=slider_value, line_width=2, line_dash="dash", line_color="red")
+        figures.append(fig)
+    return figures
+
 # Callback to update all views
 @app.callback(
     [Output('map-view', 'figure'),
@@ -114,60 +167,11 @@ def update_views(map_relayout, speed_relayout, throttle_relayout, brake_relayout
     if relayout_data and 'xaxis.range[0]' in relayout_data and 'xaxis.range[1]' in relayout_data:
         shared_range = [relayout_data['xaxis.range[0]'], relayout_data['xaxis.range[1]']]
 
-    map_fig = plot_2d_map([df])
-    speed_fig = lap_fig(df, columns=["SpeedMs"], title="Speed (m/s)", show_legend=False)
-    throttle_fig = lap_fig(df, columns=["Throttle"], title="Throttle", show_legend=False)
-    brake_fig = lap_fig(df, columns=["Brake"], title="Brake", show_legend=False)
-    gear_fig = lap_fig(df, columns=["Gear"], title="Gear", show_legend=False)
-    steer_fig = lap_fig(df, columns=["SteeringAngle"], title="Steering Angle", show_legend=False)
-    time_fig = lap_fig(df, columns=["CurrentLapTime"], title="Lap Time", show_legend=False)
+    map_fig = update_map_view(df, shared_range, slider_value if trigger_id == 'distance-slider' else None)
+    lap_figures = update_lap_figures(df, shared_range, slider_value if trigger_id == 'distance-slider' else None)
+    slider_min, slider_max, new_slider_value = update_slider(df, shared_range, slider_value)
 
-    figures = [map_fig, speed_fig, throttle_fig, brake_fig, gear_fig, steer_fig, time_fig]
-
-    if trigger_id == 'distance-slider':
-        for fig in figures:
-            if fig == map_fig:
-                # For the map view, we need to update both x and y axes
-                filtered_df = df[df['DistanceRoundTrack'] <= slider_value]
-                min_x = filtered_df['WorldPosition_x'].min()
-                max_x = filtered_df['WorldPosition_x'].max()
-                min_y = filtered_df['WorldPosition_y'].min()
-                max_y = filtered_df['WorldPosition_y'].max()
-                margin = 50  # Add a margin around the visible area
-                fig.update_layout(
-                    xaxis=dict(range=[min_x - margin, max_x + margin]),
-                    yaxis=dict(range=[min_y - margin, max_y + margin])
-                )
-            else:
-                fig.add_vline(x=slider_value, line_width=2, line_dash="dash", line_color="red")
-    elif shared_range:
-        for fig in figures:
-            if fig == map_fig:
-                # For the map view, we need to update both x and y axes
-                min_distance, max_distance = shared_range
-                filtered_df = df[(df['DistanceRoundTrack'] >= min_distance) & (df['DistanceRoundTrack'] <= max_distance)]
-                min_x = filtered_df['WorldPosition_x'].min()
-                max_x = filtered_df['WorldPosition_x'].max()
-                min_y = filtered_df['WorldPosition_y'].min()
-                max_y = filtered_df['WorldPosition_y'].max()
-                margin = 50  # Add a margin around the visible area
-                fig.update_layout(
-                    xaxis=dict(range=[min_x - margin, max_x + margin]),
-                    yaxis=dict(range=[min_y - margin, max_y + margin])
-                )
-            else:
-                fig.update_xaxes(range=shared_range)
-
-    slider_min = df['DistanceRoundTrack'].min()
-    slider_max = df['DistanceRoundTrack'].max()
-    new_slider_value = slider_value
-
-    if shared_range:
-        slider_min = max(slider_min, shared_range[0])
-        slider_max = min(slider_max, shared_range[1])
-        new_slider_value = max(slider_min, min(slider_value, slider_max))
-
-    return *figures, shared_range, slider_min, slider_max, new_slider_value
+    return map_fig, *lap_figures, shared_range, slider_min, slider_max, new_slider_value
 
 if __name__ == '__main__':
     app.run_server(debug=True)
