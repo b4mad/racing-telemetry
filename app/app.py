@@ -35,7 +35,7 @@ app.layout = html.Div([
                 step=1,
                 value=df['DistanceRoundTrack'].min(),
                 marks={i: str(i) for i in range(int(df['DistanceRoundTrack'].min()), int(df['DistanceRoundTrack'].max()), 1000)},
-                updatemode='mouseup'
+                updatemode='drag'
             ),
             dcc.Graph(id='speed-view', style={'height': '16.67%'}),
             dcc.Graph(id='throttle-view', style={'height': '16.67%'}),
@@ -79,7 +79,7 @@ app.index_string = '''
 
 def update_map_view(df, shared_range, slider_value):
     map_fig = plot_2d_map([df])
-    
+
     if shared_range:
         min_distance, max_distance = shared_range
     elif slider_value is not None:
