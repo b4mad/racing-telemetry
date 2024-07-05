@@ -5,6 +5,13 @@ setup(
     version='0.1.1',
     packages=find_packages(include=['telemetry']),
     install_requires=[
+        'gql',
+        'requests',
+        'influxdb-client',
+        'pandas',
+        'requests-toolbelt',
+        'psycopg2-binary',
+        'sqlalchemy',
     ],
     author='Marcel Hild',
     author_email='hild@b4mad.net',

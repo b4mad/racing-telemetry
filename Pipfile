@@ -12,6 +12,7 @@ jupyter = "*"
 setuptools = "*"
 wheel = "*"
 twine = "*"
+dash = "*"
 
 [packages]
 gql = "*"

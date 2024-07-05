@@ -1,4 +1,4 @@
-.PHONY: test build upload clean
+.PHONY: test build upload clean app
 
 test:
     # TEST_PATTERN="test_average_speed" make test
@@ -18,3 +18,5 @@ clean:
 	find . -type d -name __pycache__ -exec rm -rf {} +
 	find . -type f -name '*.pyc' -delete
 
+app:
+	PYTHONPATH=. pipenv run python app/app.py
