@@ -3,6 +3,7 @@ from dash import dcc, html
 from dash.dependencies import Input, Output, State
 import plotly.express as px
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 from telemetry import Telemetry
 from telemetry.utility.utilities import get_or_create_df
 from telemetry.plot.plots import plot_2d_map, lap_fig
@@ -27,12 +28,12 @@ app.layout = html.Div([
             dcc.Graph(id='map-view', style={'height': '100%'})
         ], style={'width': '50%', 'height': '100%', 'display': 'inline-block'}),
         html.Div([
-            dcc.RangeSlider(
+            dcc.Slider(
                 id='distance-slider',
                 min=df['DistanceRoundTrack'].min(),
                 max=df['DistanceRoundTrack'].max(),
                 step=1,
-                value=[df['DistanceRoundTrack'].min(), df['DistanceRoundTrack'].max()],
+                value=df['DistanceRoundTrack'].min(),
                 marks={i: str(i) for i in range(int(df['DistanceRoundTrack'].min()), int(df['DistanceRoundTrack'].max()), 1000)},
                 updatemode='mouseup'
             ),
@@ -85,8 +86,7 @@ app.index_string = '''
      Output('gear-view', 'figure'),
      Output('steer-view', 'figure'),
      Output('time-view', 'figure'),
-     Output('shared-range', 'data'),
-     Output('distance-slider', 'value')],
+     Output('shared-range', 'data')],
     [Input('map-view', 'relayoutData'),
      Input('speed-view', 'relayoutData'),
      Input('throttle-view', 'relayoutData'),
@@ -110,8 +110,6 @@ def update_views(map_relayout, speed_relayout, throttle_relayout, brake_relayout
 
     if relayout_data and 'xaxis.range[0]' in relayout_data and 'xaxis.range[1]' in relayout_data:
         shared_range = [relayout_data['xaxis.range[0]'], relayout_data['xaxis.range[1]']]
-    elif trigger_id == 'distance-slider':
-        shared_range = slider_value
 
     map_fig = plot_2d_map([df])
     speed_fig = lap_fig(df, columns=["SpeedMs"], title="Speed (m/s)", show_legend=False)
@@ -123,7 +121,23 @@ def update_views(map_relayout, speed_relayout, throttle_relayout, brake_relayout
 
     figures = [map_fig, speed_fig, throttle_fig, brake_fig, gear_fig, steer_fig, time_fig]
 
-    if shared_range:
+    if trigger_id == 'distance-slider':
+        for fig in figures:
+            if fig == map_fig:
+                # For the map view, we need to update both x and y axes
+                filtered_df = df[df['DistanceRoundTrack'] <= slider_value]
+                min_x = filtered_df['WorldPosition_x'].min()
+                max_x = filtered_df['WorldPosition_x'].max()
+                min_y = filtered_df['WorldPosition_y'].min()
+                max_y = filtered_df['WorldPosition_y'].max()
+                margin = 50  # Add a margin around the visible area
+                fig.update_layout(
+                    xaxis=dict(range=[min_x - margin, max_x + margin]),
+                    yaxis=dict(range=[min_y - margin, max_y + margin])
+                )
+            else:
+                fig.add_vline(x=slider_value, line_width=2, line_dash="dash", line_color="red")
+    elif shared_range:
         for fig in figures:
             if fig == map_fig:
                 # For the map view, we need to update both x and y axes
@@ -141,7 +155,7 @@ def update_views(map_relayout, speed_relayout, throttle_relayout, brake_relayout
             else:
                 fig.update_xaxes(range=shared_range)
 
-    return *figures, shared_range, shared_range
+    return *figures, shared_range
 
 if __name__ == '__main__':
     app.run_server(debug=True)
