@@ -4,10 +4,11 @@ from dash.dependencies import Input, Output, State
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-import math
 from telemetry import Telemetry
 from telemetry.utility.utilities import get_or_create_df
 from telemetry.plot.plots import plot_2d_map, lap_fig
+
+from views import *
 
 # Initialize the Dash app
 app = dash.Dash(__name__)
@@ -22,19 +23,8 @@ telemetry.set_filter({'session_id': session_id, 'driver': 'durandom'})
 # Use get_or_create_df to retrieve the DataFrame
 df = get_or_create_df(lambda: telemetry.get_telemetry_df(), name=session_id)
 
-# Get the list of drivers
-drivers = telemetry.drivers()['name'].tolist()
-
 # Layout of the app
 app.layout = html.Div([
-    html.Div([
-        dcc.Dropdown(
-            id='driver-dropdown',
-            options=[{'label': driver, 'value': driver} for driver in drivers],
-            value=driver,
-            style={'width': '100%'}
-        )
-    ], style={'width': '100%', 'padding': '10px'}),
     html.Div([
         html.Div([
             dcc.Graph(id='map-view', style={'height': '100%'})
@@ -89,91 +79,6 @@ app.index_string = '''
 </html>
 '''
 
-def update_map_view(df, shared_range, slider_value):
-    map_fig = plot_2d_map([df])
-
-    if shared_range:
-        min_distance, max_distance = shared_range
-    elif slider_value is not None:
-        min_distance = df['DistanceRoundTrack'].min()
-        max_distance = slider_value
-    else:
-        return map_fig
-
-    filtered_df = df[(df['DistanceRoundTrack'] >= min_distance) & (df['DistanceRoundTrack'] <= max_distance)]
-    min_x = filtered_df['WorldPosition_x'].min()
-    max_x = filtered_df['WorldPosition_x'].max()
-    min_y = filtered_df['WorldPosition_y'].min()
-    max_y = filtered_df['WorldPosition_y'].max()
-    margin = 50  # Add a margin around the visible area
-    map_fig.update_layout(
-        xaxis=dict(range=[min_x - margin, max_x + margin]),
-        yaxis=dict(range=[min_y - margin, max_y + margin])
-    )
-
-    if slider_value is not None:
-        # Find the closest point to the slider value
-        closest_point = df.iloc[(df['DistanceRoundTrack'] - slider_value).abs().argsort()[:1]]
-        x = closest_point['WorldPosition_x'].values[0]
-        y = closest_point['WorldPosition_y'].values[0]
-        yaw = closest_point['Yaw'].values[0]
-
-        # Draw circle
-        circle_size = 20
-        map_fig.add_shape(
-            type="circle",
-            xref="x", yref="y",
-            x0=x - circle_size, y0=y - circle_size,
-            x1=x + circle_size, y1=y + circle_size,
-            line_color="red"
-        )
-
-        # Draw arrow
-        arrow_length = 100
-        arrow_x = x + math.cos(math.radians(yaw)) * arrow_length
-        arrow_y = y + math.sin(math.radians(yaw)) * arrow_length
-        map_fig.add_annotation(
-            x=x, y=y,
-            ax=arrow_x, ay=arrow_y,
-            xref="x", yref="y", axref="x", ayref="y",
-            showarrow=True,
-            arrowhead=2,
-            arrowsize=1.5,
-            arrowwidth=2,
-            arrowcolor="green"
-        )
-
-    return map_fig
-
-def update_slider(df, shared_range, current_value):
-    slider_min = df['DistanceRoundTrack'].min()
-    slider_max = df['DistanceRoundTrack'].max()
-    new_slider_value = current_value
-
-    if shared_range:
-        slider_min = max(slider_min, shared_range[0])
-        slider_max = min(slider_max, shared_range[1])
-        new_slider_value = max(slider_min, min(current_value, slider_max))
-
-    return slider_min, slider_max, new_slider_value
-
-def update_lap_figures(df, shared_range, slider_value):
-    figures = []
-    for column, title in [
-        (["SpeedMs"], "Speed (m/s)"),
-        (["Throttle"], "Throttle"),
-        (["Brake"], "Brake"),
-        (["Gear"], "Gear"),
-        (["SteeringAngle"], "Steering Angle"),
-        (["CurrentLapTime"], "Lap Time")
-    ]:
-        fig = lap_fig(df, columns=column, title=title, show_legend=False)
-        if shared_range:
-            fig.update_xaxes(range=shared_range)
-        if slider_value is not None:
-            fig.add_vline(x=slider_value, line_width=2, line_dash="dash", line_color="red")
-        figures.append(fig)
-    return figures
 
 # Callback to update all views
 @app.callback(
@@ -195,21 +100,13 @@ def update_lap_figures(df, shared_range, slider_value):
      Input('gear-view', 'relayoutData'),
      Input('steer-view', 'relayoutData'),
      Input('time-view', 'relayoutData'),
-     Input('distance-slider', 'value'),
-     Input('driver-dropdown', 'value')],
+     Input('distance-slider', 'value')],
     [State('shared-range', 'data')]
 )
-def update_views(map_relayout, speed_relayout, throttle_relayout, brake_relayout, gear_relayout, steer_relayout, time_relayout, slider_value, selected_driver, shared_range):
+def update_views(map_relayout, speed_relayout, throttle_relayout, brake_relayout, gear_relayout, steer_relayout, time_relayout, slider_value, shared_range):
     global df
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
-
-    if trigger_id == 'driver-dropdown':
-        # Update the DataFrame for the new driver
-        telemetry.set_filter({'session_id': session_id, 'driver': selected_driver})
-        df = get_or_create_df(lambda: telemetry.get_telemetry_df(), name=f"{session_id}_{selected_driver}")
-        shared_range = None
-        slider_value = df['DistanceRoundTrack'].min()
 
     relayout_data = None
     for view, data in zip(['map-view', 'speed-view', 'throttle-view', 'brake-view', 'gear-view', 'steer-view', 'time-view'],
