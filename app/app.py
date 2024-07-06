@@ -99,11 +99,11 @@ app.index_string = '''
      Input('brake-view', 'relayoutData'),
      Input('gear-view', 'relayoutData'),
      Input('steer-view', 'relayoutData'),
-     Input('time-view', 'relayoutData'),
-     Input('distance-slider', 'value')],
+     Input('time-view', 'relayoutData')],
     [State('shared-range', 'data')]
 )
-def update_views(map_relayout, speed_relayout, throttle_relayout, brake_relayout, gear_relayout, steer_relayout, time_relayout, slider_value, shared_range):
+def update_views(map_relayout, speed_relayout, throttle_relayout, brake_relayout, gear_relayout,
+                 steer_relayout, time_relayout, shared_range):
     global df
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
@@ -118,11 +118,38 @@ def update_views(map_relayout, speed_relayout, throttle_relayout, brake_relayout
     if relayout_data and 'xaxis.range[0]' in relayout_data and 'xaxis.range[1]' in relayout_data:
         shared_range = [relayout_data['xaxis.range[0]'], relayout_data['xaxis.range[1]']]
 
-    map_fig = update_map_view(df, shared_range, slider_value if trigger_id == 'distance-slider' else None)
-    lap_figures = update_line_graphs(df, shared_range, slider_value if trigger_id == 'distance-slider' else None)
+    map_fig = update_map_view(df, shared_range)
+    lap_figures = update_line_graphs(df, shared_range)
+
+    slider_value = shared_range[0] if shared_range else df['DistanceRoundTrack'].min()
     slider_min, slider_max, new_slider_value = update_slider(df, shared_range, slider_value)
 
     return map_fig, *lap_figures, shared_range, slider_min, slider_max, new_slider_value
+
+# Callback to update all views
+@app.callback(
+    [Output('map-view', 'figure', allow_duplicate=True),
+     Output('speed-view', 'figure', allow_duplicate=True),
+     Output('throttle-view', 'figure', allow_duplicate=True),
+     Output('brake-view', 'figure', allow_duplicate=True),
+     Output('gear-view', 'figure', allow_duplicate=True),
+     Output('steer-view', 'figure', allow_duplicate=True),
+     Output('time-view', 'figure', allow_duplicate=True)],
+    [Input('distance-slider', 'value')],
+    [State('shared-range', 'data')],
+    prevent_initial_call=True
+)
+def update_slider_view(slider_value, shared_range):
+    global df
+    ctx = dash.callback_context
+    trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
+
+    map_fig = update_map_view(df, shared_range, slider_value if trigger_id == 'distance-slider' else None)
+    lap_figures = update_line_graphs(df, shared_range, slider_value if trigger_id == 'distance-slider' else None)
+    # slider_min, slider_max, new_slider_value = update_slider(df, shared_range, slider_value)
+
+    # return map_fig, *lap_figures, shared_range, slider_min, slider_max, new_slider_value
+    return map_fig, *lap_figures
 
 if __name__ == '__main__':
     app.run_server(debug=True)

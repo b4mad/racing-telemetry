@@ -14,7 +14,7 @@ def update_slider(df, shared_range, current_value):
 
     return slider_min, slider_max, new_slider_value
 
-def update_line_graphs(df, shared_range, slider_value):
+def update_line_graphs(df, shared_range, slider_value = None):
     figures = []
     for column, title in [
         (["SpeedMs"], "Speed (m/s)"),
@@ -32,7 +32,7 @@ def update_line_graphs(df, shared_range, slider_value):
         figures.append(fig)
     return figures
 
-def update_map_view(df, shared_range, slider_value):
+def update_map_view(df, shared_range, slider_value = None):
     map_fig = plot_2d_map([df])
 
     if shared_range:
