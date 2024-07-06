@@ -39,12 +39,12 @@ app.layout = html.Div([
                 marks={i: str(i) for i in range(int(df['DistanceRoundTrack'].min()), int(df['DistanceRoundTrack'].max()), 1000)},
                 updatemode='drag'
             ),
-            dcc.Graph(id='speed-view', style={'height': '16.67%'}),
-            dcc.Graph(id='throttle-view', style={'height': '16.67%'}),
-            dcc.Graph(id='brake-view', style={'height': '16.67%'}),
-            dcc.Graph(id='gear-view', style={'height': '16.67%'}),
-            dcc.Graph(id='steer-view', style={'height': '16.67%'}),
-            dcc.Graph(id='time-view', style={'height': '16.67%'})
+            dcc.Graph(id='speed-view'),
+            dcc.Graph(id='throttle-view'),
+            dcc.Graph(id='brake-view'),
+            dcc.Graph(id='gear-view'),
+            dcc.Graph(id='steer-view'),
+            dcc.Graph(id='time-view')
         ], style={'width': '50%', 'height': '100%', 'display': 'inline-block', 'flexDirection': 'column', 'margin-right': '20px'})
     ], style={'display': 'flex', 'height': '100vh'}),
     dcc.Store(id='shared-range')
@@ -119,7 +119,7 @@ def update_views(map_relayout, speed_relayout, throttle_relayout, brake_relayout
         shared_range = [relayout_data['xaxis.range[0]'], relayout_data['xaxis.range[1]']]
 
     map_fig = update_map_view(df, shared_range, slider_value if trigger_id == 'distance-slider' else None)
-    lap_figures = update_lap_figures(df, shared_range, slider_value if trigger_id == 'distance-slider' else None)
+    lap_figures = update_line_graphs(df, shared_range, slider_value if trigger_id == 'distance-slider' else None)
     slider_min, slider_max, new_slider_value = update_slider(df, shared_range, slider_value)
 
     return map_fig, *lap_figures, shared_range, slider_min, slider_max, new_slider_value

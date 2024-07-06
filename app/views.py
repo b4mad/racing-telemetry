@@ -14,7 +14,7 @@ def update_slider(df, shared_range, current_value):
 
     return slider_min, slider_max, new_slider_value
 
-def update_lap_figures(df, shared_range, slider_value):
+def update_line_graphs(df, shared_range, slider_value):
     figures = []
     for column, title in [
         (["SpeedMs"], "Speed (m/s)"),
