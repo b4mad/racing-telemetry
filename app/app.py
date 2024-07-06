@@ -1,3 +1,4 @@
+import logging
 import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
@@ -80,6 +81,7 @@ app.index_string = '''
 '''
 
 
+
 # Callback to update all views
 @app.callback(
     [Output('map-view', 'figure'),
@@ -100,11 +102,13 @@ app.index_string = '''
      Input('gear-view', 'relayoutData'),
      Input('steer-view', 'relayoutData'),
      Input('time-view', 'relayoutData')],
-    [State('shared-range', 'data')]
+    [State('shared-range', 'data')],
+    prevent_initial_call=True
 )
 def update_views(map_relayout, speed_relayout, throttle_relayout, brake_relayout, gear_relayout,
                  steer_relayout, time_relayout, shared_range):
     global df
+    logging.debug(f"update_views: shared_range: {shared_range}")
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
 
@@ -140,18 +144,21 @@ def update_views(map_relayout, speed_relayout, throttle_relayout, brake_relayout
     prevent_initial_call=True
 )
 def update_slider_view(slider_value, shared_range):
+    logging.info(f"update_slider: Slider value: {slider_value}, shared_range: {shared_range}")
     global df
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
 
-    map_fig = update_map_view(df, shared_range, slider_value if trigger_id == 'distance-slider' else None)
-    lap_figures = update_line_graphs(df, shared_range, slider_value if trigger_id == 'distance-slider' else None)
+    map_fig = update_map_view(df, shared_range, slider_value)
+    lap_figures = update_line_graphs(df, shared_range, slider_value)
     # slider_min, slider_max, new_slider_value = update_slider(df, shared_range, slider_value)
 
     # return map_fig, *lap_figures, shared_range, slider_min, slider_max, new_slider_value
     return map_fig, *lap_figures
 
 if __name__ == '__main__':
+    # set log level
+    logging.basicConfig(level=logging.DEBUG)
     app.run_server(debug=True)
 
 

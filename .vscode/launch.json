@@ -42,11 +42,11 @@
             "debugOptions": [
                 "RedirectOutput"
             ],
-            "serverReadyAction": {
-                "pattern": "Running on (https?://\\S+|[0-9]+)",
-                "uriFormat": "http://localhost:%s",
-                "action": "debugWithChrome"
-            }
+            // "serverReadyAction": {
+            //     "pattern": "Running on (https?://\\S+|[0-9]+)",
+            //     "uriFormat": "http://localhost:%s",
+            //     "action": "debugWithChrome"
+            // }
         }
     ]
 }
