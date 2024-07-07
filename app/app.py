@@ -1,18 +1,15 @@
 import logging
-import json
 import dash
 from dash import dcc, html
-from flask import request, Response
+from flask import request
 from werkzeug.wsgi import get_current_url
 from dash.dependencies import Input, Output, State
-import plotly.express as px
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 from telemetry import Telemetry
 from telemetry.utility.utilities import get_or_create_df
-from telemetry.plot.plots import plot_2d_map, lap_fig
 
-from views import *
+from map import *
+from line_graphs import *
+from slider import *
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
@@ -129,15 +126,14 @@ def update_views(map_relayout, speed_relayout, throttle_relayout, brake_relayout
     if relayout_data and 'xaxis.range[0]' in relayout_data and 'xaxis.range[1]' in relayout_data:
         shared_range = [relayout_data['xaxis.range[0]'], relayout_data['xaxis.range[1]']]
 
-    map_fig = update_map_view(df, shared_range)
-    lap_figures = update_line_graphs(df, shared_range)
+    map_fig = create_map_view(df, shared_range)
+    lap_figures = create_line_graphs(df, shared_range)
 
     slider_value = shared_range[0] if shared_range else df['DistanceRoundTrack'].min()
     slider_min, slider_max, new_slider_value = update_slider(df, shared_range, slider_value)
 
     return map_fig, *lap_figures, shared_range, slider_min, slider_max, new_slider_value
 
-# Callback to update all views
 @app.callback(
     [Output('map-view', 'figure', allow_duplicate=True),
      Output('speed-view', 'figure', allow_duplicate=True),
@@ -153,15 +149,14 @@ def update_views(map_relayout, speed_relayout, throttle_relayout, brake_relayout
 def update_slider_view(slider_value, shared_range):
     logger.info(f"update_slider: Slider value: {slider_value}, shared_range: {shared_range}")
     global df
-    ctx = dash.callback_context
-    trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
 
-    map_fig = update_map_view(df, shared_range, slider_value)
-    lap_figures = update_line_graphs(df, shared_range, slider_value)
-    # slider_min, slider_max, new_slider_value = update_slider(df, shared_range, slider_value)
+    patched_map = patch_circle_and_arrow(df, slider_value)
+    patched_figures = [patched_map]
+    for _ in range(6):  # For each of the 6 line graphs
+        patched_figure = add_vertical_line(None, slider_value)
+        patched_figures.append(patched_figure)
 
-    # return map_fig, *lap_figures, shared_range, slider_min, slider_max, new_slider_value
-    return map_fig, *lap_figures
+    return patched_figures
 
 if __name__ == '__main__':
     # set log level
@@ -186,12 +181,16 @@ if __name__ == '__main__':
         url = get_current_url(request.environ)
         if url.endswith("_reload-hash"):
             return response
+        # if response.status_code == 500 or response.status_code == 304:
+        #     return response
         # logger.debug('RES--------------------------------')
         # logger.debug(f'Status: {response.status}')
         # logger.debug(f'Headers: {dict(response.headers)}')
         # logger.debug(f'Body: {response.get_data(as_text=True)}')
-        # log the size of the response
-        logger.debug(f'Response size: {len(response.get_data(as_text=True))} bytes')
+        # try:
+        #     logger.debug(f'Response size: {len(response.get_data(as_text=True))} bytes')
+        # except:
+        #     pass
         return response
 
     app.run_server(debug=True)
