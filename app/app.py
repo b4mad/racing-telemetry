@@ -1,6 +1,9 @@
 import logging
+import json
 import dash
 from dash import dcc, html
+from flask import request, Response
+from werkzeug.wsgi import get_current_url
 from dash.dependencies import Input, Output, State
 import plotly.express as px
 import plotly.graph_objects as go
@@ -10,6 +13,10 @@ from telemetry.utility.utilities import get_or_create_df
 from telemetry.plot.plots import plot_2d_map, lap_fig
 
 from views import *
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 # Initialize the Dash app
 app = dash.Dash(__name__)
@@ -108,7 +115,7 @@ app.index_string = '''
 def update_views(map_relayout, speed_relayout, throttle_relayout, brake_relayout, gear_relayout,
                  steer_relayout, time_relayout, shared_range):
     global df
-    logging.debug(f"update_views: shared_range: {shared_range}")
+    logger.debug(f"update_views: shared_range: {shared_range}")
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
 
@@ -144,7 +151,7 @@ def update_views(map_relayout, speed_relayout, throttle_relayout, brake_relayout
     prevent_initial_call=True
 )
 def update_slider_view(slider_value, shared_range):
-    logging.info(f"update_slider: Slider value: {slider_value}, shared_range: {shared_range}")
+    logger.info(f"update_slider: Slider value: {slider_value}, shared_range: {shared_range}")
     global df
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
@@ -159,6 +166,34 @@ def update_slider_view(slider_value, shared_range):
 if __name__ == '__main__':
     # set log level
     logging.basicConfig(level=logging.DEBUG)
+
+    @app.server.before_request
+    def log_request_info():
+        url = get_current_url(request.environ)
+        if url.endswith("_reload-hash"):
+            return
+        # logger.debug('REQ--------------------------------')
+        logger.debug(f'URL: {url}')
+        # logger.debug(f'Method: {request.method}')
+        # logger.debug(f'Headers: {dict(request.headers)}')
+        # logger.debug(f'Body: {request.get_data(as_text=True)}')
+        # log the size of the request
+        logger.debug(f'Request size: {request.content_length} bytes')
+        pass
+
+    @app.server.after_request
+    def log_response_info(response):
+        url = get_current_url(request.environ)
+        if url.endswith("_reload-hash"):
+            return response
+        # logger.debug('RES--------------------------------')
+        # logger.debug(f'Status: {response.status}')
+        # logger.debug(f'Headers: {dict(response.headers)}')
+        # logger.debug(f'Body: {response.get_data(as_text=True)}')
+        # log the size of the response
+        logger.debug(f'Response size: {len(response.get_data(as_text=True))} bytes')
+        return response
+
     app.run_server(debug=True)
 
 

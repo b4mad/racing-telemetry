@@ -35,8 +35,6 @@ def update_line_graphs(df, shared_range, slider_value = None):
 def update_map_view(df, shared_range, slider_value = None):
     map_fig = plot_2d_map([df])
 
-    print(f"MapView: shared_range: {shared_range}")
-
     if shared_range:
         min_distance, max_distance = shared_range
     else:
