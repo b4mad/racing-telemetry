@@ -1,24 +1,6 @@
 from telemetry.plot.plots import lap_fig
 from dash import Patch
 
-def update_line_graphs_old(df, shared_range, slider_value = None):
-    figures = []
-    for column, title in [
-        (["SpeedMs"], "Speed (m/s)"),
-        (["Throttle"], "Throttle"),
-        (["Brake"], "Brake"),
-        (["Gear"], "Gear"),
-        (["SteeringAngle"], "Steering Angle"),
-        (["CurrentLapTime"], "Lap Time")
-    ]:
-        fig = lap_fig(df, columns=column, title=title, show_legend=False)
-        if shared_range:
-            fig.update_xaxes(range=shared_range)
-        if slider_value is not None:
-            fig.add_vline(x=slider_value, line_width=2, line_dash="dash", line_color="red")
-        figures.append(fig)
-    return figures
-
 def create_line_graph(df, shared_range, column, title):
     fig = lap_fig(df, columns=[column], full_range=True, show_legend=False, title=title)
     if shared_range:
@@ -36,7 +18,7 @@ def add_vertical_line(fig, slider_value):
             "y1": 1,
             "xref": "x",
             "yref": "paper",
-            "line": {"width": 3, "dash": "dash", "color": "red"}
+            "line": {"width": 2, "dash": "dash", "color": "red"}
         }
     ]
     return patched_figure

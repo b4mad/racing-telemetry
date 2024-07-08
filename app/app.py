@@ -16,9 +16,9 @@ from slider import *
 DATA_VIEWS = [
     {'column': 'SpeedMs', 'title': 'Speed (m/s)'},
     {'column': 'Throttle', 'title': 'Throttle'},
-    {'column': 'Brake', 'title': 'Brake'},
-    {'column': 'Gear', 'title': 'Gear'},
-    {'column': 'SteeringAngle', 'title': 'Steer Angle'},
+    # {'column': 'Brake', 'title': 'Brake'},
+    # {'column': 'Gear', 'title': 'Gear'},
+    # {'column': 'SteeringAngle', 'title': 'Steer Angle'},
     {'column': 'CurrentLapTime', 'title': 'Lap Time'}
 ]
 
@@ -64,33 +64,33 @@ app.layout = dbc.Container([
 ], fluid=True, style={'height': '100vh', 'width': '100vw'}, className='p-0')
 
 # Add CSS to ensure full height and width
-app.index_string = '''
+app.index_string = f'''
 <!DOCTYPE html>
 <html>
     <head>
-        {%metas%}
-        <title>{%title%}</title>
-        {%favicon%}
-        {%css%}
+        {{%metas%}}
+        <title>{{%title%}}</title>
+        {{%favicon%}}
+        {{%css%}}
         <style>
-            html, body {
+            html, body {{
                 margin: 0;
                 padding: 0;
                 height: 100%;
                 width: 100%;
-            }
-            .graph {
-                height: calc(16.66% - 8px);
+            }}
+            .graph {{
+                height: calc((100% / {len(DATA_VIEWS)}) - 8px);
                 margin-bottom: 8px;
-            }
+            }}
         </style>
     </head>
     <body>
-        {%app_entry%}
+        {{%app_entry%}}
         <footer>
-            {%config%}
-            {%scripts%}
-            {%renderer%}
+            {{%config%}}
+            {{%scripts%}}
+            {{%renderer%}}
         </footer>
     </body>
 </html>
