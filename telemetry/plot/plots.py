@@ -215,7 +215,7 @@ def plot_2d_map(data, landmarks=None):
 
     if isinstance(data, list):
         colors = ['blue', 'green', 'red', 'purple', 'orange', 'cyan', 'magenta', 'yellow']
-        for i, df in enumerate(data):
+        for i, df in enumerate(data[1:]):
             fig.add_trace(go.Scatter(
                 x=df['WorldPosition_x'],
                 y=df['WorldPosition_y'],
@@ -226,10 +226,15 @@ def plot_2d_map(data, landmarks=None):
                 ),
                 name=f'Track {i+1}'
             ))
+        df = data[0]
     else:
+        df = data
+
+    # if landmarks is None or landmarks does not contain any kind == 'segment' rows
+    if landmarks is None or landmarks[landmarks['kind'] == 'segment'].empty:
         fig.add_trace(go.Scatter(
-            x=data['WorldPosition_x'],
-            y=data['WorldPosition_y'],
+            x=df['WorldPosition_x'],
+            y=df['WorldPosition_y'],
             mode='lines',
             line=dict(
                 color='blue',
@@ -239,29 +244,47 @@ def plot_2d_map(data, landmarks=None):
         ))
 
     if landmarks is not None:
+        segment_colors = ['red', 'blue']  # Alternating colors for segments
+        color_index = 0
+
         for _, landmark in landmarks.iterrows():
-            # Find the closest point in the first DataFrame to the landmark's DistanceRoundTrack
-            df = data[0] if isinstance(data, list) else data
-            closest_point = df.iloc[(df['DistanceRoundTrack'] - landmark['start']).abs().argsort()[:1]]
+            if landmark['kind'] == 'turn':
+                # Find the closest point to the landmark's start
+                closest_point = df.iloc[(df['DistanceRoundTrack'] - landmark['start']).abs().argsort()[:1]]
 
-            fig.add_trace(go.Scatter(
-                x=[closest_point['WorldPosition_x'].values[0]],
-                y=[closest_point['WorldPosition_y'].values[0]],
-                mode='markers',
-                marker=dict(
-                    size=10,
-                    color='red',
-                    symbol='star'
-                ),
-                name=f"{landmark['name']}"
-            ))
+                fig.add_trace(go.Scatter(
+                    x=[closest_point['WorldPosition_x'].values[0]],
+                    y=[closest_point['WorldPosition_y'].values[0]],
+                    mode='markers',
+                    marker=dict(
+                        size=10,
+                        color='red',
+                        symbol='star'
+                    ),
+                    name=f"{landmark['name']}"
+                ))
+            elif landmark['kind'] == 'segment':
+                # Color points between start and end of the segment
+                segment_df = df[(df['DistanceRoundTrack'] > landmark['start']) &
+                                (df['DistanceRoundTrack'] <= landmark['end'])]
 
-    # Get the first DataFrame if data is a list, otherwise use data itself
-    first_df = data[0] if isinstance(data, list) else data
+                fig.add_trace(go.Scatter(
+                    x=segment_df['WorldPosition_x'],
+                    y=segment_df['WorldPosition_y'],
+                    mode='lines',
+                    marker=dict(
+                        size=2,
+                        color=segment_colors[color_index % 2],
+                    ),
+                    name=f"{landmark['name']}"
+                ))
+
+                color_index += 1
+
 
     # Calculate the range for x and y axes
-    x_min, x_max = first_df['WorldPosition_x'].min(), first_df['WorldPosition_x'].max()
-    y_min, y_max = first_df['WorldPosition_y'].min(), first_df['WorldPosition_y'].max()
+    x_min, x_max = df['WorldPosition_x'].min(), df['WorldPosition_x'].max()
+    y_min, y_max = df['WorldPosition_y'].min(), df['WorldPosition_y'].max()
 
     # Add a small margin (e.g., 5%) to the range
     margin = 0.05
