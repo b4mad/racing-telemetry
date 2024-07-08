@@ -12,6 +12,16 @@ from map import *
 from line_graphs import *
 from slider import *
 
+# Define the configuration for data views
+DATA_VIEWS = [
+    {'column': 'SpeedMs', 'title': 'Speed (m/s)'},
+    {'column': 'Throttle', 'title': 'Throttle'},
+    {'column': 'Brake', 'title': 'Brake'},
+    {'column': 'Gear', 'title': 'Gear'},
+    {'column': 'SteeringAngle', 'title': 'Steer Angle'},
+    {'column': 'CurrentLapTime', 'title': 'Lap Time'}
+]
+
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -46,12 +56,7 @@ app.layout = dbc.Container([
                 updatemode='drag'
             ),
             html.Div([
-                dcc.Graph(id='speed-view', className='graph'),
-                dcc.Graph(id='throttle-view', className='graph'),
-                dcc.Graph(id='brake-view', className='graph'),
-                dcc.Graph(id='gear-view', className='graph'),
-                dcc.Graph(id='steer-view', className='graph'),
-                dcc.Graph(id='time-view', className='graph')
+                dcc.Graph(id=f'data-{i+1}-view', className='graph') for i in range(len(DATA_VIEWS))
             ], style={'height': 'calc(100vh - 50px)', 'overflowY': 'auto', 'width': '90%'})
         ], width=6, className='p-0')
     ], className='g-0'),
@@ -95,38 +100,28 @@ app.index_string = '''
 
 # Callback to update all views
 @app.callback(
-    [Output('map-view', 'figure'),
-     Output('speed-view', 'figure'),
-     Output('throttle-view', 'figure'),
-     Output('brake-view', 'figure'),
-     Output('gear-view', 'figure'),
-     Output('steer-view', 'figure'),
-     Output('time-view', 'figure'),
-     Output('shared-range', 'data'),
+    [Output('map-view', 'figure')] +
+    [Output(f'data-{i+1}-view', 'figure') for i in range(len(DATA_VIEWS))] +
+    [Output('shared-range', 'data'),
      Output('distance-slider', 'min'),
      Output('distance-slider', 'max'),
      Output('distance-slider', 'marks'),
      Output('distance-slider', 'value')],
-    [Input('map-view', 'relayoutData'),
-     Input('speed-view', 'relayoutData'),
-     Input('throttle-view', 'relayoutData'),
-     Input('brake-view', 'relayoutData'),
-     Input('gear-view', 'relayoutData'),
-     Input('steer-view', 'relayoutData'),
-     Input('time-view', 'relayoutData')],
+    [Input('map-view', 'relayoutData')] +
+    [Input(f'data-{i+1}-view', 'relayoutData') for i in range(len(DATA_VIEWS))],
     [State('shared-range', 'data')],
     prevent_initial_call=True
 )
-def update_views(map_relayout, speed_relayout, throttle_relayout, brake_relayout, gear_relayout,
-                 steer_relayout, time_relayout, shared_range):
+def update_views(*args):
     global df
+    shared_range = args[-1]
     logger.debug(f"update_views: shared_range: {shared_range}")
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
 
     relayout_data = None
-    for view, data in zip(['map-view', 'speed-view', 'throttle-view', 'brake-view', 'gear-view', 'steer-view', 'time-view'],
-                          [map_relayout, speed_relayout, throttle_relayout, brake_relayout, gear_relayout, steer_relayout, time_relayout]):
+    for i, data in enumerate(args[:-1]):
+        view = f'data-{i}-view' if i > 0 else 'map-view'
         if trigger_id == view:
             relayout_data = data
             break
@@ -135,7 +130,7 @@ def update_views(map_relayout, speed_relayout, throttle_relayout, brake_relayout
         shared_range = [relayout_data['xaxis.range[0]'], relayout_data['xaxis.range[1]']]
 
     map_fig = create_map_view(df, shared_range)
-    lap_figures = create_line_graphs(df, shared_range)
+    lap_figures = [create_line_graph(df, shared_range, view['column'], view['title']) for view in DATA_VIEWS]
 
     slider_value = shared_range[0] if shared_range else df['DistanceRoundTrack'].min()
     slider_min, slider_max, new_slider_value = update_slider(df, shared_range, slider_value)
@@ -144,16 +139,11 @@ def update_views(map_relayout, speed_relayout, throttle_relayout, brake_relayout
     step = int(slider_range / 10)
     slider_marks = {i: {'label': str(i)} for i in range(int(slider_min), int(slider_max) + 1, step)}
 
-    return map_fig, *lap_figures, shared_range, slider_min, slider_max, slider_marks, new_slider_value
+    return [map_fig] + lap_figures + [shared_range, slider_min, slider_max, slider_marks, new_slider_value]
 
 @app.callback(
-    [Output('map-view', 'figure', allow_duplicate=True),
-     Output('speed-view', 'figure', allow_duplicate=True),
-     Output('throttle-view', 'figure', allow_duplicate=True),
-     Output('brake-view', 'figure', allow_duplicate=True),
-     Output('gear-view', 'figure', allow_duplicate=True),
-     Output('steer-view', 'figure', allow_duplicate=True),
-     Output('time-view', 'figure', allow_duplicate=True)],
+    [Output('map-view', 'figure', allow_duplicate=True)] +
+    [Output(f'data-{i+1}-view', 'figure', allow_duplicate=True) for i in range(len(DATA_VIEWS))],
     [Input('distance-slider', 'value')],
     [State('shared-range', 'data')],
     prevent_initial_call=True
@@ -164,7 +154,7 @@ def update_slider_view(slider_value, shared_range):
 
     patched_map = patch_circle_and_arrow(df, slider_value)
     patched_figures = [patched_map]
-    for _ in range(6):  # For each of the 6 line graphs
+    for _ in range(len(DATA_VIEWS)):  # For each of the data views
         patched_figure = add_vertical_line(None, slider_value)
         patched_figures.append(patched_figure)
 
@@ -206,6 +196,3 @@ if __name__ == '__main__':
         return response
 
     app.run_server(debug=True)
-
-
-
