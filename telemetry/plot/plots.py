@@ -110,6 +110,32 @@ def lap_fig(df, mode=None, columns=["Throttle", "Brake"], fig=None,
 
     return fig
 
+def plot_histogram(df, column_name):
+    """
+    Create a histogram using Plotly.
+
+    :param df: DataFrame containing the data
+    :param column_name: Name of the column to plot
+    :return: Plotly Figure object
+    """
+    value_counts = df[column_name].value_counts().sort_values(ascending=False)
+
+    fig = go.Figure(data=[go.Bar(
+        x=value_counts.index,
+        y=value_counts.values,
+        text=value_counts.values,
+        textposition='auto',
+    )])
+
+    fig.update_layout(
+        title=f'Histogram of {column_name}',
+        xaxis_title=column_name,
+        yaxis_title='Count',
+        bargap=0.2,
+    )
+
+    return fig
+
 
 def fig_add_shape(fig, color="black", **kwargs):
     default = dict(

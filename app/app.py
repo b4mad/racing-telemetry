@@ -42,7 +42,7 @@ telemetry.set_filter({'session_id': session_id, 'driver': 'durandom'})
 df = get_or_create_df(lambda: telemetry.get_telemetry_df(), name=session_id)
 game = df["GameName"].iloc[0]
 track = df["TrackCode"].iloc[0]
-landmarks = telemetry.landmarks(game="Richard Burns Rally", track=track, kind="turn")
+landmarks = telemetry.landmarks(game=game, track=track, kind="turn")
 
 # Layout of the app
 app.layout = dbc.Container([
