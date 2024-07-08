@@ -16,6 +16,7 @@ from slider import *
 DATA_VIEWS = [
     {'column': 'SpeedMs', 'title': 'Speed (m/s)'},
     {'column': 'Throttle', 'title': 'Throttle'},
+    {'column': 'Yaw', 'title': 'Yaw'},
     # {'column': 'Brake', 'title': 'Brake'},
     # {'column': 'Gear', 'title': 'Gear'},
     # {'column': 'SteeringAngle', 'title': 'Steer Angle'},

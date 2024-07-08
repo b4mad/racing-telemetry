@@ -21,8 +21,6 @@ def create_map_view(df, shared_range, slider_value = None):
         xaxis=dict(range=[min_x - margin, max_x + margin]),
         yaxis=dict(range=[min_y - margin, max_y + margin])
     )
-    if slider_value is not None:
-        map_fig = add_circle_and_arrow(map_fig, df, slider_value)
     return map_fig
 
 def patch_circle_and_arrow(df, slider_value):
@@ -42,59 +40,19 @@ def patch_circle_and_arrow(df, slider_value):
             "xref": "x", "yref": "y",
             "x0": x - circle_size, "y0": y - circle_size,
             "x1": x + circle_size, "y1": y + circle_size,
-            "line_color": "red"
+            "line": {"color": "red"}
         }
     ]
 
     # Draw arrow
     arrow_length = 100
-    arrow_x = x + math.cos(math.radians(yaw)) * arrow_length
-    arrow_y = y + math.sin(math.radians(yaw)) * arrow_length
-    patched_figure["layout"]["annotations"] = [
-        {
-            "x": x, "y": y,
-            "ax": arrow_x, "ay": arrow_y,
-            "xref": "x", "yref": "y", "axref": "x", "ayref": "y",
-            "showarrow": True,
-            "arrowhead": 2,
-            "arrowsize": 1.5,
-            "arrowwidth": 2,
-            "arrowcolor": "green"
-        }
-    ]
+    arrow_x = x + math.cos(math.radians(yaw + 90)) * arrow_length
+    arrow_y = y + math.sin(math.radians(yaw + 90)) * arrow_length
+    patched_figure["layout"]["shapes"].append({
+        "type": "line",
+        "x0": x, "y0": y,
+        "x1": arrow_x, "y1": arrow_y,
+        "line": {"color": "green"}
+    })
 
     return patched_figure
-
-
-def add_circle_and_arrow(df, map_fig, slider_value):
-    # Find the closest point to the slider value
-    closest_point = df.iloc[(df['DistanceRoundTrack'] - slider_value).abs().argsort()[:1]]
-    x = closest_point['WorldPosition_x'].values[0]
-    y = closest_point['WorldPosition_y'].values[0]
-    yaw = closest_point['Yaw'].values[0]
-
-    # Draw circle
-    circle_size = 20
-    map_fig.add_shape(
-        type="circle",
-        xref="x", yref="y",
-        x0=x - circle_size, y0=y - circle_size,
-        x1=x + circle_size, y1=y + circle_size,
-        line_color="red"
-    )
-
-    # Draw arrow
-    arrow_length = 100
-    arrow_x = x + math.cos(math.radians(yaw)) * arrow_length
-    arrow_y = y + math.sin(math.radians(yaw)) * arrow_length
-    map_fig.add_annotation(
-        x=x, y=y,
-        ax=arrow_x, ay=arrow_y,
-        xref="x", yref="y", axref="x", ayref="y",
-        showarrow=True,
-        arrowhead=2,
-        arrowsize=1.5,
-        arrowwidth=2,
-        arrowcolor="green"
-    )
-    return map_fig
