@@ -35,29 +35,28 @@ app.layout = dbc.Container([
     dbc.Row([
         dbc.Col([
             dcc.Graph(id='map-view', style={'height': '100vh'})
-        ], width=6),
+        ], width=6, className='p-0'),
         dbc.Col([
-            dbc.Stack([
-                dcc.Slider(
-                    id='distance-slider',
-                    min=df['DistanceRoundTrack'].min(),
-                    max=df['DistanceRoundTrack'].max(),
-                    step=1,
-                    value=df['DistanceRoundTrack'].min(),
-                    marks={i: str(i) for i in range(int(df['DistanceRoundTrack'].min()), int(df['DistanceRoundTrack'].max()), 1000)},
-                    updatemode='drag'
-                ),
-                dcc.Graph(id='speed-view'),
-                dcc.Graph(id='throttle-view'),
-                dcc.Graph(id='brake-view'),
-                dcc.Graph(id='gear-view'),
-                dcc.Graph(id='steer-view'),
-                dcc.Graph(id='time-view')
-            ])
-        ], width=6)
-    ]),
+            dcc.Slider(
+                id='distance-slider',
+                step=1,
+                value=1,
+                min=0,
+                max=1,
+                updatemode='drag'
+            ),
+            html.Div([
+                dcc.Graph(id='speed-view', className='graph'),
+                dcc.Graph(id='throttle-view', className='graph'),
+                dcc.Graph(id='brake-view', className='graph'),
+                dcc.Graph(id='gear-view', className='graph'),
+                dcc.Graph(id='steer-view', className='graph'),
+                dcc.Graph(id='time-view', className='graph')
+            ], style={'height': 'calc(100vh - 50px)', 'overflowY': 'auto', 'width': '90%'})
+        ], width=6, className='p-0')
+    ], className='g-0'),
     dcc.Store(id='shared-range')
-], fluid=True, style={'height': '100vh', 'width': '100vw'})
+], fluid=True, style={'height': '100vh', 'width': '100vw'}, className='p-0')
 
 # Add CSS to ensure full height and width
 app.index_string = '''
@@ -74,6 +73,10 @@ app.index_string = '''
                 padding: 0;
                 height: 100%;
                 width: 100%;
+            }
+            .graph {
+                height: calc(16.66% - 8px);
+                margin-bottom: 8px;
             }
         </style>
     </head>
@@ -102,6 +105,7 @@ app.index_string = '''
      Output('shared-range', 'data'),
      Output('distance-slider', 'min'),
      Output('distance-slider', 'max'),
+     Output('distance-slider', 'marks'),
      Output('distance-slider', 'value')],
     [Input('map-view', 'relayoutData'),
      Input('speed-view', 'relayoutData'),
@@ -135,8 +139,12 @@ def update_views(map_relayout, speed_relayout, throttle_relayout, brake_relayout
 
     slider_value = shared_range[0] if shared_range else df['DistanceRoundTrack'].min()
     slider_min, slider_max, new_slider_value = update_slider(df, shared_range, slider_value)
+    # calculate the step size for the slider
+    slider_range = slider_max - slider_min
+    step = int(slider_range / 10)
+    slider_marks = {i: {'label': str(i)} for i in range(int(slider_min), int(slider_max) + 1, step)}
 
-    return map_fig, *lap_figures, shared_range, slider_min, slider_max, new_slider_value
+    return map_fig, *lap_figures, shared_range, slider_min, slider_max, slider_marks, new_slider_value
 
 @app.callback(
     [Output('map-view', 'figure', allow_duplicate=True),

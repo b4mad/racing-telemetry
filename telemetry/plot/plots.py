@@ -53,7 +53,7 @@ def lap_fig(df, mode=None, columns=["Throttle", "Brake"], fig=None,
             title += f" - Car: {car_model}" if title else f"Car: {car_model}"
 
     layout_base = {
-        # 'height': '100',  # Increased height to accommodate title
+        # 'height': 100,  # Increased height to accommodate title
         'xaxis': {
             'showgrid': True,
             'zeroline': False,

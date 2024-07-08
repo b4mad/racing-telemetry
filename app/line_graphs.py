@@ -22,7 +22,7 @@ def update_line_graphs_old(df, shared_range, slider_value = None):
 def create_line_graphs(df, shared_range):
      lap_figures = []
      for column in ["SpeedMs", "Throttle", "Brake", "Gear", "SteeringAngle", "CurrentLapTime"]:
-         fig = lap_fig(df, columns=[column], full_range=True, show_legend=False)
+         fig = lap_fig(df, columns=[column], full_range=True, show_legend=False, title=column)
          if shared_range:
              fig.update_xaxes(range=shared_range)
          lap_figures.append(fig)
