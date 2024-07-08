@@ -2,8 +2,8 @@ from telemetry.plot.plots import plot_2d_map
 from dash import Patch
 import math
 
-def create_map_view(df, shared_range, slider_value = None):
-    map_fig = plot_2d_map([df])
+def create_map_view(df, shared_range, landmarks=None):
+    map_fig = plot_2d_map([df], landmarks=landmarks)
 
     if shared_range:
         min_distance, max_distance = shared_range

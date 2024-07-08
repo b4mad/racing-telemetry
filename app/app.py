@@ -19,8 +19,8 @@ DATA_VIEWS = [
     {'column': 'Yaw', 'title': 'Yaw'},
     # {'column': 'Brake', 'title': 'Brake'},
     # {'column': 'Gear', 'title': 'Gear'},
-    # {'column': 'SteeringAngle', 'title': 'Steer Angle'},
-    {'column': 'CurrentLapTime', 'title': 'Lap Time'}
+    {'column': 'SteeringAngle', 'title': 'Steer Angle'},
+    # {'column': 'CurrentLapTime', 'title': 'Lap Time'}
 ]
 
 # Set up logging
@@ -40,6 +40,9 @@ telemetry.set_filter({'session_id': session_id, 'driver': 'durandom'})
 
 # Use get_or_create_df to retrieve the DataFrame
 df = get_or_create_df(lambda: telemetry.get_telemetry_df(), name=session_id)
+game = df["GameName"].iloc[0]
+track = df["TrackCode"].iloc[0]
+landmarks = telemetry.landmarks(game="Richard Burns Rally", track=track, kind="turn")
 
 # Layout of the app
 app.layout = dbc.Container([
@@ -114,9 +117,8 @@ app.index_string = f'''
     prevent_initial_call=True
 )
 def update_views(*args):
-    global df
+    global df, landmarks
     shared_range = args[-1]
-    logger.debug(f"update_views: shared_range: {shared_range}")
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
 
@@ -127,10 +129,13 @@ def update_views(*args):
             relayout_data = data
             break
 
+    logger.debug(f"update_views: trigger_id: {trigger_id}")
+    logger.debug(f"update_views: shared_range: {shared_range}")
+    logger.debug(f"update_views: relayout_data: {relayout_data}")
     if relayout_data and 'xaxis.range[0]' in relayout_data and 'xaxis.range[1]' in relayout_data:
         shared_range = [relayout_data['xaxis.range[0]'], relayout_data['xaxis.range[1]']]
 
-    map_fig = create_map_view(df, shared_range)
+    map_fig = create_map_view(df, shared_range, landmarks=landmarks)
     lap_figures = [create_line_graph(df, shared_range, view['column'], view['title']) for view in DATA_VIEWS]
 
     slider_value = shared_range[0] if shared_range else df['DistanceRoundTrack'].min()
