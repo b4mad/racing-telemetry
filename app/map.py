@@ -19,7 +19,11 @@ def create_map_view(df, shared_range, slider_value = None):
     margin = 50  # Add a margin around the visible area
     map_fig.update_layout(
         xaxis=dict(range=[min_x - margin, max_x + margin]),
-        yaxis=dict(range=[min_y - margin, max_y + margin])
+        yaxis=dict(range=[min_y - margin, max_y + margin]),
+        title=None,
+        showlegend=False,
+        xaxis_visible=False,
+        yaxis_visible=False,
     )
     return map_fig
 
