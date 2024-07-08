@@ -1,5 +1,6 @@
 import logging
 import dash
+import dash_bootstrap_components as dbc
 from dash import dcc, html
 from flask import request
 from werkzeug.wsgi import get_current_url
@@ -16,7 +17,8 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 # Initialize the Dash app
-app = dash.Dash(__name__)
+app = dash.Dash(__name__,
+                external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 # Initialize Telemetry
 telemetry = Telemetry()
@@ -29,31 +31,33 @@ telemetry.set_filter({'session_id': session_id, 'driver': 'durandom'})
 df = get_or_create_df(lambda: telemetry.get_telemetry_df(), name=session_id)
 
 # Layout of the app
-app.layout = html.Div([
-    html.Div([
-        html.Div([
-            dcc.Graph(id='map-view', style={'height': '100%'})
-        ], style={'width': '50%', 'height': '100%', 'display': 'inline-block'}),
-        html.Div([
-            dcc.Slider(
-                id='distance-slider',
-                min=df['DistanceRoundTrack'].min(),
-                max=df['DistanceRoundTrack'].max(),
-                step=1,
-                value=df['DistanceRoundTrack'].min(),
-                marks={i: str(i) for i in range(int(df['DistanceRoundTrack'].min()), int(df['DistanceRoundTrack'].max()), 1000)},
-                updatemode='drag'
-            ),
-            dcc.Graph(id='speed-view'),
-            dcc.Graph(id='throttle-view'),
-            dcc.Graph(id='brake-view'),
-            dcc.Graph(id='gear-view'),
-            dcc.Graph(id='steer-view'),
-            dcc.Graph(id='time-view')
-        ], style={'width': '50%', 'height': '100%', 'display': 'inline-block', 'flexDirection': 'column', 'margin-right': '20px'})
-    ], style={'display': 'flex', 'height': '100vh'}),
+app.layout = dbc.Container([
+    dbc.Row([
+        dbc.Col([
+            dcc.Graph(id='map-view', style={'height': '100vh'})
+        ], width=6),
+        dbc.Col([
+            dbc.Stack([
+                dcc.Slider(
+                    id='distance-slider',
+                    min=df['DistanceRoundTrack'].min(),
+                    max=df['DistanceRoundTrack'].max(),
+                    step=1,
+                    value=df['DistanceRoundTrack'].min(),
+                    marks={i: str(i) for i in range(int(df['DistanceRoundTrack'].min()), int(df['DistanceRoundTrack'].max()), 1000)},
+                    updatemode='drag'
+                ),
+                dcc.Graph(id='speed-view'),
+                dcc.Graph(id='throttle-view'),
+                dcc.Graph(id='brake-view'),
+                dcc.Graph(id='gear-view'),
+                dcc.Graph(id='steer-view'),
+                dcc.Graph(id='time-view')
+            ])
+        ], width=6)
+    ]),
     dcc.Store(id='shared-range')
-], style={'height': '100vh', 'width': '100vw'})
+], fluid=True, style={'height': '100vh', 'width': '100vw'})
 
 # Add CSS to ensure full height and width
 app.index_string = '''
@@ -187,10 +191,10 @@ if __name__ == '__main__':
         # logger.debug(f'Status: {response.status}')
         # logger.debug(f'Headers: {dict(response.headers)}')
         # logger.debug(f'Body: {response.get_data(as_text=True)}')
-        # try:
-        #     logger.debug(f'Response size: {len(response.get_data(as_text=True))} bytes')
-        # except:
-        #     pass
+        try:
+            logger.debug(f'Response size: {len(response.get_data(as_text=True))} bytes')
+        except:
+            pass
         return response
 
     app.run_server(debug=True)

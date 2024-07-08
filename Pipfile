@@ -13,6 +13,7 @@ setuptools = "*"
 wheel = "*"
 twine = "*"
 dash = "*"
+dash-bootstrap-components = "*"
 
 [packages]
 gql = "*"
