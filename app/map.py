@@ -2,20 +2,28 @@ from telemetry.plot.plots import plot_2d_map
 from dash import Patch
 import math
 
-def create_map_view(df, shared_range, landmarks=None):
+def create_map_view(df, shared_range = None, map_zoom = None, landmarks=None):
     map_fig = plot_2d_map([df], landmarks=landmarks)
+    min_x, max_x, min_y, max_y = 0, 0, 0, 0
 
-    if shared_range:
+    if map_zoom:
+        min_x, max_x = map_zoom['x']
+        min_y, max_y = map_zoom['y']
+        min_distance = df[(df['WorldPosition_x'] >= min_x) & (df['WorldPosition_x'] <= max_x) & (df['WorldPosition_y'] >= min_y) & (df['WorldPosition_y'] <= max_y)]['DistanceRoundTrack'].min()
+        max_distance = df[(df['WorldPosition_x'] >= min_x) & (df['WorldPosition_x'] <= max_x) & (df['WorldPosition_y'] >= min_y) & (df['WorldPosition_y'] <= max_y)]['DistanceRoundTrack'].max()
+    elif shared_range:
         min_distance, max_distance = shared_range
     else:
         min_distance = df['DistanceRoundTrack'].min()
         max_distance = df['DistanceRoundTrack'].max()
 
     filtered_df = df[(df['DistanceRoundTrack'] >= min_distance) & (df['DistanceRoundTrack'] <= max_distance)]
-    min_x = filtered_df['WorldPosition_x'].min()
-    max_x = filtered_df['WorldPosition_x'].max()
-    min_y = filtered_df['WorldPosition_y'].min()
-    max_y = filtered_df['WorldPosition_y'].max()
+    if min_x == 0 and max_x == 0 and min_y == 0 and max_y == 0:
+        min_x = filtered_df['WorldPosition_x'].min()
+        max_x = filtered_df['WorldPosition_x'].max()
+        min_y = filtered_df['WorldPosition_y'].min()
+        max_y = filtered_df['WorldPosition_y'].max()
+
     margin = 50  # Add a margin around the visible area
     map_fig.update_layout(
         xaxis=dict(range=[min_x - margin, max_x + margin]),

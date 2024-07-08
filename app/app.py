@@ -132,17 +132,31 @@ def update_views(*args):
     logger.debug(f"update_views: trigger_id: {trigger_id}")
     logger.debug(f"update_views: shared_range: {shared_range}")
     logger.debug(f"update_views: relayout_data: {relayout_data}")
-    if relayout_data and 'xaxis.range[0]' in relayout_data and 'xaxis.range[1]' in relayout_data:
-        shared_range = [relayout_data['xaxis.range[0]'], relayout_data['xaxis.range[1]']]
 
-    map_fig = create_map_view(df, shared_range, landmarks=landmarks)
+    map_zoom = None
+    if relayout_data:
+        if 'xaxis.range[0]' in relayout_data and 'xaxis.range[1]' in relayout_data and 'yaxis.range[0]' in relayout_data and 'yaxis.range[1]' in relayout_data:
+            map_zoom = {
+                'x': [relayout_data['xaxis.range[0]'], relayout_data['xaxis.range[1]']],
+                'y': [relayout_data['yaxis.range[0]'], relayout_data['yaxis.range[1]']]
+            }
+            min_distance = df[(df['WorldPosition_x'] >= map_zoom['x'][0]) & (df['WorldPosition_x'] <= map_zoom['x'][1]) & (df['WorldPosition_y'] >= map_zoom['y'][0]) & (df['WorldPosition_y'] <= map_zoom['y'][1])]['DistanceRoundTrack'].min()
+            max_distance = df[(df['WorldPosition_x'] >= map_zoom['x'][0]) & (df['WorldPosition_x'] <= map_zoom['x'][1]) & (df['WorldPosition_y'] >= map_zoom['y'][0]) & (df['WorldPosition_y'] <= map_zoom['y'][1])]['DistanceRoundTrack'].max()
+            shared_range = [min_distance, max_distance]
+        elif 'xaxis.range[0]' in relayout_data and 'xaxis.range[1]' in relayout_data:
+            shared_range = [relayout_data['xaxis.range[0]'], relayout_data['xaxis.range[1]']]
+
+    map_fig = create_map_view(df,
+                              shared_range = shared_range,
+                              map_zoom = map_zoom,
+                              landmarks=landmarks)
     lap_figures = [create_line_graph(df, shared_range, view['column'], view['title']) for view in DATA_VIEWS]
 
     slider_value = shared_range[0] if shared_range else df['DistanceRoundTrack'].min()
     slider_min, slider_max, new_slider_value = update_slider(df, shared_range, slider_value)
     # calculate the step size for the slider
     slider_range = slider_max - slider_min
-    step = int(slider_range / 10)
+    step = int(slider_range / 10) + 1
     slider_marks = {i: {'label': str(i)} for i in range(int(slider_min), int(slider_max) + 1, step)}
 
     return [map_fig] + lap_figures + [shared_range, slider_min, slider_max, slider_marks, new_slider_value]
