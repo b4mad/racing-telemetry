@@ -2,8 +2,8 @@ from setuptools import setup, find_packages
 
 setup(
     name='racing-telemetry',
-    version='0.1.1',
-    packages=find_packages(include=['telemetry']),
+    version='0.1.2',
+    packages=find_packages(include=['telemetry', 'telemetry.*']),
     install_requires=[
         'gql',
         'requests',

@@ -1,3 +1,5 @@
 from .telemetry import Telemetry
-from telemetry.retrieval.retrieval_strategy import RetrievalStrategy
-from telemetry.adapter.adapter import Adapter
+from .retrieval.retrieval_strategy import RetrievalStrategy
+from .adapter.adapter import Adapter
+
+__all__ = ['Telemetry']

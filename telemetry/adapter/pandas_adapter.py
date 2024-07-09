@@ -1,5 +1,5 @@
 import pandas as pd
-from telemetry.adapter.adapter import Adapter
+from .adapter import Adapter
 
 class PandasAdapter(Adapter):
     def convert(self, data):

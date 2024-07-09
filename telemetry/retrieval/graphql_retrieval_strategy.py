@@ -3,7 +3,7 @@ from typing import Optional, Any, List, Dict
 from gql import Client, gql
 from gql.dsl import DSLSchema, DSLQuery, dsl_gql
 from gql.transport.requests import RequestsHTTPTransport
-from telemetry.retrieval.retrieval_strategy import RetrievalStrategy
+from .retrieval_strategy import RetrievalStrategy
 
 class GraphQLRetrievalStrategy(RetrievalStrategy):
     def __init__(self, endpoint: str = "") -> None:

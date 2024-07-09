@@ -1,5 +1,5 @@
-from telemetry.retrieval import *
-from telemetry.adapter import *
+from .retrieval import *
+from .adapter import *
 
 from typing import Optional, Any, Dict
 

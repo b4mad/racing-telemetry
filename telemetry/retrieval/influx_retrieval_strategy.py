@@ -3,7 +3,7 @@ import os
 import pandas as pd
 
 import influxdb_client
-from telemetry.retrieval.retrieval_strategy import RetrievalStrategy
+from .retrieval_strategy import RetrievalStrategy
 
 class InfluxRetrievalStrategy(RetrievalStrategy):
 
