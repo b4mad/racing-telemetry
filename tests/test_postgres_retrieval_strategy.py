@@ -1,12 +1,12 @@
 import unittest
-from telemetry.retrieval.postgres_retrieval_strategy import PostgresRetrievalStrategy
+from racing_telemetry.retrieval.postgres_retrieval_strategy import PostgresRetrievalStrategy
 
 class TestPostgresRetrievalStrategy(unittest.TestCase):
     def setUp(self):
         self.strategy = PostgresRetrievalStrategy()
 
     def test_retrieve_data(self):
-        query = "SELECT * FROM telemetry_game"  # Example query
+        query = "SELECT * from telemetry_game"  # Example query
         data = self.strategy.retrieve_data(query)
         self.assertIsNotNone(data)
 

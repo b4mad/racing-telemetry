@@ -17,9 +17,9 @@ Here are some examples of how to use the Telemetry library:
 ### Basic Usage
 
 ```python
-from telemetry import Telemetry
-from telemetry.plot.plots import lap_fig, plot_2d_map
-from telemetry.analysis.streaming import Streaming
+from racing_telemetry import Telemetry
+from racing_telemetry.plot.plots import lap_fig, plot_2d_map
+from racing_telemetry.analysis.streaming import Streaming
 
 # Initialize Telemetry
 t = Telemetry()
@@ -34,7 +34,7 @@ t.set_filter({'session_id': 1719933663, 'driver': 'durandom'})
 lap_data = t.get_telemetry_df()
 
 # Calculate average speed
-from telemetry.analysis import average_speed
+from racing_telemetry.analysis import average_speed
 avg_speed = average_speed(lap_data)
 print(f"Average speed: {avg_speed:.2f} m/s")
 

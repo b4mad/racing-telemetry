@@ -1,9 +1,9 @@
 import unittest
 
 import pandas as pd
-from telemetry import Telemetry
-from telemetry.retrieval.retrieval_strategy import RetrievalStrategy
-from telemetry.retrieval.graphql_retrieval_strategy import GraphQLRetrievalStrategy
+from racing_telemetry import Telemetry
+from racing_telemetry.retrieval.retrieval_strategy import RetrievalStrategy
+from racing_telemetry.retrieval.graphql_retrieval_strategy import GraphQLRetrievalStrategy
 
 class MockDataRetrievalStrategy(RetrievalStrategy):
     def retrieve_data(self, filters):

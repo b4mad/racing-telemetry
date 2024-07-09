@@ -1,4 +1,4 @@
-from telemetry.plot.plots import lap_fig
+from racing_telemetry.plot.plots import lap_fig
 from dash import Patch
 
 def create_line_graph(df, shared_range, column, title):

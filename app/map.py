@@ -1,4 +1,4 @@
-from telemetry.plot.plots import plot_2d_map
+from racing_telemetry.plot.plots import plot_2d_map
 from dash import Patch
 import math
 

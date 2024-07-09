@@ -3,8 +3,8 @@ import os
 from typing import Callable, List, Optional
 from plotly.graph_objs import Figure
 
-from telemetry.telemetry import Telemetry
-from telemetry.plot import *
+from racing_telemetry.telemetry import Telemetry
+from racing_telemetry.plot import *
 
 def plot_sessions(session_ids: List[str], landmarks: bool = False, columns: Optional[List[str]] = None) -> Figure:
     """

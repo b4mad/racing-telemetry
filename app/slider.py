@@ -1,4 +1,4 @@
-from telemetry.plot.plots import plot_2d_map, lap_fig
+from racing_telemetry.plot.plots import plot_2d_map, lap_fig
 from dash import Patch
 
 def update_slider(df, shared_range, current_value):

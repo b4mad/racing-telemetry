@@ -12,9 +12,9 @@ project_root = os.path.dirname(script_dir)
 # Add the project root to the Python path
 sys.path.append(project_root)
 
-from telemetry import Telemetry
-from telemetry.utility import *
-from telemetry.analysis import *
+from racing_telemetry import Telemetry
+from racing_telemetry.utility import *
+from racing_telemetry.analysis import *
 
 
 

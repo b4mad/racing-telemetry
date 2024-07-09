@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from init import *
-from telemetry.analysis import *
+from racing_telemetry.analysis import *
 
 t = Telemetry()
 t.set_pandas_adapter()

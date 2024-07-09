@@ -5,8 +5,8 @@ from dash import dcc, html
 from flask import request
 from werkzeug.wsgi import get_current_url
 from dash.dependencies import Input, Output, State
-from telemetry import Telemetry
-from telemetry.utility.utilities import get_or_create_df
+from racing_telemetry import Telemetry
+from racing_telemetry.utility.utilities import get_or_create_df
 
 from map import *
 from line_graphs import *

@@ -1,6 +1,6 @@
 import unittest
 import vcr
-from telemetry.retrieval.graphql_retrieval_strategy import GraphQLRetrievalStrategy
+from racing_telemetry.retrieval.graphql_retrieval_strategy import GraphQLRetrievalStrategy
 
 class TestGraphQLRetrievalStrategy(unittest.TestCase):
     pass

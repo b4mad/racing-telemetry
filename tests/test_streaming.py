@@ -3,8 +3,8 @@ import vcr
 import pandas as pd
 import json
 import os
-from telemetry.analysis.streaming import Streaming
-from telemetry.retrieval.influx_retrieval_strategy import InfluxRetrievalStrategy
+from racing_telemetry.analysis.streaming import Streaming
+from racing_telemetry.retrieval.influx_retrieval_strategy import InfluxRetrievalStrategy
 
 class TestStreaming(unittest.TestCase):
 

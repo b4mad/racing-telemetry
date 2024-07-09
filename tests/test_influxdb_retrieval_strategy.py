@@ -1,7 +1,7 @@
 import unittest
 import vcr
 import pandas as pd
-from telemetry.retrieval.influx_retrieval_strategy import InfluxRetrievalStrategy
+from racing_telemetry.retrieval.influx_retrieval_strategy import InfluxRetrievalStrategy
 
 class TestInfluxdbRetrievalStrategy(unittest.TestCase):
 
