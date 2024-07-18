@@ -40,6 +40,12 @@ df = get_or_create_df(lambda: telemetry.get_telemetry_df(), name=session_id)
 game = df["GameName"].iloc[0]
 track = df["TrackCode"].iloc[0]
 landmarks = telemetry.landmarks(game=game, track=track)
+#        id                          created                         modified              name  start    end is_overtaking_spot     kind  track_id  from_cc
+# 0    75436 2024-07-08 17:47:21.478387+00:00 2024-07-08 17:47:21.478387+00:00          EASYLEFT    302    NaN               None     turn      4194     True
+# 1    75437 2024-07-08 17:47:21.486955+00:00 2024-07-08 17:47:21.486955+00:00         Segment 0      0  337.0               None  segment      4194     True
+# 2    75438 2024-07-08 17:47:21.501492+00:00 2024-07-08 17:47:21.501492+00:00         EASYRIGHT    373    NaN               None     turn      4194     True
+# 3    75439 2024-07-08 17:47:21.512838+00:00 2024-07-08 17:47:21.512838+00:00         Segment 1    337  454.0               None  segment      4194     True
+# 4    75440 2024-07-08 17:47:21.532487+00:00 2024-07-08 17:47:21.532487+00:00       MEDIUMRIGHT    534    NaN               None     turn      4194     True
 
 
 # iterate df over Streaming
@@ -203,7 +209,7 @@ def update_views(*args):
         df, shared_range=shared_range, map_zoom=map_zoom, landmarks=landmarks
     )
     lap_figures = [
-        create_line_graph(df, shared_range, view["column"], view["title"])
+        create_line_graph(df, shared_range, view["column"], view["title"], landmarks)
         for view in DATA_VIEWS
     ]
 
