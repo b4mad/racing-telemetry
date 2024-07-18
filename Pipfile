@@ -25,6 +25,7 @@ plotly = "*"
 psycopg2-binary = "*"
 sqlalchemy = "*"
 ipywidgets = "*"
+loguru = "*"
 
 [requires]
 python_version = "3"
