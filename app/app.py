@@ -6,6 +6,7 @@ from flask import request
 from werkzeug.wsgi import get_current_url
 from dash.dependencies import Input, Output, State
 from racing_telemetry import Telemetry
+from racing_telemetry.analysis.streaming import Streaming
 from racing_telemetry.utility.utilities import get_or_create_df
 
 from map import *
@@ -15,11 +16,12 @@ from slider import *
 # Define the configuration for data views
 DATA_VIEWS = [
     {'column': 'SpeedMs', 'title': 'Speed (m/s)'},
-    {'column': 'Throttle', 'title': 'Throttle'},
-    {'column': 'Yaw', 'title': 'Yaw'},
-    # {'column': 'Brake', 'title': 'Brake'},
+    # {'column': 'Throttle', 'title': 'Throttle'},
+    # {'column': 'Yaw', 'title': 'Yaw'},
+    {'column': 'Brake', 'title': 'Brake'},
+    {'column': 'braking_point', 'title': 'Braking Point'},
     # {'column': 'Gear', 'title': 'Gear'},
-    {'column': 'SteeringAngle', 'title': 'Steer Angle'},
+    # {'column': 'SteeringAngle', 'title': 'Steer Angle'},
     # {'column': 'CurrentLapTime', 'title': 'Lap Time'}
 ]
 
@@ -43,6 +45,15 @@ df = get_or_create_df(lambda: telemetry.get_telemetry_df(), name=session_id)
 game = df["GameName"].iloc[0]
 track = df["TrackCode"].iloc[0]
 landmarks = telemetry.landmarks(game=game, track=track)
+
+
+# iterate df over Streaming
+streaming = Streaming(average_speed=True, coasting_time=True, raceline_yaw=True, ground_speed=True, braking_point=True)
+for index, row in df.iterrows():
+    streaming.notify(row.to_dict())
+    features = streaming.get_features()
+    for feature, value in features.items():
+        df.at[index, feature] = value
 
 # Layout of the app
 app.layout = dbc.Container([

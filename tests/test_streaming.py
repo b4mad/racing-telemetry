@@ -20,7 +20,7 @@ class TestStreaming(unittest.TestCase):
         assert len(cls.session_data) > 0
 
         # Initialize the Streaming class with all features enabled
-        cls.streaming = Streaming(average_speed=True, coasting_time=True, raceline_yaw=True, ground_speed=True)
+        cls.streaming = Streaming(average_speed=True, coasting_time=True, raceline_yaw=True, ground_speed=True, braking_point=True)
 
         # Process each row of the session data and collect features
         cls.collected_features = []
@@ -82,6 +82,27 @@ class TestStreaming(unittest.TestCase):
                                    msg=f"Mismatch at index {i}")
             # Check if the ground speed is non-negative
             self.assertGreaterEqual(collected['ground_speed'], 0)
+
+    def test_braking_point(self):
+        # Find the first occurrence of a valid braking point
+        first_valid_braking_point = next((feature['braking_point'] for feature in self.collected_features if feature['braking_point'] != -1), None)
+
+        # Ensure a valid braking point was found
+        self.assertIsNotNone(first_valid_braking_point, "No valid braking point was detected")
+
+        # Check that the braking point is within the expected range
+        self.assertGreater(first_valid_braking_point, 0)
+        self.assertLess(first_valid_braking_point, self.session_data['DistanceRoundTrack'].max())
+
+        # Verify that the braking point remains constant after it's first detected
+        braking_points = [feature['braking_point'] for feature in self.collected_features]
+        first_valid_index = braking_points.index(first_valid_braking_point)
+        self.assertTrue(all(bp == first_valid_braking_point for bp in braking_points[first_valid_index:]),
+                        "Braking point should remain constant after first detection")
+
+        # Verify that all values before the first valid braking point are -1
+        self.assertTrue(all(bp == -1 for bp in braking_points[:first_valid_index]),
+                        "All braking point values before detection should be -1")
 
 if __name__ == '__main__':
     unittest.main()

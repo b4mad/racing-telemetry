@@ -24,6 +24,10 @@ class Streaming:
         self.last_y: float = 0.0
         self.total_coasting_time: float = 0.0
         self.brake_pressed: bool = False
+        self.last_brake_pressure: float = 0.0
+        self.braking_point_found: bool = False
+        self.brake_pressure_threshold: float = 0.1
+        self.rate_of_change_threshold: float = 0.05
 
     def configure_feature(self, name: str, feature_func: Callable):
         """
@@ -160,16 +164,29 @@ class Streaming:
 
     def braking_point(self, telemetry: Dict) -> float:
         """
-        Record the DistanceRoundTrack when the brake is first pressed.
+        Determine the braking point based on brake pressure and its rate of change.
 
         Args:
             telemetry (Dict): The incoming telemetry data.
 
         Returns:
-            float: The DistanceRoundTrack when the brake was first pressed, or -1 if not yet pressed.
+            float: The DistanceRoundTrack when the braking point is detected, or -1 if not yet detected.
         """
-        if not self.brake_pressed and telemetry.get("Brake", 0) > 0:
-            self.brake_pressed = True
-            return telemetry.get("DistanceRoundTrack", -1)
-        return -1 if not self.brake_pressed else self.computed_features["braking_point"]
+        if self.braking_point_found:
+            return self.computed_features["braking_point"]
+
+        current_brake_pressure = telemetry.get("Brake", 0)
+
+        time_difference = self.elapsed_time
+
+        if time_difference > 0:
+            rate_of_change = (current_brake_pressure - self.last_brake_pressure) / time_difference
+
+            if (current_brake_pressure > self.brake_pressure_threshold and
+                rate_of_change > self.rate_of_change_threshold):
+                self.braking_point_found = True
+                return telemetry.get("DistanceRoundTrack", -1)
+
+        self.last_brake_pressure = current_brake_pressure
+        return -1
 
