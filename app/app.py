@@ -50,14 +50,25 @@ landmarks = telemetry.landmarks(game=game, track=track)
 
 
 # iterate df over Streaming
-streaming = Streaming(
-    average_speed=True,
-    coasting_time=True,
-    raceline_yaw=True,
-    ground_speed=True,
-    braking_point=True,
-)
+# Get segment end distances
+segment_ends = landmarks[landmarks['kind'] == 'segment']['end'].dropna().tolist()
+current_segment_index = 0
+
 for index, row in df.iterrows():
+    # Check if we've reached the end of a segment
+    if current_segment_index == 0 or (
+        current_segment_index < len(segment_ends) and row['DistanceRoundTrack'] >= segment_ends[current_segment_index]
+    ):
+        # Reset the streaming object
+        streaming = Streaming(
+            average_speed=True,
+            coasting_time=True,
+            raceline_yaw=True,
+            ground_speed=True,
+            braking_point=True,
+        )
+        current_segment_index += 1
+
     streaming.notify(row.to_dict())
     features = streaming.get_features()
     for feature, value in features.items():
