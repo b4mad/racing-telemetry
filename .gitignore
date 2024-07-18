@@ -1,6 +1,7 @@
 .aider*
 .plandex
 .cache/
+.pytest_cache/
 build/
 dist/
 racing_telemetry.egg-info/

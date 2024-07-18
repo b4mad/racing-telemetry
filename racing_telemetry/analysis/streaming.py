@@ -2,7 +2,7 @@ from typing import Optional, Dict, Callable, List
 import math
 
 class Streaming:
-    def __init__(self, average_speed: bool = False, coasting_time: bool = False, raceline_yaw: bool = False, ground_speed: bool = False, **kwargs):
+    def __init__(self, average_speed: bool = False, coasting_time: bool = False, raceline_yaw: bool = False, ground_speed: bool = False, braking_point: bool = False, **kwargs):
         self.total_speed: float = 0.0
         self.count: int = 0
         self.features: Dict[str, Callable] = {}
@@ -16,11 +16,14 @@ class Streaming:
             self.configure_feature("raceline_yaw", self.raceline_yaw)
         if ground_speed:
             self.configure_feature("ground_speed", self.ground_speed)
+        if braking_point:
+            self.configure_feature("braking_point", self.braking_point)
 
         self.last_lap_time: float = 0.0
         self.last_x: float = 0.0
         self.last_y: float = 0.0
         self.total_coasting_time: float = 0.0
+        self.brake_pressed: bool = False
 
     def configure_feature(self, name: str, feature_func: Callable):
         """
@@ -154,4 +157,19 @@ class Streaming:
         speed = distance / self.elapsed_time
 
         return speed
+
+    def braking_point(self, telemetry: Dict) -> float:
+        """
+        Record the DistanceRoundTrack when the brake is first pressed.
+
+        Args:
+            telemetry (Dict): The incoming telemetry data.
+
+        Returns:
+            float: The DistanceRoundTrack when the brake was first pressed, or -1 if not yet pressed.
+        """
+        if not self.brake_pressed and telemetry.get("Brake", 0) > 0:
+            self.brake_pressed = True
+            return telemetry.get("DistanceRoundTrack", -1)
+        return -1 if not self.brake_pressed else self.computed_features["braking_point"]
 
