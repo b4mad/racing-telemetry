@@ -1,5 +1,6 @@
 import dash
 import dash_bootstrap_components as dbc
+import pandas as pd
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
 from flask import request
@@ -205,11 +206,24 @@ def update_views(*args):
                 relayout_data["xaxis.range[1]"],
             ]
 
+    # Process landmarks to get segment distances within the shared_range
+    segment_distances = []
+    if shared_range:
+        min_distance, max_distance = shared_range
+    else:
+        min_distance = df["DistanceRoundTrack"].min()
+        max_distance = df["DistanceRoundTrack"].max()
+
+    for _, landmark in landmarks.iterrows():
+        if landmark['kind'] == 'segment' and pd.notna(landmark['end']):
+            if min_distance <= landmark['end'] <= max_distance:
+                segment_distances.append(landmark['end'])
+
     map_fig = create_map_view(
         df, shared_range=shared_range, map_zoom=map_zoom, landmarks=landmarks
     )
     lap_figures = [
-        create_line_graph(df, shared_range, view["column"], view["title"], landmarks)
+        create_line_graph(df, shared_range, view["column"], view["title"], segment_distances)
         for view in DATA_VIEWS
     ]
 
