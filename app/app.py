@@ -51,14 +51,12 @@ landmarks = telemetry.landmarks(game=game, track=track)
 
 # iterate df over Streaming
 # Get segment end distances
-segment_ends = landmarks[landmarks['kind'] == 'segment']['end'].dropna().tolist()
+segment_ends = landmarks[landmarks["kind"] == "segment"]["end"].dropna().tolist()
 current_segment_index = 0
 
 for index, row in df.iterrows():
     # Check if we've reached the end of a segment
-    if current_segment_index == 0 or (
-        current_segment_index < len(segment_ends) and row['DistanceRoundTrack'] >= segment_ends[current_segment_index]
-    ):
+    if current_segment_index == 0 or (current_segment_index < len(segment_ends) and row["DistanceRoundTrack"] >= segment_ends[current_segment_index]):
         # Reset the streaming object
         streaming = Streaming(
             average_speed=True,
@@ -95,10 +93,7 @@ app.layout = dbc.Container(
                             updatemode="drag",
                         ),
                         html.Div(
-                            [
-                                dcc.Graph(id=f"data-{i+1}-view", className="graph")
-                                for i in range(len(DATA_VIEWS))
-                            ],
+                            [dcc.Graph(id=f"data-{i+1}-view", className="graph") for i in range(len(DATA_VIEWS))],
                             style={
                                 "height": "calc(100vh - 50px)",
                                 "overflowY": "auto",
@@ -164,8 +159,7 @@ app.index_string = f"""
         Output("distance-slider", "marks"),
         Output("distance-slider", "value"),
     ],
-    [Input("map-view", "relayoutData")]
-    + [Input(f"data-{i+1}-view", "relayoutData") for i in range(len(DATA_VIEWS))],
+    [Input("map-view", "relayoutData")] + [Input(f"data-{i+1}-view", "relayoutData") for i in range(len(DATA_VIEWS))],
     [State("shared-range", "data")],
     prevent_initial_call=True,
 )
@@ -188,28 +182,13 @@ def update_views(*args):
 
     map_zoom = None
     if relayout_data:
-        if (
-            "xaxis.range[0]" in relayout_data
-            and "xaxis.range[1]" in relayout_data
-            and "yaxis.range[0]" in relayout_data
-            and "yaxis.range[1]" in relayout_data
-        ):
+        if "xaxis.range[0]" in relayout_data and "xaxis.range[1]" in relayout_data and "yaxis.range[0]" in relayout_data and "yaxis.range[1]" in relayout_data:
             map_zoom = {
                 "x": [relayout_data["xaxis.range[0]"], relayout_data["xaxis.range[1]"]],
                 "y": [relayout_data["yaxis.range[0]"], relayout_data["yaxis.range[1]"]],
             }
-            min_distance = df[
-                (df["WorldPosition_x"] >= map_zoom["x"][0])
-                & (df["WorldPosition_x"] <= map_zoom["x"][1])
-                & (df["WorldPosition_y"] >= map_zoom["y"][0])
-                & (df["WorldPosition_y"] <= map_zoom["y"][1])
-            ]["DistanceRoundTrack"].min()
-            max_distance = df[
-                (df["WorldPosition_x"] >= map_zoom["x"][0])
-                & (df["WorldPosition_x"] <= map_zoom["x"][1])
-                & (df["WorldPosition_y"] >= map_zoom["y"][0])
-                & (df["WorldPosition_y"] <= map_zoom["y"][1])
-            ]["DistanceRoundTrack"].max()
+            min_distance = df[(df["WorldPosition_x"] >= map_zoom["x"][0]) & (df["WorldPosition_x"] <= map_zoom["x"][1]) & (df["WorldPosition_y"] >= map_zoom["y"][0]) & (df["WorldPosition_y"] <= map_zoom["y"][1])]["DistanceRoundTrack"].min()
+            max_distance = df[(df["WorldPosition_x"] >= map_zoom["x"][0]) & (df["WorldPosition_x"] <= map_zoom["x"][1]) & (df["WorldPosition_y"] >= map_zoom["y"][0]) & (df["WorldPosition_y"] <= map_zoom["y"][1])]["DistanceRoundTrack"].max()
             shared_range = [min_distance, max_distance]
         elif "xaxis.range[0]" in relayout_data and "xaxis.range[1]" in relayout_data:
             shared_range = [
@@ -226,50 +205,31 @@ def update_views(*args):
         max_distance = df["DistanceRoundTrack"].max()
 
     for _, landmark in landmarks.iterrows():
-        if landmark['kind'] == 'segment' and pd.notna(landmark['end']):
-            if min_distance <= landmark['end'] <= max_distance:
-                segment_distances.append(landmark['end'])
+        if landmark["kind"] == "segment" and pd.notna(landmark["end"]):
+            if min_distance <= landmark["end"] <= max_distance:
+                segment_distances.append(landmark["end"])
 
-    map_fig = create_map_view(
-        df, shared_range=shared_range, map_zoom=map_zoom, landmarks=landmarks
-    )
-    lap_figures = [
-        create_line_graph(df, shared_range, view["column"], view["title"], segment_distances)
-        for view in DATA_VIEWS
-    ]
+    map_fig = create_map_view(df, shared_range=shared_range, map_zoom=map_zoom, landmarks=landmarks)
+    lap_figures = [create_line_graph(df, shared_range, view["column"], view["title"], segment_distances) for view in DATA_VIEWS]
 
     slider_value = shared_range[0] if shared_range else df["DistanceRoundTrack"].min()
-    slider_min, slider_max, new_slider_value = update_slider(
-        df, shared_range, slider_value
-    )
+    slider_min, slider_max, new_slider_value = update_slider(df, shared_range, slider_value)
     # calculate the step size for the slider
     slider_range = slider_max - slider_min
     step = int(slider_range / 10) + 1
-    slider_marks = {
-        i: {"label": str(i)} for i in range(int(slider_min), int(slider_max) + 1, step)
-    }
+    slider_marks = {i: {"label": str(i)} for i in range(int(slider_min), int(slider_max) + 1, step)}
 
-    return (
-        [map_fig]
-        + lap_figures
-        + [shared_range, slider_min, slider_max, slider_marks, new_slider_value]
-    )
+    return [map_fig] + lap_figures + [shared_range, slider_min, slider_max, slider_marks, new_slider_value]
 
 
 @app.callback(
-    [Output("map-view", "figure", allow_duplicate=True)]
-    + [
-        Output(f"data-{i+1}-view", "figure", allow_duplicate=True)
-        for i in range(len(DATA_VIEWS))
-    ],
+    [Output("map-view", "figure", allow_duplicate=True)] + [Output(f"data-{i+1}-view", "figure", allow_duplicate=True) for i in range(len(DATA_VIEWS))],
     [Input("distance-slider", "value")],
     [State("shared-range", "data")],
     prevent_initial_call=True,
 )
 def update_slider_view(slider_value, shared_range):
-    logger.info(
-        f"update_slider: Slider value: {slider_value}, shared_range: {shared_range}"
-    )
+    logger.info(f"update_slider: Slider value: {slider_value}, shared_range: {shared_range}")
     global df
 
     patched_map = patch_circle_and_arrow(df, slider_value)

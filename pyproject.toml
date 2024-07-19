@@ -1,0 +1,11 @@
+[tool.isort]
+default_section = "THIRDPARTY"
+known_first_party = ["racing_telemetry"]
+known_third_party = []
+line_length = 128
+multi_line_output = 3
+profile = "black"
+
+[tool.black]
+include = '\.pyi?$'
+line-length = 256
