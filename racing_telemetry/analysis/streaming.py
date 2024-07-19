@@ -1,10 +1,24 @@
 import math
-from typing import Callable, Dict
+from typing import Callable, Dict, List
+
+import pandas as pd
+
+import racing_telemetry.analysis.basic_stats as basic_stats
 
 
 class Streaming:
     def __init__(
-        self, average_speed: bool = False, coasting_time: bool = False, raceline_yaw: bool = False, ground_speed: bool = False, braking_point: bool = False, wheel_slip: bool = False, lift_off_point: bool = False, acceleration_point: bool = False, **kwargs
+        self,
+        average_speed: bool = False,
+        coasting_time: bool = False,
+        raceline_yaw: bool = False,
+        ground_speed: bool = False,
+        braking_point: bool = False,
+        wheel_slip: bool = False,
+        lift_off_point: bool = False,
+        acceleration_point: bool = False,
+        apex: bool = False,
+        **kwargs
     ):
         self.total_speed: float = 0.0
         self.count: int = 0
@@ -29,6 +43,10 @@ class Streaming:
             self.configure_feature("ground_speed", self.ground_speed)
         if lift_off_point:
             self.configure_feature("lift_off_point", self.lift_off_point)
+        if acceleration_point:
+            self.configure_feature("acceleration_point", self.acceleration_point)
+        if apex:
+            self.configure_feature("apex", self.apex)
 
         self.last_lap_time: float = 0.0
         self.last_x: float = 0.0
@@ -47,8 +65,9 @@ class Streaming:
         self.acceleration_point_found: bool = False
         self.throttle_increase_threshold: float = 0.1
         self.speed_increase_threshold: float = 0.5
-        if acceleration_point:
-            self.configure_feature("acceleration_point", self.acceleration_point)
+        self.x_positions: List[float] = []
+        self.y_positions: List[float] = []
+        self.distance_round_track: List[float] = []
 
     def configure_feature(self, name: str, feature_func: Callable):
         """
@@ -280,4 +299,38 @@ class Streaming:
 
         self.last_throttle = current_throttle
         self.last_speed = current_speed
+        return -1
+
+    def apex(self, telemetry: Dict) -> int:
+        """
+        Calculate the apex using the collected x and y positions.
+
+        Args:
+            telemetry (Dict): The incoming telemetry data (not used in this method).
+
+        Returns:
+            Dict: The apex information or None if it can't be calculated.
+        """
+        x = telemetry.get("WorldPosition_x", 0.0)
+        y = telemetry.get("WorldPosition_y", 0.0)
+        distance = telemetry.get("DistanceRoundTrack", 0.0)
+
+        self.x_positions.append(x)
+        self.y_positions.append(y)
+        self.distance_round_track.append(distance)
+
+        return -1
+
+    def calculate_apex(self) -> float:
+        """
+        Trigger the apex calculation.
+
+        Returns:
+            Dict: The apex information or None if it can't be calculated.
+        """
+        df = pd.DataFrame({"WorldPosition_x": self.x_positions, "WorldPosition_y": self.y_positions})
+        apex = basic_stats.apex(df)
+        print(apex)
+        if apex:
+            return self.distance_round_track[apex["index"]]
         return -1

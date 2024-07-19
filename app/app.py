@@ -1,3 +1,5 @@
+# import sys
+
 import dash
 import dash_bootstrap_components as dbc
 import pandas as pd
@@ -19,20 +21,23 @@ DATA_VIEWS = [
     {"column": "SpeedMs", "title": "Speed (m/s)"},
     # {"column": "Brake", "title": "Brake"},
     {"column": "Throttle", "title": "Throttle"},
+    {"column": "apex", "title": "Apex"},
     # {"column": "ground_speed", "title": "ground_speed"},
     # {"column": "ground_speed_delta", "title": "ground_speed_delta"},
     # {"column": "braking_point", "title": "Braking Point"},
     # {"column": "wheel_slip", "title": "Wheel Slip"},
     # {"column": "raceline_yaw", "title": "Raceline Yaw"},
     # {"column": "coasting_time", "title": "Coasting Time"},
-    {"column": "lift_off_point", "title": "Lift Off Point"},
-    {"column": "acceleration_point", "title": "Acceleration Point"},
+    # {"column": "lift_off_point", "title": "Lift Off Point"},
+    # {"column": "acceleration_point", "title": "Acceleration Point"},
     # {"column": "average_speed", "title": "Average Speed"},
     # {'column': 'Yaw', 'title': 'Yaw'},
     # {"column": "braking_point", "title": "Braking Point"},
     # {'column': 'Gear', 'title': 'Gear'},
     # {'column': 'SteeringAngle', 'title': 'Steer Angle'},
     # {'column': 'CurrentLapTime', 'title': 'Lap Time'}
+    # {"column": "WorldPosition_x", "title": "X"},
+    # {"column": "WorldPosition_y", "title": "Y"},
 ]
 
 # Initialize the Dash app
@@ -75,35 +80,58 @@ landmarks = telemetry.landmarks(game=game, track=track)
 # Get segment end distances
 segment_ends = landmarks[landmarks["kind"] == "segment"]["end"].dropna().tolist()
 current_segment_index = 0
+apex = -1
+df["apex"] = 0
+streaming_features = {
+    "average_speed": True,
+    "coasting_time": True,
+    "raceline_yaw": True,
+    "ground_speed": True,
+    "braking_point": True,
+    "wheel_slip": True,
+    "lift_off_point": True,
+    "acceleration_point": True,
+    "apex": True,
+}
 
+
+def merge_features(df, streaming, start, stop):
+    features = streaming.get_features()
+    for feature, value in features.items():
+        df.at[index, feature] = value
+        logger.debug(f"Value {current_segment_index}: {feature} = {value}")
+    apex = streaming.calculate_apex()
+    # print(streaming.distance_round_track)
+    # apex is DistanceRoundTrack
+    # find the index of where DistanceRoundTrack == apex
+    apex_index = df[df["DistanceRoundTrack"] == apex].index[0]
+    df.at[apex_index, "apex"] = 1
+    logger.debug(f"Apex: {apex} index: {apex_index}")
+    logger.debug(f"Finished segment from {start} to {stop}")
+
+
+streaming = Streaming(**streaming_features)
 for index, row in df.iterrows():
     # Check if we've reached the end of a segment
-    if current_segment_index == 0 or (current_segment_index < len(segment_ends) and row["DistanceRoundTrack"] >= segment_ends[current_segment_index]):
-        # Reset the streaming object
-        streaming = Streaming(
-            average_speed=True,
-            coasting_time=True,
-            raceline_yaw=True,
-            ground_speed=True,
-            braking_point=True,
-            wheel_slip=True,
-            lift_off_point=True,
-            acceleration_point=True,
-        )
+    if row["DistanceRoundTrack"] >= segment_ends[current_segment_index]:
+        if current_segment_index == 0:
+            segment_distance_start = df.at[0, "DistanceRoundTrack"]
+        else:
+            segment_distance_start = segment_ends[current_segment_index - 1]
+        segment_distance_end = segment_ends[current_segment_index]
+        merge_features(df, streaming, segment_distance_start, segment_distance_end)
+        streaming = Streaming(**streaming_features)
         current_segment_index += 1
-        new_segment = True
 
-    if new_segment:
-        logger.debug(f"New segment {current_segment_index}")
     streaming.notify(row.to_dict())
     features = streaming.get_features()
     for feature, value in features.items():
         df.at[index, feature] = value
-        if new_segment:
-            logger.debug(f"Value {current_segment_index}: {feature} = {value}")
     ground_speed_delta = df.at[index, "ground_speed"] - df.at[index, "SpeedMs"]
     df.at[index, "ground_speed_delta"] = ground_speed_delta
-    new_segment = False
+segment_distance_start = segment_ends[current_segment_index - 1]
+segment_distance_end = segment_ends[current_segment_index]
+merge_features(df, streaming, segment_distance_start, segment_distance_end)
 
 # Layout of the app
 app.layout = dbc.Container(
