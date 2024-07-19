@@ -6,6 +6,13 @@
 * Lyon - Gerland
 * right/left: 1719854504 / 1719854622
 
+* Ruuhimäki / VW Polo GTI R5
+* fast / slow 1721368565 / 1721368169
+
+* Kuohu / VW Polo GTI R5
+* fast / slow 1721367717 / 1721367176
+
+
 ### Features
 
 * momentum

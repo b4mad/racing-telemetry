@@ -1,8 +1,9 @@
-from typing import Optional, Dict, Callable, List
 import math
+from typing import Callable, Dict
+
 
 class Streaming:
-    def __init__(self, average_speed: bool = False, coasting_time: bool = False, raceline_yaw: bool = False, ground_speed: bool = False, braking_point: bool = False, **kwargs):
+    def __init__(self, average_speed: bool = False, coasting_time: bool = False, raceline_yaw: bool = False, ground_speed: bool = False, braking_point: bool = False, wheel_slip: bool = False, **kwargs):
         self.total_speed: float = 0.0
         self.count: int = 0
         self.features: Dict[str, Callable] = {}
@@ -14,10 +15,16 @@ class Streaming:
             self.configure_feature("coasting_time", self.coasting_time)
         if raceline_yaw:
             self.configure_feature("raceline_yaw", self.raceline_yaw)
-        if ground_speed:
-            self.configure_feature("ground_speed", self.ground_speed)
         if braking_point:
             self.configure_feature("braking_point", self.braking_point)
+        if wheel_slip:
+            # wheel_slip requires ground_speed to be computed
+            self.configure_feature("ground_speed", self.ground_speed)
+            self.configure_feature("wheel_slip", self.wheel_slip)
+            # dont compute ground_speed twice
+            ground_speed = False
+        if ground_speed:
+            self.configure_feature("ground_speed", self.ground_speed)
 
         self.last_lap_time: float = 0.0
         self.last_x: float = 0.0
@@ -48,10 +55,7 @@ class Streaming:
             telemetry (Dict): The incoming telemetry data.
         """
         self.elapsed_time = self._calculate_elapsed_time(telemetry.get("CurrentLapTime", 0.0))
-        self.dx, self.dy = self._calculate_position_delta(
-            telemetry.get("WorldPosition_x", 0.0),
-            telemetry.get("WorldPosition_y", 0.0)
-        )
+        self.dx, self.dy = self._calculate_position_delta(telemetry.get("WorldPosition_x", 0.0), telemetry.get("WorldPosition_y", 0.0))
 
         for feature_name, feature_func in self.features.items():
             result = feature_func(telemetry)
@@ -153,7 +157,7 @@ class Streaming:
         """
 
         if self.elapsed_time == 0:
-            return 0.0
+            return telemetry.get("SpeedMs", 0)
 
         dx, dy = self.dx, self.dy
 
@@ -182,11 +186,28 @@ class Streaming:
         if time_difference > 0:
             rate_of_change = (current_brake_pressure - self.last_brake_pressure) / time_difference
 
-            if (current_brake_pressure > self.brake_pressure_threshold and
-                rate_of_change > self.rate_of_change_threshold):
+            if current_brake_pressure > self.brake_pressure_threshold and rate_of_change > self.rate_of_change_threshold:
                 self.braking_point_found = True
                 return telemetry.get("DistanceRoundTrack", -1)
 
         self.last_brake_pressure = current_brake_pressure
         return -1
 
+    def wheel_slip(self, telemetry: Dict) -> float:
+        """
+        Calculate the wheel slip based on the difference between ground speed and SpeedMs.
+
+        Args:
+            telemetry (Dict): The incoming telemetry data.
+
+        Returns:
+            float: The wheel slip as a percentage between -1 and 1.
+        """
+        ground_speed = self.computed_features.get("ground_speed", 0.0)
+        speed_ms = telemetry.get("SpeedMs", 0)
+
+        if speed_ms == 0:
+            return 0.0
+
+        slip = (ground_speed - speed_ms) / speed_ms
+        return max(min(slip, 1.0), -1.0)
