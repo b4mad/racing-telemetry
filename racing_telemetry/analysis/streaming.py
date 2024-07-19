@@ -3,7 +3,7 @@ from typing import Callable, Dict
 
 
 class Streaming:
-    def __init__(self, average_speed: bool = False, coasting_time: bool = False, raceline_yaw: bool = False, ground_speed: bool = False, braking_point: bool = False, wheel_slip: bool = False, **kwargs):
+    def __init__(self, average_speed: bool = False, coasting_time: bool = False, raceline_yaw: bool = False, ground_speed: bool = False, braking_point: bool = False, wheel_slip: bool = False, lift_off_point: bool = False, **kwargs):
         self.total_speed: float = 0.0
         self.count: int = 0
         self.features: Dict[str, Callable] = {}
@@ -25,6 +25,8 @@ class Streaming:
             ground_speed = False
         if ground_speed:
             self.configure_feature("ground_speed", self.ground_speed)
+        if lift_off_point:
+            self.configure_feature("lift_off_point", self.lift_off_point)
 
         self.last_lap_time: float = 0.0
         self.last_x: float = 0.0
@@ -35,6 +37,10 @@ class Streaming:
         self.braking_point_found: bool = False
         self.brake_pressure_threshold: float = 0.1
         self.rate_of_change_threshold: float = 0.05
+        self.last_throttle: float = 0.0
+        self.lift_off_point_found: bool = False
+        self.throttle_threshold: float = 0.9
+        self.throttle_decrease_threshold: float = 0.1
 
     def configure_feature(self, name: str, feature_func: Callable):
         """
@@ -211,3 +217,25 @@ class Streaming:
 
         slip = (ground_speed - speed_ms) / speed_ms
         return max(min(slip, 1.0), -1.0)
+
+    def lift_off_point(self, telemetry: Dict) -> float:
+        """
+        Determine the lift-off point based on throttle decrease.
+
+        Args:
+            telemetry (Dict): The incoming telemetry data.
+
+        Returns:
+            float: The DistanceRoundTrack when the lift-off point is detected, or -1 if not yet detected.
+        """
+        if self.lift_off_point_found:
+            return self.computed_features["lift_off_point"]
+
+        current_throttle = telemetry.get("Throttle", 0)
+
+        if self.last_throttle > self.throttle_threshold and (self.last_throttle - current_throttle) > self.throttle_decrease_threshold:
+            self.lift_off_point_found = True
+            return telemetry.get("DistanceRoundTrack", -1)
+
+        self.last_throttle = current_throttle
+        return -1

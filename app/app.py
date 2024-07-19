@@ -17,15 +17,17 @@ from racing_telemetry.utility.utilities import get_or_create_df
 # Define the configuration for data views
 DATA_VIEWS = [
     {"column": "SpeedMs", "title": "Speed (m/s)"},
-    {"column": "ground_speed", "title": "ground_speed"},
+    # {"column": "Brake", "title": "Brake"},
+    {"column": "Throttle", "title": "Throttle"},
+    # {"column": "ground_speed", "title": "ground_speed"},
+    # {"column": "ground_speed_delta", "title": "ground_speed_delta"},
     # {"column": "braking_point", "title": "Braking Point"},
-    {"column": "wheel_slip", "title": "Wheel Slip"},
+    # {"column": "wheel_slip", "title": "Wheel Slip"},
     # {"column": "raceline_yaw", "title": "Raceline Yaw"},
     # {"column": "coasting_time", "title": "Coasting Time"},
+    {"column": "lift_off_point", "title": "Lift Off Point"},
     # {"column": "average_speed", "title": "Average Speed"},
-    # {'column': 'Throttle', 'title': 'Throttle'},
     # {'column': 'Yaw', 'title': 'Yaw'},
-    # {"column": "Brake", "title": "Brake"},
     # {"column": "braking_point", "title": "Braking Point"},
     # {'column': 'Gear', 'title': 'Gear'},
     # {'column': 'SteeringAngle', 'title': 'Steer Angle'},
@@ -84,6 +86,7 @@ for index, row in df.iterrows():
             ground_speed=True,
             braking_point=True,
             wheel_slip=True,
+            lift_off_point=True,
         )
         current_segment_index += 1
         new_segment = True
@@ -96,6 +99,8 @@ for index, row in df.iterrows():
         df.at[index, feature] = value
         if new_segment:
             logger.debug(f"Value {current_segment_index}: {feature} = {value}")
+    ground_speed_delta = df.at[index, "ground_speed"] - df.at[index, "SpeedMs"]
+    df.at[index, "ground_speed_delta"] = ground_speed_delta
     new_segment = False
 
 # Layout of the app
