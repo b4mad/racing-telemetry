@@ -330,7 +330,7 @@ class Streaming:
         """
         df = pd.DataFrame({"WorldPosition_x": self.x_positions, "WorldPosition_y": self.y_positions})
         apex = basic_stats.apex(df)
-        print(apex)
+        apex_distance = -1
         if apex:
-            return self.distance_round_track[apex["index"]]
-        return -1
+            apex_distance = self.distance_round_track[apex["index"]]
+        self.computed_features["apex"] = apex_distance
