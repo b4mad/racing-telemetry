@@ -26,6 +26,7 @@ DATA_VIEWS = [
     # {"column": "raceline_yaw", "title": "Raceline Yaw"},
     # {"column": "coasting_time", "title": "Coasting Time"},
     {"column": "lift_off_point", "title": "Lift Off Point"},
+    {"column": "acceleration_point", "title": "Acceleration Point"},
     # {"column": "average_speed", "title": "Average Speed"},
     # {'column': 'Yaw', 'title': 'Yaw'},
     # {"column": "braking_point", "title": "Braking Point"},
@@ -87,6 +88,7 @@ for index, row in df.iterrows():
             braking_point=True,
             wheel_slip=True,
             lift_off_point=True,
+            acceleration_point=True,
         )
         current_segment_index += 1
         new_segment = True

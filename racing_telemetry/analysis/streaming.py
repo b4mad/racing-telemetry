@@ -3,7 +3,9 @@ from typing import Callable, Dict
 
 
 class Streaming:
-    def __init__(self, average_speed: bool = False, coasting_time: bool = False, raceline_yaw: bool = False, ground_speed: bool = False, braking_point: bool = False, wheel_slip: bool = False, lift_off_point: bool = False, **kwargs):
+    def __init__(
+        self, average_speed: bool = False, coasting_time: bool = False, raceline_yaw: bool = False, ground_speed: bool = False, braking_point: bool = False, wheel_slip: bool = False, lift_off_point: bool = False, acceleration_point: bool = False, **kwargs
+    ):
         self.total_speed: float = 0.0
         self.count: int = 0
         self.features: Dict[str, Callable] = {}
@@ -41,6 +43,12 @@ class Streaming:
         self.lift_off_point_found: bool = False
         self.throttle_threshold: float = 0.9
         self.throttle_decrease_threshold: float = 0.1
+        self.last_speed: float = 0.0
+        self.acceleration_point_found: bool = False
+        self.throttle_increase_threshold: float = 0.1
+        self.speed_increase_threshold: float = 0.5
+        if acceleration_point:
+            self.configure_feature("acceleration_point", self.acceleration_point)
 
     def configure_feature(self, name: str, feature_func: Callable):
         """
@@ -60,7 +68,14 @@ class Streaming:
         Args:
             telemetry (Dict): The incoming telemetry data.
         """
-        self.elapsed_time = self._calculate_elapsed_time(telemetry.get("CurrentLapTime", 0.0))
+        current_lap_time = telemetry.get("CurrentLapTime", 0.0)
+        if current_lap_time < self.last_lap_time:
+            # New lap started, reset detection flags
+            self.braking_point_found = False
+            self.lift_off_point_found = False
+            self.acceleration_point_found = False
+
+        self.elapsed_time = self._calculate_elapsed_time(current_lap_time)
         self.dx, self.dy = self._calculate_position_delta(telemetry.get("WorldPosition_x", 0.0), telemetry.get("WorldPosition_y", 0.0))
 
         for feature_name, feature_func in self.features.items():
@@ -238,4 +253,31 @@ class Streaming:
             return telemetry.get("DistanceRoundTrack", -1)
 
         self.last_throttle = current_throttle
+        return -1
+
+    def acceleration_point(self, telemetry: Dict) -> float:
+        """
+        Determine the acceleration point based on throttle increase and speed increase.
+
+        Args:
+            telemetry (Dict): The incoming telemetry data.
+
+        Returns:
+            float: The DistanceRoundTrack when the acceleration point is detected, or -1 if not yet detected.
+        """
+        if self.acceleration_point_found:
+            return self.computed_features["acceleration_point"]
+
+        current_throttle = telemetry.get("Throttle", 0)
+        current_speed = telemetry.get("SpeedMs", 0)
+
+        throttle_increase = current_throttle - self.last_throttle
+        speed_increase = current_speed - self.last_speed
+
+        if throttle_increase > self.throttle_increase_threshold and speed_increase > self.speed_increase_threshold:
+            self.acceleration_point_found = True
+            return telemetry.get("DistanceRoundTrack", -1)
+
+        self.last_throttle = current_throttle
+        self.last_speed = current_speed
         return -1
