@@ -18,16 +18,13 @@ class Streaming:
         wheel_slip: bool = False,
         lift_off_point: bool = False,
         acceleration_point: bool = False,
-        apex: bool = False,
         **kwargs,
     ):
-        self.total_speed: float = 0.0
-        self.count: int = 0
         self.features: Dict[str, Callable] = {}
         self.computed_features: Dict[str, float] = {}
 
         if average_speed:
-            self.configure_feature("average_speed", lambda telemetry: self.average_speed(telemetry.get("SpeedMs", 0)))
+            self.configure_feature("average_speed", self.average_speed)
         if coasting_time:
             self.configure_feature("coasting_time", self.coasting_time)
         if raceline_yaw:
@@ -46,29 +43,28 @@ class Streaming:
             self.configure_feature("lift_off_point", self.lift_off_point)
         if acceleration_point:
             self.configure_feature("acceleration_point", self.acceleration_point)
-        if apex:
-            self.configure_feature("apex", self.apex)
 
-        self.last_lap_time: float = 0.0
-        self.last_x: float = 0.0
-        self.last_y: float = 0.0
-        self.total_coasting_time: float = 0.0
+        self.telemetry: Dict[str, list] = {
+            "CurrentLapTime": [],
+            "WorldPosition_x": [],
+            "WorldPosition_y": [],
+            "Throttle": [],
+            "Brake": [],
+            "SpeedMs": [],
+            "DistanceRoundTrack": [],
+        }
+        self.telemetry_len = 0
         self.brake_pressed: bool = False
-        self.last_brake: float = 0.0
         self.braking_point_found: bool = False
+        self.lift_off_point_found: bool = False
+        self.total_coasting_time: float = 0.0
         self.brake_pressure_threshold: float = 0.1
         self.rate_of_change_threshold: float = 0.05
-        self.last_throttle: float = 0.0
-        self.lift_off_point_found: bool = False
         self.throttle_threshold: float = 0.9
         self.throttle_decrease_threshold: float = 0.1
-        self.last_speed: float = 0.0
         self.acceleration_point_found: bool = False
         self.throttle_increase_threshold: float = 0.1
         self.speed_increase_threshold: float = 0.5
-        self.x_positions: List[float] = []
-        self.y_positions: List[float] = []
-        self.distance_round_track: List[float] = []
 
     def configure_feature(self, name: str, feature_func: Callable):
         """
@@ -88,15 +84,9 @@ class Streaming:
         Args:
             telemetry (Dict): The incoming telemetry data.
         """
-        current_lap_time = telemetry.get("CurrentLapTime", 0.0)
-        if current_lap_time < self.last_lap_time:
-            # New lap started, reset detection flags
-            self.braking_point_found = False
-            self.lift_off_point_found = False
-            self.acceleration_point_found = False
-
-        self.elapsed_time = self._calculate_elapsed_time(current_lap_time)
-        self.dx, self.dy = self._calculate_position_delta(telemetry.get("WorldPosition_x", 0.0), telemetry.get("WorldPosition_y", 0.0))
+        self._store_telemetry_values(telemetry)
+        self.delta_time = self._calculate_elapsed_time()
+        self.delta_x, self.delta_y = self._calculate_position_delta(telemetry.get("WorldPosition_x", 0.0), telemetry.get("WorldPosition_y", 0.0))
 
         self.throttle_change_rate, self.brake_change_rate = self._calculate_change_rate(telemetry.get("Throttle", 0.0), telemetry.get("Brake", 0.0))
 
@@ -113,36 +103,46 @@ class Streaming:
         """
         return self.computed_features
 
-    def _calculate_elapsed_time(self, current_lap_time: float) -> float:
+    def _calculate_elapsed_time(self) -> float:
         """Calculate elapsed time since last update."""
-        if self.last_lap_time == 0:
-            self.last_lap_time = current_lap_time
+        if self.telemetry_len < 2:
             return 0
-        elapsed_time = current_lap_time - self.last_lap_time
-        self.last_lap_time = current_lap_time
+
+        current_lap_time = self.telemetry["CurrentLapTime"][-1]
+        last_lap_time = self.telemetry["CurrentLapTime"][-2]
+        elapsed_time = current_lap_time - last_lap_time
         return elapsed_time
 
     def _calculate_position_delta(self, current_x: float, current_y: float) -> tuple[float, float]:
         """Calculate the change in position since last update."""
-        if self.last_x == 0 and self.last_y == 0:
-            self.last_x, self.last_y = current_x, current_y
+        if len(self.telemetry["WorldPosition_x"]) < 2:
             return 0.0, 0.0
-        dx = current_x - self.last_x
-        dy = current_y - self.last_y
-        self.last_x, self.last_y = current_x, current_y
+        last_x = self.telemetry["WorldPosition_x"][-2]
+        last_y = self.telemetry["WorldPosition_y"][-2]
+        dx = current_x - last_x
+        dy = current_y - last_y
         return dx, dy
 
     def _calculate_change_rate(self, current_throttle: float, current_brake: float) -> tuple[float, float]:
         """Calculate the change rate of throttle and brake values."""
-        if self.elapsed_time == 0:
+        if self.telemetry_len < 2:
             return 0.0, 0.0
 
-        throttle_change_rate = current_throttle - self.last_throttle
-        brake_change_rate = current_brake - self.last_brake
+        last_throttle = self.telemetry["Throttle"][-2]
+        last_brake = self.telemetry["Brake"][-2]
+        throttle_change_rate = current_throttle - last_throttle
+        brake_change_rate = current_brake - last_brake
 
         return throttle_change_rate, brake_change_rate
 
-    def average_speed(self, current_speed: float) -> float:
+    def _store_telemetry_values(self, telemetry: Dict) -> None:
+        """Store all values of the telemetry dict in a dict of arrays."""
+        for key in self.telemetry.keys():
+            value = telemetry.get(key, None)
+            self.telemetry[key].append(value)
+        self.telemetry_len += 1
+
+    def average_speed(self, telemetry: Dict) -> float:
         """
         Calculate the running average speed.
 
@@ -152,13 +152,8 @@ class Streaming:
         Returns:
             Optional[float]: The updated average speed, or None if no data has been processed.
         """
-        self.total_speed += current_speed
-        self.count += 1
 
-        if self.count == 0:
-            return 0.0
-
-        return self.total_speed / self.count
+        return sum(self.telemetry["SpeedMs"]) / self.telemetry_len
 
     def coasting_time(self, telemetry: Dict) -> float:
         """
@@ -171,7 +166,7 @@ class Streaming:
             float: The total time spent coasting in seconds.
         """
         if telemetry.get("Throttle", 0) == 0 and telemetry.get("Brake", 0) == 0:
-            self.total_coasting_time += self.elapsed_time
+            self.total_coasting_time += self.delta_time
         return self.total_coasting_time
 
     def raceline_yaw(self, telemetry: Dict) -> float:
@@ -185,7 +180,7 @@ class Streaming:
             float: The calculated yaw angle between -180 and 180 degrees.
         """
 
-        dx, dy = self.dx, self.dy
+        dx, dy = self.delta_x, self.delta_y
 
         if dx == 0 and dy == 0:
             return 0.0
@@ -209,13 +204,13 @@ class Streaming:
             float: The calculated ground speed in meters per second.
         """
 
-        if self.elapsed_time == 0:
-            return telemetry.get("SpeedMs", 0)
+        if self.delta_time == 0:
+            return 0.0
 
-        dx, dy = self.dx, self.dy
+        dx, dy = self.delta_x, self.delta_y
 
         distance = math.sqrt(dx**2 + dy**2)
-        speed = distance / self.elapsed_time
+        speed = distance / self.delta_time
 
         return speed
 
@@ -232,18 +227,20 @@ class Streaming:
         if self.braking_point_found:
             return self.computed_features["braking_point"]
 
+        if self.telemetry_len < 2:
+            return -1
+
+        if self.delta_time == 0:
+            return -1
+
         current_brake_pressure = telemetry.get("Brake", 0)
 
-        time_difference = self.elapsed_time
+        last_brake = self.telemetry["Brake"][-2]
+        rate_of_change = self.brake_change_rate
 
-        if time_difference > 0:
-            rate_of_change = (current_brake_pressure - self.last_brake) / time_difference
-
-            if current_brake_pressure > self.brake_pressure_threshold and rate_of_change > self.rate_of_change_threshold:
-                self.braking_point_found = True
-                return telemetry.get("DistanceRoundTrack", -1)
-
-        self.last_brake = current_brake_pressure
+        if current_brake_pressure > self.brake_pressure_threshold and rate_of_change > self.rate_of_change_threshold:
+            self.braking_point_found = True
+            return telemetry.get("DistanceRoundTrack", -1)
         return -1
 
     def wheel_slip(self, telemetry: Dict) -> float:
@@ -278,13 +275,15 @@ class Streaming:
         if self.lift_off_point_found:
             return self.computed_features["lift_off_point"]
 
-        current_throttle = telemetry.get("Throttle", 0)
+        if self.telemetry_len < 2:
+            return -1
 
-        if self.last_throttle > self.throttle_threshold and (self.last_throttle - current_throttle) > self.throttle_decrease_threshold:
+        current_throttle = telemetry.get("Throttle", 0)
+        last_throttle = self.telemetry["Throttle"][-2]
+
+        if last_throttle > self.throttle_threshold and (last_throttle - current_throttle) > self.throttle_decrease_threshold:
             self.lift_off_point_found = True
             return telemetry.get("DistanceRoundTrack", -1)
-
-        self.last_throttle = current_throttle
         return -1
 
     def acceleration_point(self, telemetry: Dict) -> float:
@@ -300,38 +299,20 @@ class Streaming:
         if self.acceleration_point_found:
             return self.computed_features["acceleration_point"]
 
+        if self.telemetry_len < 2:
+            return -1
+
         current_throttle = telemetry.get("Throttle", 0)
         current_speed = telemetry.get("SpeedMs", 0)
+        last_throttle = self.telemetry["Throttle"][-2]
+        last_speed = self.telemetry["SpeedMs"][-2]
 
-        throttle_increase = current_throttle - self.last_throttle
-        speed_increase = current_speed - self.last_speed
+        throttle_increase = current_throttle - last_throttle
+        speed_increase = current_speed - last_speed
 
         if throttle_increase > self.throttle_increase_threshold and speed_increase > self.speed_increase_threshold:
             self.acceleration_point_found = True
             return telemetry.get("DistanceRoundTrack", -1)
-
-        self.last_throttle = current_throttle
-        self.last_speed = current_speed
-        return -1
-
-    def apex(self, telemetry: Dict) -> int:
-        """
-        Prepare to calculate the apex using the collected x and y positions.
-        To get the apex, call calculate_apex() after all telemetry data has been processed.
-
-        Args:
-            telemetry (Dict): The incoming telemetry data (not used in this method).
-
-        Returns:
-            Dict: The apex information or None if it can't be calculated.
-        """
-        x = telemetry.get("WorldPosition_x", 0.0)
-        y = telemetry.get("WorldPosition_y", 0.0)
-        distance = telemetry.get("DistanceRoundTrack", 0.0)
-
-        self.x_positions.append(x)
-        self.y_positions.append(y)
-        self.distance_round_track.append(distance)
 
         return -1
 
@@ -342,9 +323,12 @@ class Streaming:
         Returns:
             Dict: The apex information or None if it can't be calculated.
         """
-        df = pd.DataFrame({"WorldPosition_x": self.x_positions, "WorldPosition_y": self.y_positions})
+        x_positions = self.telemetry.get("WorldPosition_x", [])
+        y_positions = self.telemetry.get("WorldPosition_y", [])
+        df = pd.DataFrame({"WorldPosition_x": x_positions, "WorldPosition_y": y_positions})
         apex = basic_stats.apex(df)
         apex_distance = -1
         if apex:
-            apex_distance = self.distance_round_track[apex["index"]]
+            distance_round_track = self.telemetry.get("DistanceRoundTrack", [])
+            apex_distance = distance_round_track[apex["index"]]
         self.computed_features["apex"] = apex_distance

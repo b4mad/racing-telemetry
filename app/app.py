@@ -21,8 +21,8 @@ DATA_VIEWS = [
     {"column": "SpeedMs", "title": "Speed (m/s)"},
     {"column": "Brake", "title": "Brake"},
     # {"column": "Throttle", "title": "Throttle"},
-    {"column": "brake_change_rate", "title": "brake_change_rate"},
-    # {"column": "apex", "title": "Apex"},
+    # {"column": "brake_change_rate", "title": "brake_change_rate"},
+    {"column": "apex", "title": "Apex"},
     # {"column": "ground_speed", "title": "ground_speed"},
     # {"column": "ground_speed_delta", "title": "ground_speed_delta"},
     # {"column": "braking_point", "title": "Braking Point"},
@@ -83,17 +83,7 @@ segment_ends = landmarks[landmarks["kind"] == "segment"]["end"].dropna().tolist(
 current_segment_index = 0
 apex = -1
 df["apex"] = 0
-streaming_features = {
-    "average_speed": True,
-    "coasting_time": True,
-    "raceline_yaw": True,
-    "ground_speed": True,
-    "braking_point": True,
-    "wheel_slip": True,
-    "lift_off_point": True,
-    "acceleration_point": True,
-    "apex": True,
-}
+streaming_features = {"average_speed": True, "coasting_time": True, "raceline_yaw": True, "ground_speed": True, "braking_point": True, "wheel_slip": True, "lift_off_point": True, "acceleration_point": True}
 
 
 def merge_features(df, streaming, start, stop):
