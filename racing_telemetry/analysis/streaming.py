@@ -4,6 +4,7 @@ from typing import Callable, Dict, List
 import pandas as pd
 
 import racing_telemetry.analysis.basic_stats as basic_stats
+from loguru import logger
 
 
 class Streaming:
@@ -18,7 +19,7 @@ class Streaming:
         lift_off_point: bool = False,
         acceleration_point: bool = False,
         apex: bool = False,
-        **kwargs
+        **kwargs,
     ):
         self.total_speed: float = 0.0
         self.count: int = 0
@@ -53,7 +54,7 @@ class Streaming:
         self.last_y: float = 0.0
         self.total_coasting_time: float = 0.0
         self.brake_pressed: bool = False
-        self.last_brake_pressure: float = 0.0
+        self.last_brake: float = 0.0
         self.braking_point_found: bool = False
         self.brake_pressure_threshold: float = 0.1
         self.rate_of_change_threshold: float = 0.05
@@ -97,6 +98,8 @@ class Streaming:
         self.elapsed_time = self._calculate_elapsed_time(current_lap_time)
         self.dx, self.dy = self._calculate_position_delta(telemetry.get("WorldPosition_x", 0.0), telemetry.get("WorldPosition_y", 0.0))
 
+        self.throttle_change_rate, self.brake_change_rate = self._calculate_change_rate(telemetry.get("Throttle", 0.0), telemetry.get("Brake", 0.0))
+
         for feature_name, feature_func in self.features.items():
             result = feature_func(telemetry)
             self.computed_features[feature_name] = result
@@ -128,6 +131,16 @@ class Streaming:
         dy = current_y - self.last_y
         self.last_x, self.last_y = current_x, current_y
         return dx, dy
+
+    def _calculate_change_rate(self, current_throttle: float, current_brake: float) -> tuple[float, float]:
+        """Calculate the change rate of throttle and brake values."""
+        if self.elapsed_time == 0:
+            return 0.0, 0.0
+
+        throttle_change_rate = current_throttle - self.last_throttle
+        brake_change_rate = current_brake - self.last_brake
+
+        return throttle_change_rate, brake_change_rate
 
     def average_speed(self, current_speed: float) -> float:
         """
@@ -224,13 +237,13 @@ class Streaming:
         time_difference = self.elapsed_time
 
         if time_difference > 0:
-            rate_of_change = (current_brake_pressure - self.last_brake_pressure) / time_difference
+            rate_of_change = (current_brake_pressure - self.last_brake) / time_difference
 
             if current_brake_pressure > self.brake_pressure_threshold and rate_of_change > self.rate_of_change_threshold:
                 self.braking_point_found = True
                 return telemetry.get("DistanceRoundTrack", -1)
 
-        self.last_brake_pressure = current_brake_pressure
+        self.last_brake = current_brake_pressure
         return -1
 
     def wheel_slip(self, telemetry: Dict) -> float:
@@ -303,7 +316,8 @@ class Streaming:
 
     def apex(self, telemetry: Dict) -> int:
         """
-        Calculate the apex using the collected x and y positions.
+        Prepare to calculate the apex using the collected x and y positions.
+        To get the apex, call calculate_apex() after all telemetry data has been processed.
 
         Args:
             telemetry (Dict): The incoming telemetry data (not used in this method).
@@ -321,7 +335,7 @@ class Streaming:
 
         return -1
 
-    def calculate_apex(self) -> float:
+    def calculate_apex(self) -> None:
         """
         Trigger the apex calculation.
 

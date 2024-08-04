@@ -19,9 +19,10 @@ from racing_telemetry.utility.utilities import get_or_create_df
 # Define the configuration for data views
 DATA_VIEWS = [
     {"column": "SpeedMs", "title": "Speed (m/s)"},
-    # {"column": "Brake", "title": "Brake"},
-    {"column": "Throttle", "title": "Throttle"},
-    {"column": "apex", "title": "Apex"},
+    {"column": "Brake", "title": "Brake"},
+    # {"column": "Throttle", "title": "Throttle"},
+    {"column": "brake_change_rate", "title": "brake_change_rate"},
+    # {"column": "apex", "title": "Apex"},
     # {"column": "ground_speed", "title": "ground_speed"},
     # {"column": "ground_speed_delta", "title": "ground_speed_delta"},
     # {"column": "braking_point", "title": "Braking Point"},
@@ -100,10 +101,8 @@ def merge_features(df, streaming, start, stop):
     for feature, value in features.items():
         df.at[index, feature] = value
         logger.debug(f"Value {current_segment_index}: {feature} = {value}")
-    apex = streaming.calculate_apex()
-    # print(streaming.distance_round_track)
-    # apex is DistanceRoundTrack
-    # find the index of where DistanceRoundTrack == apex
+    streaming.calculate_apex()
+    apex = streaming.get_features()["apex"]
     apex_index = df[df["DistanceRoundTrack"] == apex].index[0]
     df.at[apex_index, "apex"] = 1
     logger.debug(f"Apex: {apex} index: {apex_index}")
@@ -127,6 +126,8 @@ for index, row in df.iterrows():
     features = streaming.get_features()
     for feature, value in features.items():
         df.at[index, feature] = value
+        df.at[index, "brake_change_rate"] = streaming.brake_change_rate
+
     ground_speed_delta = df.at[index, "ground_speed"] - df.at[index, "SpeedMs"]
     df.at[index, "ground_speed_delta"] = ground_speed_delta
 segment_distance_start = segment_ends[current_segment_index - 1]
