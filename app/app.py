@@ -21,8 +21,8 @@ DATA_VIEWS = [
     {"column": "SpeedMs", "title": "Speed (m/s)"},
     {"column": "Brake", "title": "Brake"},
     # {"column": "Throttle", "title": "Throttle"},
-    # {"column": "brake_change_rate", "title": "brake_change_rate"},
-    {"column": "apex", "title": "Apex"},
+    {"column": "brake_change_rate", "title": "brake_change_rate"},
+    # {"column": "apex", "title": "Apex"},
     # {"column": "ground_speed", "title": "ground_speed"},
     # {"column": "ground_speed_delta", "title": "ground_speed_delta"},
     # {"column": "braking_point", "title": "Braking Point"},
@@ -36,9 +36,10 @@ DATA_VIEWS = [
     # {"column": "braking_point", "title": "Braking Point"},
     # {'column': 'Gear', 'title': 'Gear'},
     # {'column': 'SteeringAngle', 'title': 'Steer Angle'},
-    # {'column': 'CurrentLapTime', 'title': 'Lap Time'}
+    {"column": "CurrentLapTime", "title": "Lap Time"},
     # {"column": "WorldPosition_x", "title": "X"},
     # {"column": "WorldPosition_y", "title": "Y"},
+    # {"column": "DistanceRoundTrack", "title": "Distance Round Track"},
 ]
 
 # Initialize the Dash app

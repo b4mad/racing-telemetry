@@ -88,7 +88,7 @@ class Streaming:
         self.delta_time = self._calculate_elapsed_time()
         self.delta_x, self.delta_y = self._calculate_position_delta(telemetry.get("WorldPosition_x", 0.0), telemetry.get("WorldPosition_y", 0.0))
 
-        self.throttle_change_rate, self.brake_change_rate = self._calculate_change_rate(telemetry.get("Throttle", 0.0), telemetry.get("Brake", 0.0))
+        self._calculate_change_rate()
 
         for feature_name, feature_func in self.features.items():
             result = feature_func(telemetry)
@@ -123,17 +123,18 @@ class Streaming:
         dy = current_y - last_y
         return dx, dy
 
-    def _calculate_change_rate(self, current_throttle: float, current_brake: float) -> tuple[float, float]:
-        """Calculate the change rate of throttle and brake values."""
+    def _calculate_change_rate(self) -> None:
+        """Calculate the change rate of throttle and brake values over the last second."""
         if self.telemetry_len < 2:
-            return 0.0, 0.0
-
-        last_throttle = self.telemetry["Throttle"][-2]
-        last_brake = self.telemetry["Brake"][-2]
-        throttle_change_rate = current_throttle - last_throttle
-        brake_change_rate = current_brake - last_brake
-
-        return throttle_change_rate, brake_change_rate
+            self.throttle_change_rate = 0.0
+            self.brake_change_rate = 0.0
+        else:
+            current_throttle = self.telemetry["Throttle"][-1]
+            current_brake = self.telemetry["Brake"][-1]
+            last_throttle = self.telemetry["Throttle"][-2]
+            last_brake = self.telemetry["Brake"][-2]
+            self.throttle_change_rate = current_throttle - last_throttle
+            self.brake_change_rate = current_brake - last_brake
 
     def _store_telemetry_values(self, telemetry: Dict) -> None:
         """Store all values of the telemetry dict in a dict of arrays."""
