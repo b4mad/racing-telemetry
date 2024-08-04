@@ -236,10 +236,7 @@ class Streaming:
 
         current_brake_pressure = telemetry.get("Brake", 0)
 
-        last_brake = self.telemetry["Brake"][-2]
-        rate_of_change = self.brake_change_rate
-
-        if current_brake_pressure > self.brake_pressure_threshold and rate_of_change > self.rate_of_change_threshold:
+        if current_brake_pressure > self.brake_pressure_threshold and self.brake_change_rate > self.rate_of_change_threshold:
             self.braking_point_found = True
             return telemetry.get("DistanceRoundTrack", -1)
         return -1
