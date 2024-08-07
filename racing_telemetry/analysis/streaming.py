@@ -18,7 +18,7 @@ class Streaming:
         wheel_slip: bool = False,
         lift_off_point: bool = False,
         acceleration_point: bool = False,
-        launch_wheel_slip_duration: bool = False,
+        launch_wheel_slip_time: bool = False,
         **kwargs,
     ):
         self.features: Dict[str, Callable] = {}
@@ -32,11 +32,11 @@ class Streaming:
             self.configure_feature("raceline_yaw", self.raceline_yaw)
         if braking_point:
             self.configure_feature("braking_point", self.braking_point)
-        if launch_wheel_slip_duration:
+        if launch_wheel_slip_time:
             # wheel_slip requires ground_speed to be computed
             self.configure_feature("ground_speed", self.ground_speed)
             self.configure_feature("wheel_slip", self.wheel_slip)
-            self.configure_feature("launch_wheel_slip_duration", self.launch_wheel_slip_duration)
+            self.configure_feature("launch_wheel_slip_time", self.launch_wheel_slip_time)
             wheel_slip = False
             ground_speed = False
         if wheel_slip:
@@ -72,7 +72,7 @@ class Streaming:
         self.acceleration_point_found: bool = False
         self.throttle_increase_threshold: float = 0.1
         self.speed_increase_threshold: float = 0.5
-        self.current_wheel_slip_duration: float = 0.0
+        self.current_wheel_slip_time: float = 0.0
 
     def configure_feature(self, name: str, feature_func: Callable):
         """
@@ -323,7 +323,7 @@ class Streaming:
 
         return -1
 
-    def launch_wheel_slip_duration(self, telemetry: Dict) -> float:
+    def launch_wheel_slip_time(self, telemetry: Dict) -> float:
         """
         Calculate the duration of wheel slip.
 
@@ -340,8 +340,8 @@ class Streaming:
             if current_lap_time < 5:
                 current_wheel_slip = self.computed_features.get("wheel_slip", 0.0)
                 if abs(current_wheel_slip) > 0.1:
-                    self.current_wheel_slip_duration += self.delta_time
-        return self.current_wheel_slip_duration
+                    self.current_wheel_slip_time += self.delta_time
+        return self.current_wheel_slip_time
 
     def calculate_apex(self) -> None:
         """

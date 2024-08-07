@@ -23,7 +23,7 @@ class TestStreaming(unittest.TestCase):
         assert len(cls.session_data) > 0
 
         # Initialize the Streaming class with all features enabled
-        cls.streaming = Streaming(average_speed=True, coasting_time=True, raceline_yaw=True, ground_speed=True, braking_point=True, launch_wheel_slip_duration=True)
+        cls.streaming = Streaming(average_speed=True, coasting_time=True, raceline_yaw=True, ground_speed=True, braking_point=True, launch_wheel_slip_time=True)
 
         # Process each row of the session data and collect features
         cls.collected_features = []
