@@ -47,3 +47,25 @@
 * tires
   * locking under braking
   * slipping under acceleration
+
+### Insights
+
+#### Without reference data
+
+* wheel spin on start
+  * wheel spin threshold
+  * meters until grip
+  * time until grip
+* handbrake use on start
+* gear selection on start
+
+#### With reference data
+
+* racing line
+  * corner approach
+* brake points
+
+#### Driving style
+
+* downshifts
+  * before or after the apex

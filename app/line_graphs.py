@@ -3,8 +3,8 @@ from dash import Patch
 from racing_telemetry.plot.plots import lap_fig
 
 
-def create_line_graph(df, shared_range, column, title, segment_distances):
-    fig = lap_fig(df, columns=[column], full_range=True, show_legend=False, title=title)
+def create_line_graph(df, shared_range, column, title, segment_distances, x_axis="DistanceRoundTrack"):
+    fig = lap_fig(df, columns=[column], full_range=True, show_legend=False, title=title, x_axis=x_axis)
     if shared_range:
         fig.update_xaxes(range=shared_range)
 

@@ -19,14 +19,15 @@ from racing_telemetry.utility.utilities import get_or_create_df
 # Define the configuration for data views
 DATA_VIEWS = [
     {"column": "SpeedMs", "title": "Speed (m/s)"},
-    {"column": "Brake", "title": "Brake"},
-    # {"column": "Throttle", "title": "Throttle"},
-    {"column": "brake_change_rate", "title": "brake_change_rate"},
+    # {"column": "Brake", "title": "Brake"},
+    {"column": "Throttle", "title": "Throttle"},
+    # {"column": "brake_change_rate", "title": "brake_change_rate"},
     # {"column": "apex", "title": "Apex"},
-    # {"column": "ground_speed", "title": "ground_speed"},
-    # {"column": "ground_speed_delta", "title": "ground_speed_delta"},
+    {"column": "ground_speed", "title": "ground_speed"},
+    {"column": "ground_speed_delta", "title": "ground_speed_delta"},
     # {"column": "braking_point", "title": "Braking Point"},
-    # {"column": "wheel_slip", "title": "Wheel Slip"},
+    {"column": "wheel_slip", "title": "Wheel Slip"},
+    {"column": "launch_wheel_slip_duration", "title": "launch_wheel_slip_duration"},
     # {"column": "raceline_yaw", "title": "Raceline Yaw"},
     # {"column": "coasting_time", "title": "Coasting Time"},
     # {"column": "lift_off_point", "title": "Lift Off Point"},
@@ -84,7 +85,7 @@ segment_ends = landmarks[landmarks["kind"] == "segment"]["end"].dropna().tolist(
 current_segment_index = 0
 apex = -1
 df["apex"] = 0
-streaming_features = {"average_speed": True, "coasting_time": True, "raceline_yaw": True, "ground_speed": True, "braking_point": True, "wheel_slip": True, "lift_off_point": True, "acceleration_point": True}
+streaming_features = {"average_speed": True, "coasting_time": True, "raceline_yaw": True, "ground_speed": True, "braking_point": True, "wheel_slip": True, "lift_off_point": True, "acceleration_point": True, "launch_wheel_slip_duration": True}
 
 
 def merge_features(df, streaming, start, stop):
@@ -263,7 +264,9 @@ def update_views(*args):
                 segment_distances.append(landmark["end"])
 
     map_fig = create_map_view(df, shared_range=shared_range, map_zoom=map_zoom, landmarks=landmarks)
-    lap_figures = [create_line_graph(df, shared_range, view["column"], view["title"], segment_distances) for view in DATA_VIEWS]
+    x_axis = "DistanceRoundTrack"
+    # x_axis = "CurrentLapTime"
+    lap_figures = [create_line_graph(df, shared_range, view["column"], view["title"], segment_distances, x_axis=x_axis) for view in DATA_VIEWS]
 
     slider_value = shared_range[0] if shared_range else df["DistanceRoundTrack"].min()
     slider_min, slider_max, new_slider_value = update_slider(df, shared_range, slider_value)

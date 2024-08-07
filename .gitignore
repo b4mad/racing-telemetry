@@ -4,5 +4,5 @@
 .pytest_cache/
 build/
 dist/
-data/
+/data/
 racing_telemetry.egg-info/

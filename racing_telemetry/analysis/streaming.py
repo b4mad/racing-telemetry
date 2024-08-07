@@ -1,10 +1,10 @@
 import math
-from typing import Callable, Dict, List
+from typing import Callable, Dict
 
 import pandas as pd
+from loguru import logger  # noqa: F401
 
 import racing_telemetry.analysis.basic_stats as basic_stats
-from loguru import logger
 
 
 class Streaming:
@@ -18,6 +18,7 @@ class Streaming:
         wheel_slip: bool = False,
         lift_off_point: bool = False,
         acceleration_point: bool = False,
+        launch_wheel_slip_duration: bool = False,
         **kwargs,
     ):
         self.features: Dict[str, Callable] = {}
@@ -31,11 +32,17 @@ class Streaming:
             self.configure_feature("raceline_yaw", self.raceline_yaw)
         if braking_point:
             self.configure_feature("braking_point", self.braking_point)
+        if launch_wheel_slip_duration:
+            # wheel_slip requires ground_speed to be computed
+            self.configure_feature("ground_speed", self.ground_speed)
+            self.configure_feature("wheel_slip", self.wheel_slip)
+            self.configure_feature("launch_wheel_slip_duration", self.launch_wheel_slip_duration)
+            wheel_slip = False
+            ground_speed = False
         if wheel_slip:
             # wheel_slip requires ground_speed to be computed
             self.configure_feature("ground_speed", self.ground_speed)
             self.configure_feature("wheel_slip", self.wheel_slip)
-            # dont compute ground_speed twice
             ground_speed = False
         if ground_speed:
             self.configure_feature("ground_speed", self.ground_speed)
@@ -65,6 +72,7 @@ class Streaming:
         self.acceleration_point_found: bool = False
         self.throttle_increase_threshold: float = 0.1
         self.speed_increase_threshold: float = 0.5
+        self.current_wheel_slip_duration: float = 0.0
 
     def configure_feature(self, name: str, feature_func: Callable):
         """
@@ -92,7 +100,8 @@ class Streaming:
 
         for feature_name, feature_func in self.features.items():
             result = feature_func(telemetry)
-            self.computed_features[feature_name] = result
+            if result is not None:
+                self.computed_features[feature_name] = result
 
     def get_features(self) -> Dict[str, float]:
         """
@@ -313,6 +322,26 @@ class Streaming:
             return telemetry.get("DistanceRoundTrack", -1)
 
         return -1
+
+    def launch_wheel_slip_duration(self, telemetry: Dict) -> float:
+        """
+        Calculate the duration of wheel slip.
+
+        Args:
+            telemetry (Dict): The incoming telemetry data.
+
+        Returns:
+            float: The duration of wheel slip in seconds, or 0 if below the threshold.
+        """
+
+        if self.telemetry_len > 2:
+            current_lap_time = telemetry.get("CurrentLapTime", 0.0)
+            # Only consider the first 5 seconds of the lap
+            if current_lap_time < 5:
+                current_wheel_slip = self.computed_features.get("wheel_slip", 0.0)
+                if abs(current_wheel_slip) > 0.1:
+                    self.current_wheel_slip_duration += self.delta_time
+        return self.current_wheel_slip_duration
 
     def calculate_apex(self) -> None:
         """
